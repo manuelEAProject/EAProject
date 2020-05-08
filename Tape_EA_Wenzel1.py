@@ -46,13 +46,10 @@ def callback(input_file):
     settingssheet.write(input_file.get())
     settingssheet.close
 
-    print(name)
 
 
 def save_settings(settings_list):
     settings_sheet = open('./settingssheet.txt', 'r+')
-    # for i in range(len(settings_list)):
-    # settings_sheet.write(settings_sheet[i]+'/n')
     for listitem in settings_list:
         settings_sheet.write('%s\n' % listitem)
     settings_sheet.close
@@ -60,7 +57,6 @@ def save_settings(settings_list):
 
 master = Tk()
 master.protocol("WM_DELETE_WINDOW", sys.exit)
-# master.geometry('600x600')
 
 Label(master, text="Settings für Tape - Algorithmus").grid(row=10, sticky=W)
 Label(master, justify=LEFT, text=" ").grid(row=11, sticky=W)
