@@ -1,0 +1,100 @@
+{
+  "arch": "x86_64",
+  "build": "py36_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64",
+  "constrains": [],
+  "depends": [
+    "python >=3.6,<3.7.0a0"
+  ],
+  "extracted_package_dir": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\pyparsing-2.3.0-py36_0",
+  "features": "",
+  "files": [
+    "Lib/site-packages/__pycache__/pyparsing.cpython-36.pyc",
+    "Lib/site-packages/pyparsing-2.3.0.dist-info/INSTALLER",
+    "Lib/site-packages/pyparsing-2.3.0.dist-info/LICENSE",
+    "Lib/site-packages/pyparsing-2.3.0.dist-info/METADATA",
+    "Lib/site-packages/pyparsing-2.3.0.dist-info/RECORD",
+    "Lib/site-packages/pyparsing-2.3.0.dist-info/WHEEL",
+    "Lib/site-packages/pyparsing-2.3.0.dist-info/top_level.txt",
+    "Lib/site-packages/pyparsing.py"
+  ],
+  "fn": "pyparsing-2.3.0-py36_0.tar.bz2",
+  "license": "MIT",
+  "link": {
+    "source": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\pyparsing-2.3.0-py36_0",
+    "type": 1
+  },
+  "md5": "88711ddda12e95b7dc7dcd279f28e7c3",
+  "name": "pyparsing",
+  "package_tarball_full_path": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\pyparsing-2.3.0-py36_0.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Lib/site-packages/__pycache__/pyparsing.cpython-36.pyc",
+        "path_type": "hardlink",
+        "sha256": "92e5c831b097ad29234cee77efb29b0dab3409f8385eafeee6bf56e90620cf94",
+        "sha256_in_prefix": "92e5c831b097ad29234cee77efb29b0dab3409f8385eafeee6bf56e90620cf94",
+        "size_in_bytes": 213283
+      },
+      {
+        "_path": "Lib/site-packages/pyparsing-2.3.0.dist-info/INSTALLER",
+        "path_type": "hardlink",
+        "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+        "sha256_in_prefix": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+        "size_in_bytes": 4
+      },
+      {
+        "_path": "Lib/site-packages/pyparsing-2.3.0.dist-info/LICENSE",
+        "path_type": "hardlink",
+        "sha256": "d3cd4fabbe12a5ed57770ac691ec0d292a9ad3bf242c887b51623ec158dd8fc2",
+        "sha256_in_prefix": "d3cd4fabbe12a5ed57770ac691ec0d292a9ad3bf242c887b51623ec158dd8fc2",
+        "size_in_bytes": 1041
+      },
+      {
+        "_path": "Lib/site-packages/pyparsing-2.3.0.dist-info/METADATA",
+        "path_type": "hardlink",
+        "sha256": "9ac4918d98e3147ae0ceb00cbbbb4ce19ae7b1479a8792a52274bc2589b4fb79",
+        "sha256_in_prefix": "9ac4918d98e3147ae0ceb00cbbbb4ce19ae7b1479a8792a52274bc2589b4fb79",
+        "size_in_bytes": 1091
+      },
+      {
+        "_path": "Lib/site-packages/pyparsing-2.3.0.dist-info/RECORD",
+        "path_type": "hardlink",
+        "sha256": "b3d51c43aa8db1702908d015cf77057dbaf31834008c859626283997351bc142",
+        "sha256_in_prefix": "b3d51c43aa8db1702908d015cf77057dbaf31834008c859626283997351bc142",
+        "size_in_bytes": 604
+      },
+      {
+        "_path": "Lib/site-packages/pyparsing-2.3.0.dist-info/WHEEL",
+        "path_type": "hardlink",
+        "sha256": "18ff40089900243c9935ff983d70c027c31db5148d9381f624aeef47ec74e421",
+        "sha256_in_prefix": "18ff40089900243c9935ff983d70c027c31db5148d9381f624aeef47ec74e421",
+        "size_in_bytes": 116
+      },
+      {
+        "_path": "Lib/site-packages/pyparsing-2.3.0.dist-info/top_level.txt",
+        "path_type": "hardlink",
+        "sha256": "7943a31b3255865437592dab140cb698ddcb5ffec5293339192274e237e72e65",
+        "sha256_in_prefix": "7943a31b3255865437592dab140cb698ddcb5ffec5293339192274e237e72e65",
+        "size_in_bytes": 10
+      },
+      {
+        "_path": "Lib/site-packages/pyparsing.py",
+        "path_type": "hardlink",
+        "sha256": "ec5b47f26feb61923a12894073733ed26a743a394358338b35f351fb450d012e",
+        "sha256_in_prefix": "ec5b47f26feb61923a12894073733ed26a743a394358338b35f351fb450d012e",
+        "size_in_bytes": 241279
+      }
+    ],
+    "paths_version": 1
+  },
+  "platform": "win32",
+  "requested_spec": "defaults/win-64::pyparsing==2.3.0=py36_0",
+  "size": 104078,
+  "subdir": "win-64",
+  "timestamp": 1541449928518,
+  "track_features": "",
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/pyparsing-2.3.0-py36_0.tar.bz2",
+  "version": "2.3.0"
+}

@@ -1,0 +1,133 @@
+{
+  "arch": "x86_64",
+  "build": "py36_1000",
+  "build_number": 1000,
+  "channel": "https://conda.anaconda.org/conda-forge/win-64",
+  "constrains": [],
+  "depends": [
+    "libspatialindex",
+    "python >=3.6,<3.7.0a0"
+  ],
+  "extracted_package_dir": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\rtree-0.8.3-py36_1000",
+  "features": "",
+  "files": [
+    "Lib/site-packages/Rtree-0.8.3.dist-info/INSTALLER",
+    "Lib/site-packages/Rtree-0.8.3.dist-info/LICENSE.txt",
+    "Lib/site-packages/Rtree-0.8.3.dist-info/METADATA",
+    "Lib/site-packages/Rtree-0.8.3.dist-info/RECORD",
+    "Lib/site-packages/Rtree-0.8.3.dist-info/WHEEL",
+    "Lib/site-packages/Rtree-0.8.3.dist-info/top_level.txt",
+    "Lib/site-packages/rtree/__init__.py",
+    "Lib/site-packages/rtree/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/rtree/__pycache__/core.cpython-36.pyc",
+    "Lib/site-packages/rtree/__pycache__/index.cpython-36.pyc",
+    "Lib/site-packages/rtree/core.py",
+    "Lib/site-packages/rtree/index.py"
+  ],
+  "fn": "rtree-0.8.3-py36_1000.tar.bz2",
+  "license": "LGPL-2.1",
+  "link": {
+    "source": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\rtree-0.8.3-py36_1000",
+    "type": 1
+  },
+  "md5": "9bd3f1da5dd8b6e4b4f42543fd705a96",
+  "name": "rtree",
+  "package_tarball_full_path": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\rtree-0.8.3-py36_1000.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Lib/site-packages/Rtree-0.8.3.dist-info/INSTALLER",
+        "path_type": "hardlink",
+        "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+        "sha256_in_prefix": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+        "size_in_bytes": 4
+      },
+      {
+        "_path": "Lib/site-packages/Rtree-0.8.3.dist-info/LICENSE.txt",
+        "path_type": "hardlink",
+        "sha256": "5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a",
+        "sha256_in_prefix": "5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a",
+        "size_in_bytes": 26436
+      },
+      {
+        "_path": "Lib/site-packages/Rtree-0.8.3.dist-info/METADATA",
+        "path_type": "hardlink",
+        "sha256": "daffa2b3faf28ba286828fc9e456b3b2fac77aff1846688c12126b4c0e803507",
+        "sha256_in_prefix": "daffa2b3faf28ba286828fc9e456b3b2fac77aff1846688c12126b4c0e803507",
+        "size_in_bytes": 2234
+      },
+      {
+        "_path": "Lib/site-packages/Rtree-0.8.3.dist-info/RECORD",
+        "path_type": "hardlink",
+        "sha256": "c49303cc73b83e088532e745ffdbd03609ce1638f7fccea8681037b91ed36376",
+        "sha256_in_prefix": "c49303cc73b83e088532e745ffdbd03609ce1638f7fccea8681037b91ed36376",
+        "size_in_bytes": 817
+      },
+      {
+        "_path": "Lib/site-packages/Rtree-0.8.3.dist-info/WHEEL",
+        "path_type": "hardlink",
+        "sha256": "f27a28e16ec1361d1cd115ae4740b45673fbf697576664732760135a9cd56edc",
+        "sha256_in_prefix": "f27a28e16ec1361d1cd115ae4740b45673fbf697576664732760135a9cd56edc",
+        "size_in_bytes": 98
+      },
+      {
+        "_path": "Lib/site-packages/Rtree-0.8.3.dist-info/top_level.txt",
+        "path_type": "hardlink",
+        "sha256": "4f5f67b4b01e841ded6794bdaab2e07e217593d37580fe7a3ffd7e4ec05aef6e",
+        "sha256_in_prefix": "4f5f67b4b01e841ded6794bdaab2e07e217593d37580fe7a3ffd7e4ec05aef6e",
+        "size_in_bytes": 6
+      },
+      {
+        "_path": "Lib/site-packages/rtree/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "c8bd681fa7d031be7f1497d0e8895553365ee45c635107d7212896c9d6126fe6",
+        "sha256_in_prefix": "c8bd681fa7d031be7f1497d0e8895553365ee45c635107d7212896c9d6126fe6",
+        "size_in_bytes": 70
+      },
+      {
+        "_path": "Lib/site-packages/rtree/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "hardlink",
+        "sha256": "27edb10e8d8f07bb3918d4d98b74e950a87bf831de6cb578b7118c6592e15ee2",
+        "sha256_in_prefix": "27edb10e8d8f07bb3918d4d98b74e950a87bf831de6cb578b7118c6592e15ee2",
+        "size_in_bytes": 210
+      },
+      {
+        "_path": "Lib/site-packages/rtree/__pycache__/core.cpython-36.pyc",
+        "path_type": "hardlink",
+        "sha256": "918782642abbfde063b26f70fd21a9edbcad34cb5ac589a9e689e708175c7281",
+        "sha256_in_prefix": "918782642abbfde063b26f70fd21a9edbcad34cb5ac589a9e689e708175c7281",
+        "size_in_bytes": 9046
+      },
+      {
+        "_path": "Lib/site-packages/rtree/__pycache__/index.cpython-36.pyc",
+        "path_type": "hardlink",
+        "sha256": "44f96c39a5431a4d5d674ac998ff6853eca3ae0e744bd12e605d03be4d26141c",
+        "sha256_in_prefix": "44f96c39a5431a4d5d674ac998ff6853eca3ae0e744bd12e605d03be4d26141c",
+        "size_in_bytes": 56491
+      },
+      {
+        "_path": "Lib/site-packages/rtree/core.py",
+        "path_type": "hardlink",
+        "sha256": "9500406886dbc7e36ab4e309212db7856b2287ea9e7bc85ff139e50dd9c3c966",
+        "sha256_in_prefix": "9500406886dbc7e36ab4e309212db7856b2287ea9e7bc85ff139e50dd9c3c966",
+        "size_in_bytes": 21107
+      },
+      {
+        "_path": "Lib/site-packages/rtree/index.py",
+        "path_type": "hardlink",
+        "sha256": "5fbc8ad544fb1989c45a6ea2468a55cf936cee7794180cb4d41cfcd643f4c7ce",
+        "sha256_in_prefix": "5fbc8ad544fb1989c45a6ea2468a55cf936cee7794180cb4d41cfcd643f4c7ce",
+        "size_in_bytes": 62210
+      }
+    ],
+    "paths_version": 1
+  },
+  "platform": "win32",
+  "requested_spec": "rtree",
+  "size": 48766,
+  "subdir": "win-64",
+  "timestamp": 1538621337707,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/win-64/rtree-0.8.3-py36_1000.tar.bz2",
+  "version": "0.8.3"
+}

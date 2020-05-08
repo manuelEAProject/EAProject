@@ -1,0 +1,1265 @@
+{
+  "build": "py_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/conda-forge/noarch",
+  "constrains": [
+    "lxml",
+    "pyglet",
+    "Shapely",
+    "rtree",
+    "sympy",
+    "msgpack-python",
+    "colorlog",
+    "python-xxhash",
+    "pillow"
+  ],
+  "depends": [
+    "networkx",
+    "numpy",
+    "python",
+    "scipy"
+  ],
+  "extracted_package_dir": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\trimesh-2.35.24-py_0",
+  "features": "",
+  "files": [
+    "Lib/site-packages/trimesh-2.35.24.dist-info/INSTALLER",
+    "Lib/site-packages/trimesh-2.35.24.dist-info/LICENSE.md",
+    "Lib/site-packages/trimesh-2.35.24.dist-info/METADATA",
+    "Lib/site-packages/trimesh-2.35.24.dist-info/RECORD",
+    "Lib/site-packages/trimesh-2.35.24.dist-info/WHEEL",
+    "Lib/site-packages/trimesh-2.35.24.dist-info/top_level.txt",
+    "Lib/site-packages/trimesh/__init__.py",
+    "Lib/site-packages/trimesh/base.py",
+    "Lib/site-packages/trimesh/boolean.py",
+    "Lib/site-packages/trimesh/bounds.py",
+    "Lib/site-packages/trimesh/caching.py",
+    "Lib/site-packages/trimesh/collision.py",
+    "Lib/site-packages/trimesh/comparison.py",
+    "Lib/site-packages/trimesh/constants.py",
+    "Lib/site-packages/trimesh/convex.py",
+    "Lib/site-packages/trimesh/creation.py",
+    "Lib/site-packages/trimesh/curvature.py",
+    "Lib/site-packages/trimesh/decomposition.py",
+    "Lib/site-packages/trimesh/geometry.py",
+    "Lib/site-packages/trimesh/graph.py",
+    "Lib/site-packages/trimesh/grouping.py",
+    "Lib/site-packages/trimesh/inertia.py",
+    "Lib/site-packages/trimesh/integrate.py",
+    "Lib/site-packages/trimesh/interfaces/__init__.py",
+    "Lib/site-packages/trimesh/interfaces/blender.py",
+    "Lib/site-packages/trimesh/interfaces/generic.py",
+    "Lib/site-packages/trimesh/interfaces/scad.py",
+    "Lib/site-packages/trimesh/interfaces/vhacd.py",
+    "Lib/site-packages/trimesh/intersections.py",
+    "Lib/site-packages/trimesh/io/__init__.py",
+    "Lib/site-packages/trimesh/io/assimp.py",
+    "Lib/site-packages/trimesh/io/export.py",
+    "Lib/site-packages/trimesh/io/gltf.py",
+    "Lib/site-packages/trimesh/io/load.py",
+    "Lib/site-packages/trimesh/io/misc.py",
+    "Lib/site-packages/trimesh/io/openctm.py",
+    "Lib/site-packages/trimesh/io/ply.py",
+    "Lib/site-packages/trimesh/io/stl.py",
+    "Lib/site-packages/trimesh/io/threemf.py",
+    "Lib/site-packages/trimesh/io/urdf.py",
+    "Lib/site-packages/trimesh/io/wavefront.py",
+    "Lib/site-packages/trimesh/io/xml_based.py",
+    "Lib/site-packages/trimesh/nsphere.py",
+    "Lib/site-packages/trimesh/parent.py",
+    "Lib/site-packages/trimesh/path/__init__.py",
+    "Lib/site-packages/trimesh/path/arc.py",
+    "Lib/site-packages/trimesh/path/creation.py",
+    "Lib/site-packages/trimesh/path/curve.py",
+    "Lib/site-packages/trimesh/path/entities.py",
+    "Lib/site-packages/trimesh/path/intersections.py",
+    "Lib/site-packages/trimesh/path/io/__init__.py",
+    "Lib/site-packages/trimesh/path/io/dxf.py",
+    "Lib/site-packages/trimesh/path/io/export.py",
+    "Lib/site-packages/trimesh/path/io/load.py",
+    "Lib/site-packages/trimesh/path/io/misc.py",
+    "Lib/site-packages/trimesh/path/io/svg_io.py",
+    "Lib/site-packages/trimesh/path/packing.py",
+    "Lib/site-packages/trimesh/path/path.py",
+    "Lib/site-packages/trimesh/path/polygons.py",
+    "Lib/site-packages/trimesh/path/raster.py",
+    "Lib/site-packages/trimesh/path/segments.py",
+    "Lib/site-packages/trimesh/path/simplify.py",
+    "Lib/site-packages/trimesh/path/traversal.py",
+    "Lib/site-packages/trimesh/path/util.py",
+    "Lib/site-packages/trimesh/permutate.py",
+    "Lib/site-packages/trimesh/points.py",
+    "Lib/site-packages/trimesh/poses.py",
+    "Lib/site-packages/trimesh/primitives.py",
+    "Lib/site-packages/trimesh/proximity.py",
+    "Lib/site-packages/trimesh/ray/__init__.py",
+    "Lib/site-packages/trimesh/ray/ray_pyembree.py",
+    "Lib/site-packages/trimesh/ray/ray_triangle.py",
+    "Lib/site-packages/trimesh/ray/ray_util.py",
+    "Lib/site-packages/trimesh/registration.py",
+    "Lib/site-packages/trimesh/remesh.py",
+    "Lib/site-packages/trimesh/rendering.py",
+    "Lib/site-packages/trimesh/repair.py",
+    "Lib/site-packages/trimesh/resources/__init__.py",
+    "Lib/site-packages/trimesh/resources/blender.py.template",
+    "Lib/site-packages/trimesh/resources/collada.dae.template",
+    "Lib/site-packages/trimesh/resources/dxf.json.template",
+    "Lib/site-packages/trimesh/resources/ply.template",
+    "Lib/site-packages/trimesh/resources/svg.xml.template",
+    "Lib/site-packages/trimesh/resources/units_to_inches.json",
+    "Lib/site-packages/trimesh/resources/viewer.html.template",
+    "Lib/site-packages/trimesh/resources/yafaray.xml.template",
+    "Lib/site-packages/trimesh/sample.py",
+    "Lib/site-packages/trimesh/scene/__init__.py",
+    "Lib/site-packages/trimesh/scene/scene.py",
+    "Lib/site-packages/trimesh/scene/transforms.py",
+    "Lib/site-packages/trimesh/scene/viewer.py",
+    "Lib/site-packages/trimesh/scene/viewerJS.py",
+    "Lib/site-packages/trimesh/transformations.py",
+    "Lib/site-packages/trimesh/triangles.py",
+    "Lib/site-packages/trimesh/units.py",
+    "Lib/site-packages/trimesh/util.py",
+    "Lib/site-packages/trimesh/version.py",
+    "Lib/site-packages/trimesh/visual.py",
+    "Lib/site-packages/trimesh/voxel.py",
+    "Lib/site-packages/trimesh/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/base.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/boolean.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/bounds.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/caching.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/collision.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/comparison.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/constants.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/convex.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/creation.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/curvature.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/decomposition.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/geometry.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/graph.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/grouping.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/inertia.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/integrate.cpython-36.pyc",
+    "Lib/site-packages/trimesh/interfaces/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/interfaces/__pycache__/blender.cpython-36.pyc",
+    "Lib/site-packages/trimesh/interfaces/__pycache__/generic.cpython-36.pyc",
+    "Lib/site-packages/trimesh/interfaces/__pycache__/scad.cpython-36.pyc",
+    "Lib/site-packages/trimesh/interfaces/__pycache__/vhacd.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/intersections.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/assimp.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/export.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/gltf.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/load.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/misc.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/openctm.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/ply.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/stl.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/threemf.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/urdf.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/wavefront.cpython-36.pyc",
+    "Lib/site-packages/trimesh/io/__pycache__/xml_based.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/nsphere.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/parent.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/arc.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/creation.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/curve.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/entities.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/intersections.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/io/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/io/__pycache__/dxf.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/io/__pycache__/export.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/io/__pycache__/load.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/io/__pycache__/misc.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/io/__pycache__/svg_io.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/packing.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/path.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/polygons.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/raster.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/segments.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/simplify.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/traversal.cpython-36.pyc",
+    "Lib/site-packages/trimesh/path/__pycache__/util.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/permutate.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/points.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/poses.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/primitives.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/proximity.cpython-36.pyc",
+    "Lib/site-packages/trimesh/ray/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/ray/__pycache__/ray_pyembree.cpython-36.pyc",
+    "Lib/site-packages/trimesh/ray/__pycache__/ray_triangle.cpython-36.pyc",
+    "Lib/site-packages/trimesh/ray/__pycache__/ray_util.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/registration.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/remesh.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/rendering.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/repair.cpython-36.pyc",
+    "Lib/site-packages/trimesh/resources/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/sample.cpython-36.pyc",
+    "Lib/site-packages/trimesh/scene/__pycache__/__init__.cpython-36.pyc",
+    "Lib/site-packages/trimesh/scene/__pycache__/scene.cpython-36.pyc",
+    "Lib/site-packages/trimesh/scene/__pycache__/transforms.cpython-36.pyc",
+    "Lib/site-packages/trimesh/scene/__pycache__/viewer.cpython-36.pyc",
+    "Lib/site-packages/trimesh/scene/__pycache__/viewerJS.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/transformations.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/triangles.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/units.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/util.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/version.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/visual.cpython-36.pyc",
+    "Lib/site-packages/trimesh/__pycache__/voxel.cpython-36.pyc"
+  ],
+  "fn": "trimesh-2.35.24-py_0.tar.bz2",
+  "license": "MIT",
+  "link": {
+    "source": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\trimesh-2.35.24-py_0",
+    "type": 1
+  },
+  "md5": "4f4a1c373e823440343c779d08b9a243",
+  "name": "trimesh",
+  "noarch": "python",
+  "package_tarball_full_path": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\trimesh-2.35.24-py_0.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "site-packages/trimesh-2.35.24.dist-info/INSTALLER",
+        "path_type": "hardlink",
+        "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+        "sha256_in_prefix": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+        "size_in_bytes": 4
+      },
+      {
+        "_path": "site-packages/trimesh-2.35.24.dist-info/LICENSE.md",
+        "path_type": "hardlink",
+        "sha256": "aa5f08b59e979fcb94975511f468edc3121f5f93c9b0752c9406937e4c26c692",
+        "sha256_in_prefix": "aa5f08b59e979fcb94975511f468edc3121f5f93c9b0752c9406937e4c26c692",
+        "size_in_bytes": 1090
+      },
+      {
+        "_path": "site-packages/trimesh-2.35.24.dist-info/METADATA",
+        "path_type": "hardlink",
+        "sha256": "70c7bf929573f710bd9498284087557300c5ae72fe2c47b3416d5ebb4d85e62c",
+        "sha256_in_prefix": "70c7bf929573f710bd9498284087557300c5ae72fe2c47b3416d5ebb4d85e62c",
+        "size_in_bytes": 10240
+      },
+      {
+        "_path": "site-packages/trimesh-2.35.24.dist-info/RECORD",
+        "path_type": "hardlink",
+        "sha256": "94ba694f336ed4ab458564250c5cd566465f786ebbb53828d1041fcff7f705c1",
+        "sha256_in_prefix": "94ba694f336ed4ab458564250c5cd566465f786ebbb53828d1041fcff7f705c1",
+        "size_in_bytes": 10243
+      },
+      {
+        "_path": "site-packages/trimesh-2.35.24.dist-info/WHEEL",
+        "path_type": "hardlink",
+        "sha256": "8c8fb2e5987e5785b01ca51ce926dda46cd7ba3bea9f160d70a4b3e8e30b309a",
+        "sha256_in_prefix": "8c8fb2e5987e5785b01ca51ce926dda46cd7ba3bea9f160d70a4b3e8e30b309a",
+        "size_in_bytes": 93
+      },
+      {
+        "_path": "site-packages/trimesh-2.35.24.dist-info/top_level.txt",
+        "path_type": "hardlink",
+        "sha256": "6c75d27802edf65e3ffe669834ba7ddc645948e279880a52d9f7b78e26c85755",
+        "sha256_in_prefix": "6c75d27802edf65e3ffe669834ba7ddc645948e279880a52d9f7b78e26c85755",
+        "size_in_bytes": 8
+      },
+      {
+        "_path": "site-packages/trimesh/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "de0dbf6ad38bf0f4eb1c289aaf68dfd26a142c1a8bb626d10810d9ed5639876b",
+        "sha256_in_prefix": "de0dbf6ad38bf0f4eb1c289aaf68dfd26a142c1a8bb626d10810d9ed5639876b",
+        "size_in_bytes": 1162
+      },
+      {
+        "_path": "site-packages/trimesh/base.py",
+        "path_type": "hardlink",
+        "sha256": "c50c5a022ddef9db9a9e4ef801e926dcfc9f2462347b7f2e0c3361189a93f12a",
+        "sha256_in_prefix": "c50c5a022ddef9db9a9e4ef801e926dcfc9f2462347b7f2e0c3361189a93f12a",
+        "size_in_bytes": 83479
+      },
+      {
+        "_path": "site-packages/trimesh/boolean.py",
+        "path_type": "hardlink",
+        "sha256": "c8e637acce397106519b190969a616be8b83f8fbcc4436ccd835a25e4a518fd8",
+        "sha256_in_prefix": "c8e637acce397106519b190969a616be8b83f8fbcc4436ccd835a25e4a518fd8",
+        "size_in_bytes": 1923
+      },
+      {
+        "_path": "site-packages/trimesh/bounds.py",
+        "path_type": "hardlink",
+        "sha256": "19f28568ffd73715b3ddbf3fcf47591fa25f42b9f049d109f97e373f5901aa2c",
+        "sha256_in_prefix": "19f28568ffd73715b3ddbf3fcf47591fa25f42b9f049d109f97e373f5901aa2c",
+        "size_in_bytes": 14180
+      },
+      {
+        "_path": "site-packages/trimesh/caching.py",
+        "path_type": "hardlink",
+        "sha256": "1d283a40a6616c843793680cc72c563cbd0f74ff21025dcff966f6db32bc4086",
+        "sha256_in_prefix": "1d283a40a6616c843793680cc72c563cbd0f74ff21025dcff966f6db32bc4086",
+        "size_in_bytes": 18500
+      },
+      {
+        "_path": "site-packages/trimesh/collision.py",
+        "path_type": "hardlink",
+        "sha256": "4a97058e1ba4364788145ed9bb3b56b175acc80b6d902188fa4a77a40e66afbe",
+        "sha256_in_prefix": "4a97058e1ba4364788145ed9bb3b56b175acc80b6d902188fa4a77a40e66afbe",
+        "size_in_bytes": 21518
+      },
+      {
+        "_path": "site-packages/trimesh/comparison.py",
+        "path_type": "hardlink",
+        "sha256": "55cce5bc1ccd5f734fd3ff3cd7f1aef4695badb67fee98bfb93966d1947ec883",
+        "sha256_in_prefix": "55cce5bc1ccd5f734fd3ff3cd7f1aef4695badb67fee98bfb93966d1947ec883",
+        "size_in_bytes": 6478
+      },
+      {
+        "_path": "site-packages/trimesh/constants.py",
+        "path_type": "hardlink",
+        "sha256": "9e1dc7d4d3ca03585c63bdc293291a0fc3e1f87dcf46262db41268ffce8844e1",
+        "sha256_in_prefix": "9e1dc7d4d3ca03585c63bdc293291a0fc3e1f87dcf46262db41268ffce8844e1",
+        "size_in_bytes": 4999
+      },
+      {
+        "_path": "site-packages/trimesh/convex.py",
+        "path_type": "hardlink",
+        "sha256": "d487366e4b39f7d681be677008d8323b12a7c4bf98add2f621e90f18cd81f698",
+        "sha256_in_prefix": "d487366e4b39f7d681be677008d8323b12a7c4bf98add2f621e90f18cd81f698",
+        "size_in_bytes": 6539
+      },
+      {
+        "_path": "site-packages/trimesh/creation.py",
+        "path_type": "hardlink",
+        "sha256": "67618e051eb5450a5a04990b0fe803cdb87e3ac19dc4c22679d47e689493804b",
+        "sha256_in_prefix": "67618e051eb5450a5a04990b0fe803cdb87e3ac19dc4c22679d47e689493804b",
+        "size_in_bytes": 25367
+      },
+      {
+        "_path": "site-packages/trimesh/curvature.py",
+        "path_type": "hardlink",
+        "sha256": "eb405acb06143f0299c8090759db4a121260870407e65ac4b0bb2bc6eeda025e",
+        "sha256_in_prefix": "eb405acb06143f0299c8090759db4a121260870407e65ac4b0bb2bc6eeda025e",
+        "size_in_bytes": 6063
+      },
+      {
+        "_path": "site-packages/trimesh/decomposition.py",
+        "path_type": "hardlink",
+        "sha256": "e6529d974e800a3dbe1ceec55536da33c2a923131f36abb924ac6684887b7275",
+        "sha256_in_prefix": "e6529d974e800a3dbe1ceec55536da33c2a923131f36abb924ac6684887b7275",
+        "size_in_bytes": 901
+      },
+      {
+        "_path": "site-packages/trimesh/geometry.py",
+        "path_type": "hardlink",
+        "sha256": "c1abbcabc47492e8599edb45d6498d90fbbaa49f288f15deaff4a7b9d237abc5",
+        "sha256_in_prefix": "c1abbcabc47492e8599edb45d6498d90fbbaa49f288f15deaff4a7b9d237abc5",
+        "size_in_bytes": 8109
+      },
+      {
+        "_path": "site-packages/trimesh/graph.py",
+        "path_type": "hardlink",
+        "sha256": "8f58baf5f80570a64fcea244ec0755dbfb28cf12234becbfdc24f7803896c4d4",
+        "sha256_in_prefix": "8f58baf5f80570a64fcea244ec0755dbfb28cf12234becbfdc24f7803896c4d4",
+        "size_in_bytes": 27893
+      },
+      {
+        "_path": "site-packages/trimesh/grouping.py",
+        "path_type": "hardlink",
+        "sha256": "4400935d58952b386cc3dbe600e107ae422a3b4fced33748fec463407249a93c",
+        "sha256_in_prefix": "4400935d58952b386cc3dbe600e107ae422a3b4fced33748fec463407249a93c",
+        "size_in_bytes": 19232
+      },
+      {
+        "_path": "site-packages/trimesh/inertia.py",
+        "path_type": "hardlink",
+        "sha256": "c0353de523dd9dc4689a562a375c4a8029bc927f85da639317d1f1f3b84e00d3",
+        "sha256_in_prefix": "c0353de523dd9dc4689a562a375c4a8029bc927f85da639317d1f1f3b84e00d3",
+        "size_in_bytes": 6028
+      },
+      {
+        "_path": "site-packages/trimesh/integrate.py",
+        "path_type": "hardlink",
+        "sha256": "83b8e3959612e8831610a5db201ec796aae1f97eb38936ecd4401801d69a1383",
+        "sha256_in_prefix": "83b8e3959612e8831610a5db201ec796aae1f97eb38936ecd4401801d69a1383",
+        "size_in_bytes": 3682
+      },
+      {
+        "_path": "site-packages/trimesh/interfaces/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "5ea9d0b742864f9b8464f068d4381993b8c9eb3dad829d9d0888674827816976",
+        "sha256_in_prefix": "5ea9d0b742864f9b8464f068d4381993b8c9eb3dad829d9d0888674827816976",
+        "size_in_bytes": 124
+      },
+      {
+        "_path": "site-packages/trimesh/interfaces/blender.py",
+        "path_type": "hardlink",
+        "sha256": "a8b76bead7d2f62ad5768d68f048b430b8daa543e104b1e19d92046e9425a1e5",
+        "sha256_in_prefix": "a8b76bead7d2f62ad5768d68f048b430b8daa543e104b1e19d92046e9425a1e5",
+        "size_in_bytes": 1826
+      },
+      {
+        "_path": "site-packages/trimesh/interfaces/generic.py",
+        "path_type": "hardlink",
+        "sha256": "dac21dcb1069306fa2c98b61749072c555539b351e6ec7a4b12b95c5eaf4aa27",
+        "sha256_in_prefix": "dac21dcb1069306fa2c98b61749072c555539b351e6ec7a4b12b95c5eaf4aa27",
+        "size_in_bytes": 2783
+      },
+      {
+        "_path": "site-packages/trimesh/interfaces/scad.py",
+        "path_type": "hardlink",
+        "sha256": "d92e1c46c23d4e41630f24f46090eb1dab3b740f99648e8c5d97f2df1a1dafa8",
+        "sha256_in_prefix": "d92e1c46c23d4e41630f24f46090eb1dab3b740f99648e8c5d97f2df1a1dafa8",
+        "size_in_bytes": 2105
+      },
+      {
+        "_path": "site-packages/trimesh/interfaces/vhacd.py",
+        "path_type": "hardlink",
+        "sha256": "1373b24b0b370ad57deb16e7e250d7a1a51d8909e3aec2faae599ea01a4ba3cb",
+        "sha256_in_prefix": "1373b24b0b370ad57deb16e7e250d7a1a51d8909e3aec2faae599ea01a4ba3cb",
+        "size_in_bytes": 1300
+      },
+      {
+        "_path": "site-packages/trimesh/intersections.py",
+        "path_type": "hardlink",
+        "sha256": "531b9e6880c7da3e2e0008f3c9e3823b9a9d8d78970ad45efefe739d08cdd94e",
+        "sha256_in_prefix": "531b9e6880c7da3e2e0008f3c9e3823b9a9d8d78970ad45efefe739d08cdd94e",
+        "size_in_bytes": 20618
+      },
+      {
+        "_path": "site-packages/trimesh/io/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "site-packages/trimesh/io/assimp.py",
+        "path_type": "hardlink",
+        "sha256": "8e8c6eeeb5db55b9ed69d9f114ef5e6d4e3aba8aa05cb19e15dd71ba239eac72",
+        "sha256_in_prefix": "8e8c6eeeb5db55b9ed69d9f114ef5e6d4e3aba8aa05cb19e15dd71ba239eac72",
+        "size_in_bytes": 3077
+      },
+      {
+        "_path": "site-packages/trimesh/io/export.py",
+        "path_type": "hardlink",
+        "sha256": "d621cce340409d487eac25362a2832fb55b7b776592b2dcdeaf1da87eb9fc400",
+        "sha256_in_prefix": "d621cce340409d487eac25362a2832fb55b7b776592b2dcdeaf1da87eb9fc400",
+        "size_in_bytes": 5961
+      },
+      {
+        "_path": "site-packages/trimesh/io/gltf.py",
+        "path_type": "hardlink",
+        "sha256": "28e3e402fbbf54a3a149e519fa9d77aaad2f39d75846f6bac96de55c48c09282",
+        "sha256_in_prefix": "28e3e402fbbf54a3a149e519fa9d77aaad2f39d75846f6bac96de55c48c09282",
+        "size_in_bytes": 21424
+      },
+      {
+        "_path": "site-packages/trimesh/io/load.py",
+        "path_type": "hardlink",
+        "sha256": "5046d5c765ee8cb89c4c50126cc590c8dae6a3931cf4f7fe1eddbe0213bfe408",
+        "sha256_in_prefix": "5046d5c765ee8cb89c4c50126cc590c8dae6a3931cf4f7fe1eddbe0213bfe408",
+        "size_in_bytes": 15825
+      },
+      {
+        "_path": "site-packages/trimesh/io/misc.py",
+        "path_type": "hardlink",
+        "sha256": "497fa2391148d0d389833fca274093df779fd42c807462ec27ecdebbc19c1419",
+        "sha256_in_prefix": "497fa2391148d0d389833fca274093df779fd42c807462ec27ecdebbc19c1419",
+        "size_in_bytes": 4527
+      },
+      {
+        "_path": "site-packages/trimesh/io/openctm.py",
+        "path_type": "hardlink",
+        "sha256": "e22238d0b6c83c51a009ea57293135dfc7baa0a1c1414138a8dbeb6f2dda50d9",
+        "sha256_in_prefix": "e22238d0b6c83c51a009ea57293135dfc7baa0a1c1414138a8dbeb6f2dda50d9",
+        "size_in_bytes": 5792
+      },
+      {
+        "_path": "site-packages/trimesh/io/ply.py",
+        "path_type": "hardlink",
+        "sha256": "4e957f161184b37be6d3ad7e04e848fda575e38164bf892f02281bc4cc42641c",
+        "sha256_in_prefix": "4e957f161184b37be6d3ad7e04e848fda575e38164bf892f02281bc4cc42641c",
+        "size_in_bytes": 18439
+      },
+      {
+        "_path": "site-packages/trimesh/io/stl.py",
+        "path_type": "hardlink",
+        "sha256": "f23d4aca71253f654171f7cf34dbecec63ef159e155d23d14f9ffe949ea2831f",
+        "sha256_in_prefix": "f23d4aca71253f654171f7cf34dbecec63ef159e155d23d14f9ffe949ea2831f",
+        "size_in_bytes": 7899
+      },
+      {
+        "_path": "site-packages/trimesh/io/threemf.py",
+        "path_type": "hardlink",
+        "sha256": "095cde48ec77af9aedd88622b34a6ec9938ca706aedc292b39084e580aacdd82",
+        "sha256_in_prefix": "095cde48ec77af9aedd88622b34a6ec9938ca706aedc292b39084e580aacdd82",
+        "size_in_bytes": 7273
+      },
+      {
+        "_path": "site-packages/trimesh/io/urdf.py",
+        "path_type": "hardlink",
+        "sha256": "bec6bf3b687d9bbd8576ea837820a77dda49e38e89d2077d6cecea181f1dac0f",
+        "sha256_in_prefix": "bec6bf3b687d9bbd8576ea837820a77dda49e38e89d2077d6cecea181f1dac0f",
+        "size_in_bytes": 5765
+      },
+      {
+        "_path": "site-packages/trimesh/io/wavefront.py",
+        "path_type": "hardlink",
+        "sha256": "9ea9e492d29b6677632091f00c32f3220c65c731417f4fb3ad075e6676004a70",
+        "sha256_in_prefix": "9ea9e492d29b6677632091f00c32f3220c65c731417f4fb3ad075e6676004a70",
+        "size_in_bytes": 8712
+      },
+      {
+        "_path": "site-packages/trimesh/io/xml_based.py",
+        "path_type": "hardlink",
+        "sha256": "32a04ed87e02c18f65405a21f1402735a6842560066af701ee9d12df75a2683c",
+        "sha256_in_prefix": "32a04ed87e02c18f65405a21f1402735a6842560066af701ee9d12df75a2683c",
+        "size_in_bytes": 17134
+      },
+      {
+        "_path": "site-packages/trimesh/nsphere.py",
+        "path_type": "hardlink",
+        "sha256": "ea7efbd1b5d868241cc5af9203dbc23c564362749e9a615af23a97bd80fd0c62",
+        "sha256_in_prefix": "ea7efbd1b5d868241cc5af9203dbc23c564362749e9a615af23a97bd80fd0c62",
+        "size_in_bytes": 4586
+      },
+      {
+        "_path": "site-packages/trimesh/parent.py",
+        "path_type": "hardlink",
+        "sha256": "3bab115dff7e2f81eecf3c28f671443d4b950fc34f937a66546d12f1c73ded1d",
+        "sha256_in_prefix": "3bab115dff7e2f81eecf3c28f671443d4b950fc34f937a66546d12f1c73ded1d",
+        "size_in_bytes": 3460
+      },
+      {
+        "_path": "site-packages/trimesh/path/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "ceb8015a7f16543e8379998a7bb6fa9a5ba9ff75cc5e073c3e41d02d2e55e933",
+        "sha256_in_prefix": "ceb8015a7f16543e8379998a7bb6fa9a5ba9ff75cc5e073c3e41d02d2e55e933",
+        "size_in_bytes": 105
+      },
+      {
+        "_path": "site-packages/trimesh/path/arc.py",
+        "path_type": "hardlink",
+        "sha256": "693b9a6adf4fdecaf686115696d8a275fa5224cf19fd725449b3a0d378d99801",
+        "sha256_in_prefix": "693b9a6adf4fdecaf686115696d8a275fa5224cf19fd725449b3a0d378d99801",
+        "size_in_bytes": 6719
+      },
+      {
+        "_path": "site-packages/trimesh/path/creation.py",
+        "path_type": "hardlink",
+        "sha256": "10e58f8ddae7484be3b677635a6d156fa0572e4dc5b2bfb12b37ec526a929564",
+        "sha256_in_prefix": "10e58f8ddae7484be3b677635a6d156fa0572e4dc5b2bfb12b37ec526a929564",
+        "size_in_bytes": 3143
+      },
+      {
+        "_path": "site-packages/trimesh/path/curve.py",
+        "path_type": "hardlink",
+        "sha256": "7643acf5c8ecaaed13a86930dec516b24b7be8aa0c9214cfe803bca9561026da",
+        "sha256_in_prefix": "7643acf5c8ecaaed13a86930dec516b24b7be8aa0c9214cfe803bca9561026da",
+        "size_in_bytes": 3828
+      },
+      {
+        "_path": "site-packages/trimesh/path/entities.py",
+        "path_type": "hardlink",
+        "sha256": "e6930a8d6b1f908c699453f18392cd2176b0ee0893c450e1bd13f0fc49669508",
+        "sha256_in_prefix": "e6930a8d6b1f908c699453f18392cd2176b0ee0893c450e1bd13f0fc49669508",
+        "size_in_bytes": 11935
+      },
+      {
+        "_path": "site-packages/trimesh/path/intersections.py",
+        "path_type": "hardlink",
+        "sha256": "d5dc080bc178c93222da00ac31bd17819e96dc299af5df52d6ef8763d79f26e1",
+        "sha256_in_prefix": "d5dc080bc178c93222da00ac31bd17819e96dc299af5df52d6ef8763d79f26e1",
+        "size_in_bytes": 2340
+      },
+      {
+        "_path": "site-packages/trimesh/path/io/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "site-packages/trimesh/path/io/dxf.py",
+        "path_type": "hardlink",
+        "sha256": "5256dbe071c6a54c75b84a312ce84c8c19d9a26f14bc1ffc6db5b7da9053e163",
+        "sha256_in_prefix": "5256dbe071c6a54c75b84a312ce84c8c19d9a26f14bc1ffc6db5b7da9053e163",
+        "size_in_bytes": 27455
+      },
+      {
+        "_path": "site-packages/trimesh/path/io/export.py",
+        "path_type": "hardlink",
+        "sha256": "1b9e8c939e7f93152aff36838c4aa2c62c22745493b9d3d80dfd99428453dda9",
+        "sha256_in_prefix": "1b9e8c939e7f93152aff36838c4aa2c62c22745493b9d3d80dfd99428453dda9",
+        "size_in_bytes": 1935
+      },
+      {
+        "_path": "site-packages/trimesh/path/io/load.py",
+        "path_type": "hardlink",
+        "sha256": "c2fcf77d4afde2f95cc3dbc6903a0a1269cee60f3860dbfd4f7eeb526efac96e",
+        "sha256_in_prefix": "c2fcf77d4afde2f95cc3dbc6903a0a1269cee60f3860dbfd4f7eeb526efac96e",
+        "size_in_bytes": 3972
+      },
+      {
+        "_path": "site-packages/trimesh/path/io/misc.py",
+        "path_type": "hardlink",
+        "sha256": "e8eaa48cc52a3010d1fbea550df64bf67da0d03b748058b3958695f4c32cb6a7",
+        "sha256_in_prefix": "e8eaa48cc52a3010d1fbea550df64bf67da0d03b748058b3958695f4c32cb6a7",
+        "size_in_bytes": 5555
+      },
+      {
+        "_path": "site-packages/trimesh/path/io/svg_io.py",
+        "path_type": "hardlink",
+        "sha256": "ece0aedede64804b2915539dc920347e6c69e9e30c41f82ade6de3d7f0f173c7",
+        "sha256_in_prefix": "ece0aedede64804b2915539dc920347e6c69e9e30c41f82ade6de3d7f0f173c7",
+        "size_in_bytes": 7984
+      },
+      {
+        "_path": "site-packages/trimesh/path/packing.py",
+        "path_type": "hardlink",
+        "sha256": "9fd57b06cbdbcaef0a8d4ac8612e6168ea77b5e137d4489a689956f0cb5a9d66",
+        "sha256_in_prefix": "9fd57b06cbdbcaef0a8d4ac8612e6168ea77b5e137d4489a689956f0cb5a9d66",
+        "size_in_bytes": 9949
+      },
+      {
+        "_path": "site-packages/trimesh/path/path.py",
+        "path_type": "hardlink",
+        "sha256": "06fca3f4a125063396921137182a0bdb45e486cf943cd3ba310534dbd12fcb35",
+        "sha256_in_prefix": "06fca3f4a125063396921137182a0bdb45e486cf943cd3ba310534dbd12fcb35",
+        "size_in_bytes": 41810
+      },
+      {
+        "_path": "site-packages/trimesh/path/polygons.py",
+        "path_type": "hardlink",
+        "sha256": "bdad68bad191e69d61dba91d16552c2d99d9783bf21f64071062a893919ac09c",
+        "sha256_in_prefix": "bdad68bad191e69d61dba91d16552c2d99d9783bf21f64071062a893919ac09c",
+        "size_in_bytes": 19737
+      },
+      {
+        "_path": "site-packages/trimesh/path/raster.py",
+        "path_type": "hardlink",
+        "sha256": "57ca4e68451d6eed7e1043543daf0849df4f0cb1d1092bec8a25061ff6e737bd",
+        "sha256_in_prefix": "57ca4e68451d6eed7e1043543daf0849df4f0cb1d1092bec8a25061ff6e737bd",
+        "size_in_bytes": 2898
+      },
+      {
+        "_path": "site-packages/trimesh/path/segments.py",
+        "path_type": "hardlink",
+        "sha256": "22aa510876e2bc446421bd729e6b554e67aa17911d5df265fd63531eb611c5e7",
+        "sha256_in_prefix": "22aa510876e2bc446421bd729e6b554e67aa17911d5df265fd63531eb611c5e7",
+        "size_in_bytes": 3802
+      },
+      {
+        "_path": "site-packages/trimesh/path/simplify.py",
+        "path_type": "hardlink",
+        "sha256": "ea58b0a0089b4ad5e9237d9572192ed7db690677ff54305b3baa09f1e420c4af",
+        "sha256_in_prefix": "ea58b0a0089b4ad5e9237d9572192ed7db690677ff54305b3baa09f1e420c4af",
+        "size_in_bytes": 12740
+      },
+      {
+        "_path": "site-packages/trimesh/path/traversal.py",
+        "path_type": "hardlink",
+        "sha256": "7420fb952871bcfe2b46cc4143d721ff02f82ab782fb0c8f6d90dacdbc2ffd54",
+        "sha256_in_prefix": "7420fb952871bcfe2b46cc4143d721ff02f82ab782fb0c8f6d90dacdbc2ffd54",
+        "size_in_bytes": 14134
+      },
+      {
+        "_path": "site-packages/trimesh/path/util.py",
+        "path_type": "hardlink",
+        "sha256": "8a5ac178cdc9c7e5cdc515aec6ef6cffbc39a4c467642f26293bc98cc0b958a1",
+        "sha256_in_prefix": "8a5ac178cdc9c7e5cdc515aec6ef6cffbc39a4c467642f26293bc98cc0b958a1",
+        "size_in_bytes": 1899
+      },
+      {
+        "_path": "site-packages/trimesh/permutate.py",
+        "path_type": "hardlink",
+        "sha256": "8ce2028ea70ea3bd56d5568e3e531eae8eb68369503c67f1d8da9d629c87aebe",
+        "sha256_in_prefix": "8ce2028ea70ea3bd56d5568e3e531eae8eb68369503c67f1d8da9d629c87aebe",
+        "size_in_bytes": 4220
+      },
+      {
+        "_path": "site-packages/trimesh/points.py",
+        "path_type": "hardlink",
+        "sha256": "03f731f132a81d72cbd0c7505513249f42ae93f9bb20c7050addd2512cadca4c",
+        "sha256_in_prefix": "03f731f132a81d72cbd0c7505513249f42ae93f9bb20c7050addd2512cadca4c",
+        "size_in_bytes": 14135
+      },
+      {
+        "_path": "site-packages/trimesh/poses.py",
+        "path_type": "hardlink",
+        "sha256": "e119ef32f7c5206d9bc39c193d6f65fa214510854cb20437c3a1b21b0c2f4783",
+        "sha256_in_prefix": "e119ef32f7c5206d9bc39c193d6f65fa214510854cb20437c3a1b21b0c2f4783",
+        "size_in_bytes": 10075
+      },
+      {
+        "_path": "site-packages/trimesh/primitives.py",
+        "path_type": "hardlink",
+        "sha256": "b6ebd6b75afbec40364368b32edb1e2bd7ef44d6f0e262cdde2511fd7f8c527f",
+        "sha256_in_prefix": "b6ebd6b75afbec40364368b32edb1e2bd7ef44d6f0e262cdde2511fd7f8c527f",
+        "size_in_bytes": 20494
+      },
+      {
+        "_path": "site-packages/trimesh/proximity.py",
+        "path_type": "hardlink",
+        "sha256": "5042a47ec1743ba7fe3c05b7043c364db40f1bb71973e8c251da7a99313dbe12",
+        "sha256_in_prefix": "5042a47ec1743ba7fe3c05b7043c364db40f1bb71973e8c251da7a99313dbe12",
+        "size_in_bytes": 17978
+      },
+      {
+        "_path": "site-packages/trimesh/ray/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "4676f18cb415d98f79311e6a7dcb2e2539b88665f965752ab7533f393e69fa63",
+        "sha256_in_prefix": "4676f18cb415d98f79311e6a7dcb2e2539b88665f965752ab7533f393e69fa63",
+        "size_in_bytes": 271
+      },
+      {
+        "_path": "site-packages/trimesh/ray/ray_pyembree.py",
+        "path_type": "hardlink",
+        "sha256": "0298dd542e790494860f6173249389d31fe5db8e9b8d398262afa4ed0e40e214",
+        "sha256_in_prefix": "0298dd542e790494860f6173249389d31fe5db8e9b8d398262afa4ed0e40e214",
+        "size_in_bytes": 11039
+      },
+      {
+        "_path": "site-packages/trimesh/ray/ray_triangle.py",
+        "path_type": "hardlink",
+        "sha256": "c635d6e9cbece2393410dc7ef15fb36016860c87f3b4db111343a58a14a9ac4e",
+        "sha256_in_prefix": "c635d6e9cbece2393410dc7ef15fb36016860c87f3b4db111343a58a14a9ac4e",
+        "size_in_bytes": 12404
+      },
+      {
+        "_path": "site-packages/trimesh/ray/ray_util.py",
+        "path_type": "hardlink",
+        "sha256": "bfcb96b7def6f62f9695dfe5e084b9e716e59fe0f8dc237e1921bac1e30fe636",
+        "sha256_in_prefix": "bfcb96b7def6f62f9695dfe5e084b9e716e59fe0f8dc237e1921bac1e30fe636",
+        "size_in_bytes": 4586
+      },
+      {
+        "_path": "site-packages/trimesh/registration.py",
+        "path_type": "hardlink",
+        "sha256": "e5e11f8baba7f41ab48879178634d4b5f0659beac6a157ab519452cf4b07dfb3",
+        "sha256_in_prefix": "e5e11f8baba7f41ab48879178634d4b5f0659beac6a157ab519452cf4b07dfb3",
+        "size_in_bytes": 10586
+      },
+      {
+        "_path": "site-packages/trimesh/remesh.py",
+        "path_type": "hardlink",
+        "sha256": "91d6d8e2b7e1c6a9c449e2e86f95ab91f00a5cda08f4f2ae41530081e6bd7d92",
+        "sha256_in_prefix": "91d6d8e2b7e1c6a9c449e2e86f95ab91f00a5cda08f4f2ae41530081e6bd7d92",
+        "size_in_bytes": 4267
+      },
+      {
+        "_path": "site-packages/trimesh/rendering.py",
+        "path_type": "hardlink",
+        "sha256": "5b356c758a8b3fb15536e49e0c515d88a8453bb010bbc825d7e85f02d018f7f8",
+        "sha256_in_prefix": "5b356c758a8b3fb15536e49e0c515d88a8453bb010bbc825d7e85f02d018f7f8",
+        "size_in_bytes": 7667
+      },
+      {
+        "_path": "site-packages/trimesh/repair.py",
+        "path_type": "hardlink",
+        "sha256": "cbb46ef8f862ee101516a93c4a5eb9986eb5536a9580e41074598d8a481451c8",
+        "sha256_in_prefix": "cbb46ef8f862ee101516a93c4a5eb9986eb5536a9580e41074598d8a481451c8",
+        "size_in_bytes": 10969
+      },
+      {
+        "_path": "site-packages/trimesh/resources/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "ec8e8a73a9284967934c6b188836f74f8e33925cda9a87ede69cdf66eb0a62a1",
+        "sha256_in_prefix": "ec8e8a73a9284967934c6b188836f74f8e33925cda9a87ede69cdf66eb0a62a1",
+        "size_in_bytes": 573
+      },
+      {
+        "_path": "site-packages/trimesh/resources/blender.py.template",
+        "path_type": "hardlink",
+        "sha256": "4c10961c9223fd9bea52f2dc4195c2cf816ef407faabaf2a88b912a0cafb75aa",
+        "sha256_in_prefix": "4c10961c9223fd9bea52f2dc4195c2cf816ef407faabaf2a88b912a0cafb75aa",
+        "size_in_bytes": 1295
+      },
+      {
+        "_path": "site-packages/trimesh/resources/collada.dae.template",
+        "path_type": "hardlink",
+        "sha256": "e029980b06a6373e94aebfa03974e03cf2f8adc7e6a0acef84e9fd3074251fe7",
+        "sha256_in_prefix": "e029980b06a6373e94aebfa03974e03cf2f8adc7e6a0acef84e9fd3074251fe7",
+        "size_in_bytes": 4131
+      },
+      {
+        "_path": "site-packages/trimesh/resources/dxf.json.template",
+        "path_type": "hardlink",
+        "sha256": "c250c3342692af517e74e1d69b05d8c953d51864561b0c576314bc85ac2aaa16",
+        "sha256_in_prefix": "c250c3342692af517e74e1d69b05d8c953d51864561b0c576314bc85ac2aaa16",
+        "size_in_bytes": 12940
+      },
+      {
+        "_path": "site-packages/trimesh/resources/ply.template",
+        "path_type": "hardlink",
+        "sha256": "182384776be537ac851c95faf877bc33b817e249e069cd9463a3bfc9fe4b5bef",
+        "sha256_in_prefix": "182384776be537ac851c95faf877bc33b817e249e069cd9463a3bfc9fe4b5bef",
+        "size_in_bytes": 479
+      },
+      {
+        "_path": "site-packages/trimesh/resources/svg.xml.template",
+        "path_type": "hardlink",
+        "sha256": "e629ac50d8c68c51c9941872211a1d0f374bfcb238ebf32667d082390188e927",
+        "sha256_in_prefix": "e629ac50d8c68c51c9941872211a1d0f374bfcb238ebf32667d082390188e927",
+        "size_in_bytes": 252
+      },
+      {
+        "_path": "site-packages/trimesh/resources/units_to_inches.json",
+        "path_type": "hardlink",
+        "sha256": "85c0c8759ff2d64a7e22f4fa44c8db3f0ee70dd90204b3ac71fdef84a54d86de",
+        "sha256_in_prefix": "85c0c8759ff2d64a7e22f4fa44c8db3f0ee70dd90204b3ac71fdef84a54d86de",
+        "size_in_bytes": 1225
+      },
+      {
+        "_path": "site-packages/trimesh/resources/viewer.html.template",
+        "path_type": "hardlink",
+        "sha256": "df6023a17fb6f247ec35656f4b9353599a5dd996db8f2fdb4cdd4d2c9cadc342",
+        "sha256_in_prefix": "df6023a17fb6f247ec35656f4b9353599a5dd996db8f2fdb4cdd4d2c9cadc342",
+        "size_in_bytes": 67106
+      },
+      {
+        "_path": "site-packages/trimesh/resources/yafaray.xml.template",
+        "path_type": "hardlink",
+        "sha256": "2445270ca6fe610ac08ecb1653a7a9611192db5e4e4afc2c35521d757023c0fe",
+        "sha256_in_prefix": "2445270ca6fe610ac08ecb1653a7a9611192db5e4e4afc2c35521d757023c0fe",
+        "size_in_bytes": 3460
+      },
+      {
+        "_path": "site-packages/trimesh/sample.py",
+        "path_type": "hardlink",
+        "sha256": "aae0b934bab1ce3c6f8b6ccc93d7a3440856173c1500747dbc975a2a1fe17ccc",
+        "sha256_in_prefix": "aae0b934bab1ce3c6f8b6ccc93d7a3440856173c1500747dbc975a2a1fe17ccc",
+        "size_in_bytes": 4573
+      },
+      {
+        "_path": "site-packages/trimesh/scene/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "389d61f744edfff4ba7d146fa4c4f4c730d18707958bb5ba6edfe0cbe9e8d941",
+        "sha256_in_prefix": "389d61f744edfff4ba7d146fa4c4f4c730d18707958bb5ba6edfe0cbe9e8d941",
+        "size_in_bytes": 147
+      },
+      {
+        "_path": "site-packages/trimesh/scene/scene.py",
+        "path_type": "hardlink",
+        "sha256": "d5efcb4479f19a14a071c94f8ec07afd2342e0deaaa55bee0866dee2e1e29cb4",
+        "sha256_in_prefix": "d5efcb4479f19a14a071c94f8ec07afd2342e0deaaa55bee0866dee2e1e29cb4",
+        "size_in_bytes": 30731
+      },
+      {
+        "_path": "site-packages/trimesh/scene/transforms.py",
+        "path_type": "hardlink",
+        "sha256": "2816b9dde3eeb2aa5c395cc23bd4800b17591640ee26fecc10cb4dd1e4370752",
+        "sha256_in_prefix": "2816b9dde3eeb2aa5c395cc23bd4800b17591640ee26fecc10cb4dd1e4370752",
+        "size_in_bytes": 14165
+      },
+      {
+        "_path": "site-packages/trimesh/scene/viewer.py",
+        "path_type": "hardlink",
+        "sha256": "b117fd4072fcdd7910ac98f56878b1df406ef9fad7159f1925123e2cb14df390",
+        "sha256_in_prefix": "b117fd4072fcdd7910ac98f56878b1df406ef9fad7159f1925123e2cb14df390",
+        "size_in_bytes": 14002
+      },
+      {
+        "_path": "site-packages/trimesh/scene/viewerJS.py",
+        "path_type": "hardlink",
+        "sha256": "369b1974d8e2dd38c95d5085bf2b81d70dd53caa09ed6cf73c24416ea685d840",
+        "sha256_in_prefix": "369b1974d8e2dd38c95d5085bf2b81d70dd53caa09ed6cf73c24416ea685d840",
+        "size_in_bytes": 2740
+      },
+      {
+        "_path": "site-packages/trimesh/transformations.py",
+        "path_type": "hardlink",
+        "sha256": "aa27450c05ead66a89e72053ce4402d32657280e012d2b54487cca06f67aaaf5",
+        "sha256_in_prefix": "aa27450c05ead66a89e72053ce4402d32657280e012d2b54487cca06f67aaaf5",
+        "size_in_bytes": 69565
+      },
+      {
+        "_path": "site-packages/trimesh/triangles.py",
+        "path_type": "hardlink",
+        "sha256": "3f15fda827c862501d97f625bd4c9ef90914a63d40c05620ac7d82a169013f9c",
+        "sha256_in_prefix": "3f15fda827c862501d97f625bd4c9ef90914a63d40c05620ac7d82a169013f9c",
+        "size_in_bytes": 18211
+      },
+      {
+        "_path": "site-packages/trimesh/units.py",
+        "path_type": "hardlink",
+        "sha256": "fa16c255caa828b17a1393846d491e89a8ece76a8697bb3e58724b35b0d7792c",
+        "sha256_in_prefix": "fa16c255caa828b17a1393846d491e89a8ece76a8697bb3e58724b35b0d7792c",
+        "size_in_bytes": 3659
+      },
+      {
+        "_path": "site-packages/trimesh/util.py",
+        "path_type": "hardlink",
+        "sha256": "464bc8135d16278bc26f9e75f631bf8658cc7c4c5ac3f4cf9cb1d0a45588661a",
+        "sha256_in_prefix": "464bc8135d16278bc26f9e75f631bf8658cc7c4c5ac3f4cf9cb1d0a45588661a",
+        "size_in_bytes": 50583
+      },
+      {
+        "_path": "site-packages/trimesh/version.py",
+        "path_type": "hardlink",
+        "sha256": "8fdfa1d38773cf33646875c02f7846923a49289705b314d1f2eea09d52178c88",
+        "sha256_in_prefix": "8fdfa1d38773cf33646875c02f7846923a49289705b314d1f2eea09d52178c88",
+        "size_in_bytes": 24
+      },
+      {
+        "_path": "site-packages/trimesh/visual.py",
+        "path_type": "hardlink",
+        "sha256": "45bca8256c24d66e4cb1927416588458e468aea77c360325b778876700bc1a7c",
+        "sha256_in_prefix": "45bca8256c24d66e4cb1927416588458e468aea77c360325b778876700bc1a7c",
+        "size_in_bytes": 22615
+      },
+      {
+        "_path": "site-packages/trimesh/voxel.py",
+        "path_type": "hardlink",
+        "sha256": "fa8f65b529afb1011654a9620b4e537025130bc40b7242bc725a4bc94930ab7a",
+        "sha256_in_prefix": "fa8f65b529afb1011654a9620b4e537025130bc40b7242bc725a4bc94930ab7a",
+        "size_in_bytes": 22101
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/base.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/boolean.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/bounds.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/caching.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/collision.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/comparison.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/constants.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/convex.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/creation.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/curvature.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/decomposition.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/geometry.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/graph.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/grouping.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/inertia.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/integrate.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/interfaces/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/interfaces/__pycache__/blender.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/interfaces/__pycache__/generic.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/interfaces/__pycache__/scad.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/interfaces/__pycache__/vhacd.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/intersections.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/assimp.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/export.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/gltf.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/load.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/misc.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/openctm.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/ply.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/stl.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/threemf.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/urdf.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/wavefront.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/io/__pycache__/xml_based.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/nsphere.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/parent.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/arc.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/creation.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/curve.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/entities.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/intersections.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/io/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/io/__pycache__/dxf.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/io/__pycache__/export.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/io/__pycache__/load.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/io/__pycache__/misc.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/io/__pycache__/svg_io.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/packing.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/path.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/polygons.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/raster.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/segments.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/simplify.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/traversal.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/path/__pycache__/util.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/permutate.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/points.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/poses.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/primitives.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/proximity.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/ray/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/ray/__pycache__/ray_pyembree.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/ray/__pycache__/ray_triangle.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/ray/__pycache__/ray_util.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/registration.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/remesh.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/rendering.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/repair.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/resources/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/sample.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/scene/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/scene/__pycache__/scene.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/scene/__pycache__/transforms.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/scene/__pycache__/viewer.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/scene/__pycache__/viewerJS.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/transformations.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/triangles.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/units.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/util.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/version.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/visual.cpython-36.pyc",
+        "path_type": "pyc_file"
+      },
+      {
+        "_path": "Lib/site-packages/trimesh/__pycache__/voxel.cpython-36.pyc",
+        "path_type": "pyc_file"
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "trimesh",
+  "size": 230420,
+  "subdir": "noarch",
+  "timestamp": 1541615738214,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/noarch/trimesh-2.35.24-py_0.tar.bz2",
+  "version": "2.35.24"
+}

@@ -1,0 +1,208 @@
+{
+  "arch": "x86_64",
+  "build": "vc14_1",
+  "build_number": 1,
+  "channel": "https://conda.anaconda.org/conda-forge/win-64",
+  "constrains": [],
+  "depends": [],
+  "extracted_package_dir": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\libspatialindex-1.8.5-vc14_1",
+  "features": "vc14",
+  "files": [
+    "Library/bin/spatialindex-64.dll",
+    "Library/bin/spatialindex_c-64.dll",
+    "Library/include/spatialindex/LineSegment.h",
+    "Library/include/spatialindex/MVRTree.h",
+    "Library/include/spatialindex/MovingPoint.h",
+    "Library/include/spatialindex/MovingRegion.h",
+    "Library/include/spatialindex/Point.h",
+    "Library/include/spatialindex/RTree.h",
+    "Library/include/spatialindex/Region.h",
+    "Library/include/spatialindex/SpatialIndex.h",
+    "Library/include/spatialindex/TPRTree.h",
+    "Library/include/spatialindex/TimePoint.h",
+    "Library/include/spatialindex/TimeRegion.h",
+    "Library/include/spatialindex/Version.h",
+    "Library/include/spatialindex/capi/BoundsQuery.h",
+    "Library/include/spatialindex/capi/CountVisitor.h",
+    "Library/include/spatialindex/capi/CustomStorage.h",
+    "Library/include/spatialindex/capi/DataStream.h",
+    "Library/include/spatialindex/capi/Error.h",
+    "Library/include/spatialindex/capi/IdVisitor.h",
+    "Library/include/spatialindex/capi/Index.h",
+    "Library/include/spatialindex/capi/LeafQuery.h",
+    "Library/include/spatialindex/capi/ObjVisitor.h",
+    "Library/include/spatialindex/capi/Utility.h",
+    "Library/include/spatialindex/capi/sidx_api.h",
+    "Library/include/spatialindex/capi/sidx_config.h",
+    "Library/include/spatialindex/capi/sidx_export.h",
+    "Library/include/spatialindex/capi/sidx_impl.h",
+    "Library/include/spatialindex/tools/PointerPool.h",
+    "Library/include/spatialindex/tools/PoolPointer.h",
+    "Library/include/spatialindex/tools/SmartPointer.h",
+    "Library/include/spatialindex/tools/Tools.h",
+    "Library/include/spatialindex/tools/rand48.h",
+    "Library/lib/spatialindex-64.lib",
+    "Library/lib/spatialindex_c-64.lib"
+  ],
+  "fn": "libspatialindex-1.8.5-vc14_1.tar.bz2",
+  "license": "MIT",
+  "link": {
+    "source": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\libspatialindex-1.8.5-vc14_1",
+    "type": 1
+  },
+  "md5": "7a41a394a4b998bb7deebb54e2676130",
+  "name": "libspatialindex",
+  "package_tarball_full_path": "C:\\Users\\Lukas\\Anaconda3\\pkgs\\libspatialindex-1.8.5-vc14_1.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Library/bin/spatialindex-64.dll",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/bin/spatialindex_c-64.dll",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/LineSegment.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/MVRTree.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/MovingPoint.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/MovingRegion.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/Point.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/RTree.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/Region.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/SpatialIndex.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/TPRTree.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/TimePoint.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/TimeRegion.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/Version.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/BoundsQuery.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/CountVisitor.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/CustomStorage.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/DataStream.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/Error.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/IdVisitor.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/Index.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/LeafQuery.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/ObjVisitor.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/Utility.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/sidx_api.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/sidx_config.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/sidx_export.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/capi/sidx_impl.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/tools/PointerPool.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/tools/PoolPointer.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/tools/SmartPointer.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/tools/Tools.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/include/spatialindex/tools/rand48.h",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/lib/spatialindex-64.lib",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "Library/lib/spatialindex_c-64.lib",
+        "path_type": "hardlink"
+      }
+    ],
+    "paths_version": 1
+  },
+  "platform": "win32",
+  "requested_spec": "None",
+  "size": 304965,
+  "subdir": "win-64",
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/win-64/libspatialindex-1.8.5-vc14_1.tar.bz2",
+  "version": "1.8.5"
+}

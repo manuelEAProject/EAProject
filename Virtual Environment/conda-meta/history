@@ -1,0 +1,53 @@
+==> 2018-11-07 19:58:22 <==
+# cmd: C:\Users\Lukas\Anaconda3\Scripts\conda create --name PatchWorld_Clone --clone PatchWorld
+# conda version: 4.5.11
++conda-forge::mkl_fft-1.0.6-py36_0
++conda-forge::mkl_random-1.0.2-py36_0
++conda-forge::pip-18.1-py36_1000
++conda-forge::python-3.6.6-he025d50_0
++conda-forge::setuptools-40.5.0-py36_0
++conda-forge::wheel-0.32.2-py36_0
++conda-forge::wincertstore-0.2-py36_1002
++defaults::blas-1.0-mkl
++defaults::ca-certificates-2018.03.07-0
++defaults::certifi-2018.10.15-py36_0
++defaults::cycler-0.10.0-py36h009560c_0
++defaults::freetype-2.9.1-ha9979f8_1
++defaults::icc_rt-2017.0.4-h97af966_0
++defaults::icu-58.2-ha66f8fd_1
++defaults::intel-openmp-2019.0-118
++defaults::jpeg-9b-hb83a4c4_2
++defaults::kiwisolver-1.0.1-py36h6538335_0
++defaults::libpng-1.6.35-h2a8f88b_0
++defaults::matplotlib-3.0.1-py36hc8f65d3_0
++defaults::mkl-2019.0-118
++defaults::numpy-1.15.4-py36ha559c80_0
++defaults::numpy-base-1.15.4-py36h8128ebf_0
++defaults::openssl-1.0.2p-hfa6e2cd_0
++defaults::pyparsing-2.3.0-py36_0
++defaults::pyqt-5.9.2-py36h6538335_2
++defaults::python-dateutil-2.7.5-py36_0
++defaults::pytz-2018.7-py36_0
++defaults::qt-5.9.6-vc14h1e9a669_2
++defaults::scipy-1.1.0-py36h4f6bf74_1
++defaults::sip-4.19.8-py36h6538335_0
++defaults::six-1.11.0-py36_1
++defaults::sqlite-3.25.2-hfa6e2cd_0
++defaults::tornado-5.1.1-py36hfa6e2cd_0
++defaults::vc-14.1-h0510ff6_4
++defaults::vs2015_runtime-14.15.26706-h3a45250_0
++defaults::zlib-1.2.11-h8395fce_2
+# update specs: ['defaults/win-64::blas==1.0=mkl', 'defaults/win-64::ca-certificates==2018.03.07=0', 'defaults/win-64::icc_rt==2017.0.4=h97af966_0', 'defaults/win-64::intel-openmp==2019.0=118', 'defaults/win-64::vs2015_runtime==14.15.26706=h3a45250_0', 'defaults/win-64::mkl==2019.0=118', 'defaults/win-64::vc==14.1=h0510ff6_4', 'defaults/win-64::icu==58.2=ha66f8fd_1', 'defaults/win-64::jpeg==9b=hb83a4c4_2', 'defaults/win-64::openssl==1.0.2p=hfa6e2cd_0', 'conda-forge/win-64::python==3.6.6=he025d50_0', 'defaults/win-64::sqlite==3.25.2=hfa6e2cd_0', 'defaults/win-64::zlib==1.2.11=h8395fce_2', 'defaults/win-64::certifi==2018.10.15=py36_0', 'defaults/win-64::kiwisolver==1.0.1=py36h6538335_0', 'defaults/win-64::libpng==1.6.35=h2a8f88b_0', 'defaults/win-64::numpy-base==1.15.4=py36h8128ebf_0', 'defaults/win-64::pyparsing==2.3.0=py36_0', 'defaults/win-64::pytz==2018.7=py36_0', 'defaults/win-64::sip==4.19.8=py36h6538335_0', 'defaults/win-64::six==1.11.0=py36_1', 'defaults/win-64::tornado==5.1.1=py36hfa6e2cd_0', 'conda-forge/win-64::wincertstore==0.2=py36_1002', 'defaults/win-64::cycler==0.10.0=py36h009560c_0', 'defaults/win-64::freetype==2.9.1=ha9979f8_1', 'defaults/win-64::python-dateutil==2.7.5=py36_0', 'defaults/win-64::qt==5.9.6=vc14h1e9a669_2', 'conda-forge/win-64::setuptools==40.5.0=py36_0', 'defaults/win-64::pyqt==5.9.2=py36h6538335_2', 'conda-forge/win-64::wheel==0.32.2=py36_0', 'conda-forge/win-64::pip==18.1=py36_1000', 'defaults/win-64::matplotlib==3.0.1=py36hc8f65d3_0', 'conda-forge/win-64::mkl_fft==1.0.6=py36_0', 'conda-forge/win-64::mkl_random==1.0.2=py36_0', 'defaults/win-64::numpy==1.15.4=py36ha559c80_0', 'defaults/win-64::scipy==1.1.0=py36h4f6bf74_1']
+==> 2018-11-07 20:00:55 <==
+# cmd: C:\Users\Lukas\Anaconda3\Scripts\conda install -c conda-forge trimesh
+# conda version: 4.5.11
++conda-forge::decorator-4.3.0-py_0
++conda-forge::networkx-2.2-py_1
++conda-forge::trimesh-2.35.24-py_0
+# update specs: ['trimesh']
+==> 2018-11-07 20:06:08 <==
+# cmd: C:\Users\Lukas\Anaconda3\Scripts\conda install -c conda-forge rtree
+# conda version: 4.5.11
++conda-forge::libspatialindex-1.8.5-vc14_1
++conda-forge::rtree-0.8.3-py36_1000
+# update specs: ['rtree']
