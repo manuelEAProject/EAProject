@@ -1089,6 +1089,7 @@ def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMO
                 [bestPatch_patternpoints[i][2], bestPatch_patternpoints[i + 1][2], bestPatch_patternpoints[i + 2][2]]))]
         axes.add_collection3d(Poly3DCollection(verts), zs='z')
         patch_meshpoints.append(verts)
+
     # Biegestellen rot färben:
     axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
@@ -1103,6 +1104,7 @@ def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMO
     axes.set_xbound(-100, 100)
     axes.set_ybound(-50, 150)
     axes.set_zbound(-100, 100)
+
     pyplot.axis('off')
     # plt.autoscale(enable=False)
     pyplot.show(figure)
@@ -1118,7 +1120,8 @@ length_fit_list = np.array([])
 border_fit_start_list = np.array([])
 border_fit_end_list = np.array([])
 mutation_rate_list = np.array([])
-## Initialisierung
+
+# Initialisierung
 time_start = timer()  # Comment_DB: start timer
 p.prepPopulation()
 p.currentGeneration.sort()  # Comment_DB: sort and reverse randomly initialized pop from best fit to worst
@@ -1174,17 +1177,6 @@ for i in range(num_gen):
         else:
             mutation_rate_list = np.append(mutation_rate_list, [p.mutationRate])
 
-        '''        
-        if j == range(p.selectionSize)[-1]: #Comment_DB: once reached last elite population member in generation, calculate the average of average distances
-            #avg_avg_dist = sum(sum_avg_dist)/len(sum_avg_dist)
-            avg_avg_dist_selected = sum(sum_avg_dist_selected)/len(sum_avg_dist_selected)
-            #print("\n\tAverage of Average Distance for Whole Population:",
-                  #avg_avg_dist)
-            print("\n\tAverage of Average Distance for Elite Members of Population:", avg_avg_dist_selected)
-            print("\n")
-        
-        '''
-
     # Comment_DB: Begin Evolutionary Algorithm
     if i != num_gen - 1:
         # Bewertung
@@ -1231,15 +1223,6 @@ for i in range(num_gen):
         if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 25 or p.generationNumber == 40:
             show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
 
-    """
-    ###Comment_DB: Show iteration at variable gamma sets###
-    if p.generationNumber == num_gen_set2 - 1 and p.generationNumber != num_gen:
-        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
-    if p.generationNumber == num_gen_set3 - 1 and p.generationNumber != num_gen:
-        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
-    if p.generationNumber == num_gen_set4 - 1 and p.generationNumber != num_gen:
-        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
-    """
     # Comment_DB: append determined values into arrays after each iteration
     num_gen_list = np.append(num_gen_list, [i])
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="Minor delets">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" afterDir="false" />
     </list>
@@ -148,7 +148,14 @@
       <option name="project" value="LOCAL" />
       <updated>1588953902856</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Minor delets">
+      <created>1588955470953</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1588955470953</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -176,7 +183,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="get_Vars_from_GUI" />
-    <option name="LAST_COMMIT_MESSAGE" value="get_Vars_from_GUI" />
+    <MESSAGE value="Minor delets" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor delets" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
