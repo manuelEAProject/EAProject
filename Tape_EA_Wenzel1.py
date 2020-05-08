@@ -54,6 +54,115 @@ def save_settings(settings_list):
         settings_sheet.write('%s\n' % listitem)
     settings_sheet.close
 
+def read_Input_from_settingssheet():
+    if os.path.isfile('./settingssheet.txt'):
+
+        t = "True" + '\n'
+        try:
+            settingssheet = open('./settingssheet.txt')
+            if not settingssheet.readline() == "Datei auswählen...":
+                settingssheet.seek(0)
+                input_file.delete(0, 'end')
+                input = settingssheet.readline()
+                input_file.insert(0, input[0:-1])
+                if settingssheet.readline() == t:
+                    init_preprocess.set(True)
+                else:
+                    init_preprocess.set(False)
+
+                if settingssheet.readline() == t:
+                    init_random.set(True)
+                else:
+                    init_random.set(False)
+
+                width.delete(0, 'end')
+                width.insert(0, float(settingssheet.readline()))
+                if settingssheet.readline() == t:
+                    fix_number_of_pts.set(True)
+                else:
+                    fix_number_of_pts.set(False)
+
+                pointspersection.delete(0, 'end')
+                pointspersection.insert(0, int(settingssheet.readline()))
+                if settingssheet.readline() == t:
+                    equidistant_pts_between_bendpts.set(True)
+                else:
+                    equidistant_pts_between_bendpts.set(False)
+
+                step_size.delete(0, 'end')
+                step_size.insert(0, float(settingssheet.readline()))
+
+                gamma_d.delete(0, 'end')  # Comment_DB: Adjusted for variable gammas
+                gamma_d.insert(0, float(settingssheet.readline()))
+                gamma_d2.delete(0, 'end')
+                gamma_d2.insert(0, float(settingssheet.readline()))
+                gamma_d3.delete(0, 'end')
+                gamma_d3.insert(0, float(settingssheet.readline()))
+                gamma_d4.delete(0, 'end')
+                gamma_d4.insert(0, float(settingssheet.readline()))
+
+                gamma_l.delete(0, 'end')
+                gamma_l.insert(0, float(settingssheet.readline()))
+                gamma_l2.delete(0, 'end')
+                gamma_l2.insert(0, float(settingssheet.readline()))
+                gamma_l3.delete(0, 'end')
+                gamma_l3.insert(0, float(settingssheet.readline()))
+                gamma_l4.delete(0, 'end')
+                gamma_l4.insert(0, float(settingssheet.readline()))
+
+                gamma_ps.delete(0, 'end')
+                gamma_ps.insert(0, float(settingssheet.readline()))
+                gamma_ps2.delete(0, 'end')
+                gamma_ps2.insert(0, float(settingssheet.readline()))
+                gamma_ps3.delete(0, 'end')
+                gamma_ps3.insert(0, float(settingssheet.readline()))
+                gamma_ps4.delete(0, 'end')
+                gamma_ps4.insert(0, float(settingssheet.readline()))
+
+                gamma_pe.delete(0, 'end')
+                gamma_pe.insert(0, float(settingssheet.readline()))
+                gamma_pe2.delete(0, 'end')
+                gamma_pe2.insert(0, float(settingssheet.readline()))
+                gamma_pe3.delete(0, 'end')
+                gamma_pe3.insert(0, float(settingssheet.readline()))
+                gamma_pe4.delete(0, 'end')
+                gamma_pe4.insert(0, float(settingssheet.readline()))
+
+                num_gen_set2.delete(0, 'end')
+                num_gen_set2.insert(0, float(settingssheet.readline()))
+                num_gen_set3.delete(0, 'end')
+                num_gen_set3.insert(0, float(settingssheet.readline()))
+                num_gen_set4.delete(0, 'end')
+                num_gen_set4.insert(0, float(settingssheet.readline()))
+
+                pop_size.delete(0, 'end')
+                pop_size.insert(0, int(settingssheet.readline()))
+                num_gen.delete(0, 'end')
+                num_gen.insert(0, int(settingssheet.readline()))
+                chromo_resolution.delete(0, 'end')
+                chromo_resolution.insert(0, int(settingssheet.readline()))
+                p_mutation.delete(0, 'end')
+                p_mutation.insert(0, float(settingssheet.readline()))
+
+                if settingssheet.readline() == t:  # Comment_DB: Adaptive mutation in settings list
+                    adap_mutation.set(True)
+                else:
+                    adap_mutation.set(False)
+
+                p_mutate_range.delete(0, 'end')
+                p_mutate_range.insert(0, float(settingssheet.readline()))
+                p_crossover.delete(0, 'end')
+                p_crossover.insert(0, float(settingssheet.readline()))
+                poly_order.delete(0, 'end')
+                poly_order.insert(0, int(settingssheet.readline()))
+                window_quotient.delete(0, 'end')
+                window_quotient.insert(0, int(settingssheet.readline()))
+                max_distance.delete(0, 'end')
+                max_distance.insert(0, int(settingssheet.readline()))
+                settingssheet.close()
+        except:
+            print("Bitte settingssheet.txt löschen")
+            settingssheet.close()
 
 master = Tk()
 master.protocol("WM_DELETE_WINDOW", sys.exit)
@@ -62,7 +171,6 @@ Label(master, text="Settings für Tape - Algorithmus").grid(row=10, sticky=W)
 Label(master, justify=LEFT, text=" ").grid(row=11, sticky=W)
 
 input_file = Entry(master)
-# if os.path.isfile('C:\\Users\\Lukas\\PycharmProjects\\PatchGeometry\\settingssheet.txt'):
 if os.path.isfile('./settingssheet.txt'):
     settingssheet = open('./settingssheet.txt')
     input_file.insert(0, settingssheet.readline())
@@ -133,7 +241,7 @@ tape_type = Entry(master)
 tape_type.insert(0, "BASF_CFK_Tape")
 tape_type.grid(row=46, column=1, sticky=W)
 Label(master, text="Tapebreite [mm]:").grid(row=47, sticky=W)
-# width = Scale(master, from_=15, to=40,orient=HORIZONTAL)
+
 width = Entry(master)
 width.insert(0, 20)
 width.grid(row=47, column=1, sticky=W)
@@ -239,23 +347,13 @@ gamma_pe4.grid(row=77, column=4, sticky=W)
 
 Label(master, text="Point of Change (# of Generations) : ").grid(row=78, column=0, sticky=W)
 num_gen_set2 = Entry(master)
-# num_gen_set2.insert(0,20)
 num_gen_set2.grid(row=78, column=2)
 
 num_gen_set3 = Entry(master)
-# num_gen_set3.insert(0,20)
 num_gen_set3.grid(row=78, column=3)
 
 num_gen_set4 = Entry(master)
-# num_gen_set4.insert(0,20)
 num_gen_set4.grid(row=78, column=4)
-
-"""
-Label(master,text="Gewichtung Start-/Endfitness [gamma_p] :").grid(row=76,column=0,sticky=W)
-gamma_p=Entry(master)
-gamma_p.insert(0,1.4)
-gamma_p.grid(row=76, column=1,sticky=W)
-"""
 
 Label(master, justify=LEFT, text=" ").grid(row=79, sticky=W)
 Label(master, text="Einstellungen für den Evolutionären Algorithmus").grid(row=80, sticky=W)
@@ -294,121 +392,15 @@ p_crossover = Entry(master)
 p_crossover.insert(0, 0.7)
 p_crossover.grid(row=130, column=1, sticky=W)
 
-if os.path.isfile('./settingssheet.txt'):
-
-    t = "True" + '\n'
-    try:
-        settingssheet = open('./settingssheet.txt')
-        if not settingssheet.readline() == "Datei auswählen...":
-            settingssheet.seek(0)
-            input_file.delete(0, 'end')
-            input = settingssheet.readline()
-            input_file.insert(0, input[0:-1])
-            if settingssheet.readline() == t:
-                init_preprocess.set(True)
-            else:
-                init_preprocess.set(False)
-
-            if settingssheet.readline() == t:
-                init_random.set(True)
-            else:
-                init_random.set(False)
-            # init_random.set(bool(settingssheet.readline()))
-            width.delete(0, 'end')
-            width.insert(0, float(settingssheet.readline()))
-            if settingssheet.readline() == t:
-                fix_number_of_pts.set(True)
-            else:
-                fix_number_of_pts.set(False)
-
-            pointspersection.delete(0, 'end')
-            pointspersection.insert(0, int(settingssheet.readline()))
-            if settingssheet.readline() == t:
-                equidistant_pts_between_bendpts.set(True)
-            else:
-                equidistant_pts_between_bendpts.set(False)
-
-            step_size.delete(0, 'end')
-            step_size.insert(0, float(settingssheet.readline()))
-
-            gamma_d.delete(0, 'end')  # Comment_DB: Adjusted for variable gammas
-            gamma_d.insert(0, float(settingssheet.readline()))
-            gamma_d2.delete(0, 'end')
-            gamma_d2.insert(0, float(settingssheet.readline()))
-            gamma_d3.delete(0, 'end')
-            gamma_d3.insert(0, float(settingssheet.readline()))
-            gamma_d4.delete(0, 'end')
-            gamma_d4.insert(0, float(settingssheet.readline()))
-
-            gamma_l.delete(0, 'end')
-            gamma_l.insert(0, float(settingssheet.readline()))
-            gamma_l2.delete(0, 'end')
-            gamma_l2.insert(0, float(settingssheet.readline()))
-            gamma_l3.delete(0, 'end')
-            gamma_l3.insert(0, float(settingssheet.readline()))
-            gamma_l4.delete(0, 'end')
-            gamma_l4.insert(0, float(settingssheet.readline()))
-
-            gamma_ps.delete(0, 'end')
-            gamma_ps.insert(0, float(settingssheet.readline()))
-            gamma_ps2.delete(0, 'end')
-            gamma_ps2.insert(0, float(settingssheet.readline()))
-            gamma_ps3.delete(0, 'end')
-            gamma_ps3.insert(0, float(settingssheet.readline()))
-            gamma_ps4.delete(0, 'end')
-            gamma_ps4.insert(0, float(settingssheet.readline()))
-
-            gamma_pe.delete(0, 'end')
-            gamma_pe.insert(0, float(settingssheet.readline()))
-            gamma_pe2.delete(0, 'end')
-            gamma_pe2.insert(0, float(settingssheet.readline()))
-            gamma_pe3.delete(0, 'end')
-            gamma_pe3.insert(0, float(settingssheet.readline()))
-            gamma_pe4.delete(0, 'end')
-            gamma_pe4.insert(0, float(settingssheet.readline()))
-
-            num_gen_set2.delete(0, 'end')
-            num_gen_set2.insert(0, float(settingssheet.readline()))
-            num_gen_set3.delete(0, 'end')
-            num_gen_set3.insert(0, float(settingssheet.readline()))
-            num_gen_set4.delete(0, 'end')
-            num_gen_set4.insert(0, float(settingssheet.readline()))
-
-            """
-            gamma_p.delete(0, 'end')
-            gamma_p.insert(0, float(settingssheet.readline()))
-            """
-            pop_size.delete(0, 'end')
-            pop_size.insert(0, int(settingssheet.readline()))
-            num_gen.delete(0, 'end')
-            num_gen.insert(0, int(settingssheet.readline()))
-            chromo_resolution.delete(0, 'end')
-            chromo_resolution.insert(0, int(settingssheet.readline()))
-            p_mutation.delete(0, 'end')
-            p_mutation.insert(0, float(settingssheet.readline()))
-
-            if settingssheet.readline() == t:  # Comment_DB: Adaptive mutation in settings list
-                adap_mutation.set(True)
-            else:
-                adap_mutation.set(False)
-
-            p_mutate_range.delete(0, 'end')
-            p_mutate_range.insert(0, float(settingssheet.readline()))
-            p_crossover.delete(0, 'end')
-            p_crossover.insert(0, float(settingssheet.readline()))
-            poly_order.delete(0, 'end')
-            poly_order.insert(0, int(settingssheet.readline()))
-            window_quotient.delete(0, 'end')
-            window_quotient.insert(0, int(settingssheet.readline()))
-            max_distance.delete(0, 'end')
-            max_distance.insert(0, int(settingssheet.readline()))
-            settingssheet.close()
-    except:
-        print("Bitte settingssheet.txt löschen")
-        settingssheet.close()
 
 Button(master, text='Abbrechen', command=sys.exit).grid(row=1000, column=0, pady=4)
 Button(master, text='Start', command=master.quit).grid(row=1000, column=1, pady=4)
+
+
+read_Input_from_settingssheet()
+
+
+
 mainloop()  # führt das GUI aus
 
 settings_list = [input_file.get(), init_preprocess.get(), init_random.get(), width.get(), fix_number_of_pts.get(), \
@@ -423,8 +415,7 @@ settings_list = [input_file.get(), init_preprocess.get(), init_random.get(), wid
                  window_quotient.get(), max_distance.get()]  # Comment_DB: removed gamma_p.get()
 
 input_file = input_file.get()
-# print("Inputfile: ",input_file)
-# Import stl-file to trimesh and numpy-stl:
+
 testpatch = trimesh.load(input_file)
 
 tape_type = tape_type.get()
@@ -466,15 +457,6 @@ gamma_l_hat = 0.0
 gamma_ps_hat = 0.0
 gamma_pe_hat = 0.0
 
-"""
-#Comment_DB: save init gammas for later print
-gamma_d_init = gamma_d
-gamma_l_init = gamma_l
-gamma_ps_init = gamma_ps
-gamma_pe_init = gamma_pe
-"""
-
-# gamma_p=float(gamma_p.get())
 
 manual_start_end = bool(manual_start_end.get())  # Comment_DB: "Start/Endpunkt aus Praeprozess"
 if manual_start_end:  # Comment_DB: If true
@@ -484,12 +466,7 @@ if manual_start_end:  # Comment_DB: If true
     x_end = float(x_end.get())
     y_end = float(y_end.get())
     z_end = float(z_end.get())
-    """
-    patch_start = [float(x_start.get()),float(y_start.get()),float(z_start.get())]
-    patch_start = np.asarray(patch_start)
-    patch_end = [float(x_end.get()),float(y_end.get()),z_end.get()]
-    patch_end = np.asarray(patch_end)
-    """
+
 
 #### Settings für Evolutionären Algorithmus ####
 num_gen = int(num_gen.get())  # Anzahl der Generationen       Comment_DB: User inputs
