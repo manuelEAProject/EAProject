@@ -506,7 +506,6 @@ def preprocessed_chromo(startparameter, chromoresolution):
         preprocessed_chromo.append(int(chromo_resolution / 2))
     return preprocessed_chromo
 
-
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
     l_list = []  # Comment_DB: empty list
@@ -532,7 +531,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     for i in range(2, len(startchromo) - 3, 3):  # Comment_DB: adjusted for reordered startchromo (betas)
         beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
         beta_list.append(beta)
-    # print("beta_list in LoP", beta_list) #Comment_DB: compare with preprocessor beta_list. LoP one is in radians.
+
     # Variabler Startpunkt
     var_range = 0.8
     var_start_pt_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[
@@ -571,13 +570,6 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     # Parametrisierung des Tapes ab Startpunkt in Trendlinienrichtung
     # Start_p_id sagt uns wie viele tape-Teilabschnitte (L1-L?) sich vor dem Startpunkt befinden
     Start_v = np.array([0, 0, 0])
-    # l_list_a = l_list[Start_p_id:]  # Längen der Teilabschnitte nach dem Startpunkt
-    # alpha_list_a = alpha_list[Start_p_id:] # Alphas nach dem Startpunkt
-
-    # beta_list_a = beta_list[Start_p_id:]    # Betas nach dem Startpunkt
-    # r_list_a = [Start_r]     # Die Richtungsvektoren/Normalenvektoren werden ebenfalls vor und nach Start_p aufgeteilt
-    # v_list_a = [Start_v]
-    # n_list_a = [Start_n_strich]
 
     r_list = [Start_r]
     v_list = [Start_v]
@@ -586,7 +578,9 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     ##########################COMMENT_DB: FROM HERE, WILL NOT KEEP ORIGINAL CODE##########################
     #### Vektorenberechnung für Tapeseite nach dem Startpunkt
     if not len(alpha_list) == 0:
+
         for i in range(1, len(l_list)):
+
             if alpha_list[i - 1] < math.pi / 2:
                 v_new = Quaternion(axis=n_list[i - 1], angle=(alpha_list[i - 1] - (math.pi) / 2)).rotate(
                     r_list[i - 1])
@@ -598,16 +592,18 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
             r_list.append(r_rotated)
             n_new = Quaternion(axis=v_list[i], angle=beta_list[i - 1]).rotate(n_list[i - 1])
             n_list.append(n_new)
+
     else:
         print("lenalpha0")
 
     # print("unstacked r_list", r_list) #Comment_DB: TEST
     r_list = np.stack(r_list)
     # print("stacked r_list", r_list) #Comment_DB: TEST
-    ## Mittellinie after startpoint
+    # Mittellinie after startpoint
     p_list = [Start_p]
     old_p = Start_p
     # new_p = Start_p
+
     for i, l in enumerate(l_list):
         dist = l * r_list[i, :]
         new_p = old_p + dist
@@ -644,6 +640,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     l_left_list = []
     if len(alpha_list) == 0:
         l_left_list = [l_list[0]]
+
     for i in range(1, len(l_list)):
         if alpha_list[i - 1] > math.pi / 2:
             delta_l_l = (width / 2) * math.tan(math.pi - alpha_list[i - 1])
@@ -674,11 +671,13 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                                       Start_n_strich) * width / 2 + delta_l_l_start * Start_r  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
     p_left_list = [Start_p_left]
     old_p_left = Start_p_left
+
     for i, l in enumerate(l_left_list):
         dist = l * r_list[i, :]
         new_p_left = old_p_left + dist
         p_left_list.append(new_p_left)
         old_p_left = new_p_left
+
     # Auffüllen mit Punkten ( Fixe Punktanzahl oder fixer Punktabstand):
     if equidistant_pts_between_bendpts:
         left_pts = []
@@ -691,9 +690,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_p)
-            # left_pts = np.asarray(left_pts)
-        # else:
-        # left_pts = np.concatenate(left_pts)
+
     else:
         left_pts = []
         for i, l in enumerate(l_left_list):
@@ -705,10 +702,9 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_p)
-            # left_pts = np.asarray(left_pts)
-        # else:
-        # left_pts = np.concatenate(left_pts)
+
     left_pts = np.concatenate(left_pts)
+
     ######################## Rechter Rand nach Startpunkt######################
     ## Anpassung Startpunkt Seitenrand rechts
     alpha_start = alpha_list[Start_p_id_fromstart - 1]  # Comment_DB: Might not be necessary
@@ -804,7 +800,6 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     return result, start, end, patch_visualisation_points, l_list, alpha_list, beta_list, Start_p, Start_r  # Comment_DB: Not dependent on preprocessed_chromo
 
-
 # Berechnung der Patchlänge (für Fitness)
 def PatchLength(chromo, AnzahlKnicke, l_factor):
     # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
@@ -821,7 +816,6 @@ def PatchLength(chromo, AnzahlKnicke, l_factor):
                        3):  # Comment_DB: fixed to correspond to new ordered starting chromosome
             L = L + chromo[i] * l_factor
     return L
-
 
 # Berechnung der Fitness eines Chromosoms
 def Fitness(chromo):
@@ -1006,49 +1000,55 @@ print("\t\tStart Border Fit Start",Fitness(startchromo)[3])
 print("\t\tStart Border Fit End",Fitness(startchromo)[4])
 print("\t\tStart Average Distance", Fitness(startchromo)[5])
 """
-# if length_fit < 0:
+
 
 # Ergebnisse aus Vorverarbeitung visualisieren:
 stlprep3_6.show_startstrip(input_file, ListOfPoints(startchromo)[0], poly_order, window_quotient, max_distance,
                            ListOfPoints(startchromo)[3], patch_start, patch_end)
 
 ####################Evolutionärer Algorithmus####################
-## Erzeuge ein Objekt der Klasse Population:
+
+# Erzeuge ein Objekt der Klasse Population:
 p = Population(pop_size)  # Comment_DB: pop_size is user input in dialog box
-## Startwerte aus Preprocessing werden an die Population gegeben
+
+# Startwerte aus Preprocessing werden an die Population gegeben
 p.startchromo = startchromo
+
 # Soll die Initialisierung mit den Startwerten des Preprozesses erfolgen?
 p.preprocessedInit = init_preprocess  # Comment_DB: init_preprocess also user input, preprocessedInit is from chromosome class in Galileo module
 p.initrange = 10  # Comment_DB: in chromosome class in Galileo module. Interval for variation of preprocessed gene
 p.p_randInit = 8
 p.p_prepInit = 70
+
 # Festlegen der Fitnessfunktion
 p.evalFunc = Fitness  # Comment_DB: The FUNCTION Fitness is assigned, not the lowercase equation fitness! Stores the function. p.evalFunc = Fitness() stores the return value
-## Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
+
+# Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
 p.chromoMinValues = [0] * (3 * AnzahlKnicke + 8)
 p.chromoMaxValues = [chromo_resolution] * (3 * AnzahlKnicke + 8)
-# print("p.chromoMaxValues", p.chromoMaxValues) #Comment_DB: [100, 100, 100, 100...] 3*AnzahlKnicke+8 times
 
-## Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
+# Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
 p.useInteger = useInteger
 # p.useInteger = 0
 
-## Wahl der Selektionsmethode -> Rouletterad, Rankedselect, Eliteranked
+# Wahl der Selektionsmethode -> Rouletterad, Rankedselect, Eliteranked
 # p.selectFunc = p.select_Roulette
 # p.selectFunc = p.select_Ranked
 # p.selectFunc = p.select_EliteRanked #Comment_DB: function returns elites[k-1]
 p.selectFunc = p.select_Roulette  # MW: Convergenz problem mit Elite?
 
-## Wie viele Chromosome dürfen überleben?
+# Wie viele Chromosome dürfen überleben?
 # p.replacementSize = p.numChromosomes #Comment_DB: all chromosomes in a population can survive
 p.replacementSize = p.numChromosomes * 5  # MW: Das ist die Anzahl an Kinder!!!
-## Crossover Wahrscheinlichkeit
+
+# Crossover Wahrscheinlichkeit
 p.crossoverRate = p_crossover
-## Wahl der Crossoverfunktion -> Flat
+
+# Wahl der Crossoverfunktion -> Flat
 p.crossoverFunc = p.crossover_Flat
 # p.crossoverFunc = p.crossover_Uniform
-# p.crossoverFunc = p.crossover_Uniform
-## Mutations Wahrscheinlichkeit
+
+# Mutations Wahrscheinlichkeit
 p.mutationRate = p_mutation
 
 ## Wahl der Mutationsfunktion
@@ -1061,22 +1061,22 @@ else:
     # p.mutateFunc = p.mutate_Gauss
     p.mutationRange = p_mutate_range
 
-## Replacementfunktion: SteadyState, SteadyState ohne doppelten Chromosome & Generationell(nur Kinder überleben)
+# Replacementfunktion: SteadyState, SteadyState ohne doppelten Chromosome & Generationell(nur Kinder überleben)
 # p.replaceFunc = p.replace_SteadyState
 p.replaceFunc = p.replace_SteadyStateNoDuplicates
 # p.replaceFunc = p.replace_Generational
+
+# Anzahl an Generationen
 p.maxGenerations = num_gen
 
 
-def show_current_solution(
-        ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMOSOME DETERMINED FROM DATA FROM PREPROCESSOR. SHOWING THE "ListOfPoints"!
+def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMOSOME DETERMINED FROM DATA FROM PREPROCESSOR. SHOWING THE "ListOfPoints"!
     bestPatch = ListOfPoints[0]
     bestPatch_patternpoints = ListOfPoints[3]
     figure = pyplot.figure()
     axes = mplot3d.Axes3D(figure)
     your_mesh = mesh.Mesh.from_file(input_file)  # Comment_DB: This is the target shape!
     patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=3, alpha=0.5)
-    # axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors,linewidths=1, alpha=0.01))
     axes.scatter(bestPatch[:, 0], bestPatch[:, 1], bestPatch[:, 2], c='y')
 
     # Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
@@ -1374,8 +1374,7 @@ axes = mplot3d.Axes3D(figure)
 your_mesh = mesh.Mesh.from_file(input_file)
 patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=1,
                                               alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
-# patch_visual.set_facecolor([0.5, 0.5, 1])
-# axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors,linewidths=1, alpha=0.01))
+
 testpatch_vector = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
 triangles = testpatch_vector.vectors
 patch_pc = stlprep3_6.patch_pointcloud(triangles)
@@ -1393,11 +1392,12 @@ for i in range(len(bestPatch_patternpoints) - 2):
                   bestPatch_patternpoints[i + 2][2]]))]
     axes.add_collection3d(Poly3DCollection(verts), zs='z')
     patch_meshpoints.append(verts)
+
 # Biegestellen rot färben:
 axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
 patch_meshpoints = np.concatenate(np.asarray(patch_meshpoints), axis=0)
-# print(patch_meshpoints[0][0])
+
 
 
 axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
@@ -1407,9 +1407,6 @@ face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 
 patch_visual.set_facecolor(face_color)
 axes.add_collection3d(patch_visual)
 
-# scale = your_mesh.points.flatten()
-# axes.auto_scale_xyz(scale, scale, scale)
-
 # Show the plot to the screen
 
 axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
@@ -1417,14 +1414,10 @@ axes.set_xbound(-100, 100)
 axes.set_ybound(-50, 150)
 axes.set_zbound(-100, 100)
 pyplot.axis('off')
-# plt.autoscale(enable=False)
-
 
 pyplot.show(figure)
 
 
-# plotly_fig = tls.mpl_to_plotly(figure)
-# plotly.offline.plot(plotly_fig) # Comment_DB: doesn't work, figure too complex
 ######## Abspeichern der Biegeparameter #########
 def save_patch_file():
     name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
@@ -1466,7 +1459,7 @@ end = Tk()
 Label(end, text="Sind Sie mit dem Patch zufrieden?").grid(row=10, column=1, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 Button(end, text="Abbrechen", command=sys.exit).grid(row=30, column=0, )
-# Button(end, text="Wiederholen",command = restart).grid(row = 30,column=1, )
+Button(end, text="Wiederholen",command = restart).grid(row = 30,column=1, )
 Button(end, text="Patchparameter speichern", command=save_patch_file).grid(row=30, column=2, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 mainloop()
