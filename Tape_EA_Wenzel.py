@@ -25,12 +25,8 @@ import plotly.graph_objects as go
 import xlsxwriter
 from timeit import default_timer as timer
 
-
-# TODO: STL Creater aus Chromo
-
 ############## GUI  &  SETTINGS #######################
 # GUI-Settings
-
 
 def callback(input_file):
     if os.path.isfile('./settingssheet.txt'):
@@ -399,17 +395,6 @@ Button(master, text='Abbrechen', command=sys.exit).grid(row=1000, column=0, pady
 Button(master, text='Start', command=master.quit).grid(row=1000, column=1, pady=4)
 mainloop()  # führt das GUI aus
 
-settings_list = [input_file.get(), init_preprocess.get(), init_random.get(), width.get(), fix_number_of_pts.get(), \
-                 pointspersection.get(), equidistant_pts_between_bendpts.get(), step_size.get(), \
-                 gamma_d.get(), gamma_d2.get(), gamma_d3.get(), gamma_d4.get(), \
-                 gamma_l.get(), gamma_l2.get(), gamma_l3.get(), gamma_l4.get(), \
-                 gamma_ps.get(), gamma_ps2.get(), gamma_ps3.get(), gamma_ps4.get(), \
-                 gamma_pe.get(), gamma_pe2.get(), gamma_pe3.get(), gamma_pe4.get(), \
-                 num_gen_set2.get(), num_gen_set3.get(), num_gen_set4.get(), \
-                 pop_size.get(), num_gen.get(), chromo_resolution.get(), \
-                 p_mutation.get(), adap_mutation.get(), p_mutate_range.get(), p_crossover.get(), poly_order.get(),
-                 window_quotient.get(), max_distance.get()]
-
 input_file = input_file.get()
 testpatch = trimesh.load(input_file)
 
@@ -446,11 +431,7 @@ num_gen_set2 = float(num_gen_set2.get())
 num_gen_set3 = float(num_gen_set3.get())
 num_gen_set4 = float(num_gen_set4.get())
 
-# Comment_DB: initialize
-gamma_d_hat = 0.0
-gamma_l_hat = 0.0
-gamma_ps_hat = 0.0
-gamma_pe_hat = 0.0
+
 
 manual_start_end = bool(manual_start_end.get())  # Comment_DB: "Start/Endpunkt aus Praeprozess"
 if manual_start_end:  # Comment_DB: If true
@@ -482,7 +463,17 @@ adap_mutation = float(adap_mutation.get())
 # Mutationsrange (in welchem Prozentbereich darf das Allel mutieren?)
 p_mutate_range = float(p_mutate_range.get())
 
-save_settings(settings_list)  # Speichert die gewählten Einstellungen
+save_settings([input_file, init_preprocess, init_random.get(), width, fix_number_of_pts.get(),
+                 pointspersection, equidistant_pts_between_bendpts, step_size,
+                 gamma_d, gamma_d2, gamma_d3, gamma_d4,
+                 gamma_l, gamma_l2, gamma_l3, gamma_l4,
+                 gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4,
+                 gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4,
+                 num_gen_set2, num_gen_set3, num_gen_set4,
+                 pop_size, num_gen, chromo_resolution,
+                 p_mutation, adap_mutation, p_mutate_range, p_crossover, poly_order,
+                 window_quotient, max_distance])  # Speichert die gewählten Einstellungen
+
 master.destroy()  # Schließt das Settings Fenster
 
 ############Vorverarbeitung der Geometriedaten###################
@@ -492,10 +483,10 @@ master.destroy()  # Schließt das Settings Fenster
 # STARTPARAMETER: [Start_p_mid, Start_r_mid, Start_n_mid, l_list, totallength, beta_list[°], Start_p_ID]
 start_parameter = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
 
-Start_p_prep = start_parameter[0]
-Start_r_prep = start_parameter[1]
-Start_n = start_parameter[2]
-Start_p_id = start_parameter[6]  # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
+Start_p_prep = start_parameter[0] # Comment_DKu_Wenzel: No usage anymore!!
+Start_r_prep = start_parameter[1] # Comment_DKu_Wenzel: No usage anymore!!
+Start_n = start_parameter[2] # Comment_DKu_Wenzel: No usage anymore!!
+Start_p_id = start_parameter[6]  # Comment_DKu_Wenzel: No usage anymore!! # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
 L_aim = start_parameter[4]  # Comment_DB: already in [mm]
 patch_start = start_parameter[7]
 patch_end = start_parameter[8]
@@ -505,7 +496,7 @@ AnzahlKnicke = len(start_parameter[3]) - 1
 Start_r_prep_fromstart = start_parameter[10]
 Start_n_atstart = start_parameter[11]
 Start_p_id_fromstart = start_parameter[9]
-AnzahlKnicke_too = start_parameter[12]
+AnzahlKnicke_too = start_parameter[12]  # Comment_DKu_Wenzel: Verschieden von AnzahlKnicke(+2) und keine Benutzung
 
 if manual_start_end:
     patch_start = np.asarray([x_start, y_start, z_start])
@@ -552,8 +543,6 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
         if chromo[i] < chromo_resolution / 2:
             alpha = (135 + (chromo[i] * 45 / (chromo_resolution / 2))) * 2 * math.pi / 360
         else:
-            # alpha =(90+chromo[i]*4.5)*2*math.pi/360
-            # alpha =90+(((chromo[i]-9)**2)*(45/81))
             alpha = ((chromo[i] - chromo_resolution / 2) * 45 / (
                     chromo_resolution / 2)) * 2 * math.pi / 360  # Quadratische Vert. von 135°-180°
         alpha_list.append(alpha)
@@ -596,23 +585,12 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
         Start_n_strich)  # Comment_DB: start_n_strich rotated about start_r
     Start_n_strich = 1 / np.linalg.norm(Start_n_strich) * Start_n_strich
 
-    # After Startpoint:
-    # Parametrisierung des Tapes ab Startpunkt in Trendlinienrichtung
-    # Start_p_id sagt uns wie viele tape-Teilabschnitte (L1-L?) sich vor dem Startpunkt befinden
     Start_v = np.array([0, 0, 0])
-    # l_list_a = l_list[Start_p_id:]  # Längen der Teilabschnitte nach dem Startpunkt
-    # alpha_list_a = alpha_list[Start_p_id:] # Alphas nach dem Startpunkt
-
-    # beta_list_a = beta_list[Start_p_id:]    # Betas nach dem Startpunkt
-    # r_list_a = [Start_r]     # Die Richtungsvektoren/Normalenvektoren werden ebenfalls vor und nach Start_p aufgeteilt
-    # v_list_a = [Start_v]
-    # n_list_a = [Start_n_strich]
 
     r_list = [Start_r]
     v_list = [Start_v]
     n_list = [Start_n_strich]
 
-    ##########################COMMENT_DB: FROM HERE, WILL NOT KEEP ORIGINAL CODE##########################
     #### Vektorenberechnung für Tapeseite nach dem Startpunkt
     if not len(alpha_list) == 0:
         for i in range(1, len(l_list)):
@@ -636,7 +614,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     ## Mittellinie after startpoint
     p_list = [Start_p]
     old_p = Start_p
-    # new_p = Start_p
+
     for i, l in enumerate(l_list):
         dist = l * r_list[i, :]
         new_p = old_p + dist
@@ -708,9 +686,11 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
         new_p_left = old_p_left + dist
         p_left_list.append(new_p_left)
         old_p_left = new_p_left
+
     # Auffüllen mit Punkten ( Fixe Punktanzahl oder fixer Punktabstand):
+    left_pts = []
     if equidistant_pts_between_bendpts:
-        left_pts = []
+
         for i, l in enumerate(l_left_list):
             if l < 0:
                 continue
@@ -720,11 +700,9 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_p)
-            # left_pts = np.asarray(left_pts)
-        # else:
-        # left_pts = np.concatenate(left_pts)
+
     else:
-        left_pts = []
+
         for i, l in enumerate(l_left_list):
             if l < 0:
                 continue
@@ -734,9 +712,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_p)
-            # left_pts = np.asarray(left_pts)
-        # else:
-        # left_pts = np.concatenate(left_pts)
+
     left_pts = np.concatenate(left_pts)
     ######################## Rechter Rand nach Startpunkt######################
     ## Anpassung Startpunkt Seitenrand rechts
@@ -785,8 +761,10 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
         new_p_right = old_p_right + dist
         p_right_list.append(new_p_right)
         old_p_right = new_p_right
+
+    right_pts = []
     if equidistant_pts_between_bendpts:
-        right_pts = []
+
         for i, l in enumerate(l_right_list):
             if l < 0:
                 continue
@@ -796,11 +774,8 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 right_pts.append(a_new_r)
         if len(right_pts) == 0:
             right_pts.append(Start_p)
-            # right_pts_b = np.asarray(right_pts_b)
-        # else:
-        # right_pts = np.concatenate(right_pts)
     else:
-        right_pts = []
+
         for i, l in enumerate(l_right_list):
             if l < 0:
                 continue
@@ -810,9 +785,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 right_pts.append(a_new_r)
         if len(right_pts) == 0:
             right_pts.append(Start_p)
-            # right_pts = np.asarray(right_pts)
-        # else:
-        # right_pts = np.concatenate(right_pts)
+
     right_pts = np.concatenate(right_pts)
 
     result = np.concatenate((middle_pts, left_pts, right_pts), axis=0)
@@ -821,14 +794,11 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     # Nur Eck- und Biegepunkte des Tapes für einfache Visualisierung
     patch_visualisation_points = []
-    # p_left_list = p_left_list[::-1] #Comment_DB: might need [::-1]?
-    # p_right_list = p_right_list[::-1]
+
     for i in range(len(p_left_list)):
         patch_visualisation_points.append(p_left_list[i])
         patch_visualisation_points.append(p_right_list[i])
-    # for i in range(len(p_left_list)):
-    # patch_visualisation_points.append(p_left_list[i])
-    # patch_visualisation_points.append(p_right_list[i])
+
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
     return result, start, end, patch_visualisation_points, l_list, alpha_list, beta_list, Start_p, Start_r  # Comment_DB: Not dependent on preprocessed_chromo
@@ -839,64 +809,40 @@ def PatchLength(chromo, AnzahlKnicke, l_factor):
     # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
 
     if inspect.isclass(chromo):
-        L = 0
-        for i in range(0, len(startchromo) - 5,
-                       3):  # Comment_DB: fixed to correspond to new ordered starting chromosome, however, this if statement is not used
-            # print(chromo.genes[i])
-            L = L + chromo.genes[i] * l_factor
+        lengt = 0
+        for i in range(0, len(startchromo) - 5,3):  # Comment_DB: fixed to correspond to new ordered starting chromosome, however, this if statement is not used
+            lengt = lengt + chromo.genes[i] * l_factor
     else:
-        L = 0
-        for i in range(0, len(startchromo) - 5,
-                       3):  # Comment_DB: fixed to correspond to new ordered starting chromosome
-            L = L + chromo[i] * l_factor
-    return L
+        lengt = 0
+        for i in range(0, len(startchromo) - 5,3):  # Comment_DB: fixed to correspond to new ordered starting chromosome
+            lengt = lengt + chromo[i] * l_factor
+    return lengt
 
 
 # Berechnung der Fitness eines Chromosoms
 def Fitness(chromo):
-    genes = chromo
+
     LoP = ListOfPoints(chromo)
     A = trimesh.proximity.closest_point(testpatch, LoP[0])  # Comment_DB: LoP[0] refers to "result" returned from LoP
     # print("for reordered chromo",A[1]) #Comment_DB: test
     # print("for reordered chromo",LoP[0]) #Comment_DB: test
     L = 0
     for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: fixed to correspond to new orderd starting chromosome
-        L = L + genes[i] * l_factor  # Comment_DB: patch length
+        L = L + chromo[i] * l_factor  # Comment_DB: patch length
 
     A_norm = []
-    A_end = []
+
     for i in range(len(A[1])):  # Comment_DB: A[1] is returned variable "result_distance" from proximity.py module
         A_norm.append(math.sqrt((A[1][i]) ** 2))
 
     L_aim = start_parameter[4]  # Comment_DB: determined from Sav-Gol curve
     L_aim = L_aim + 45  # todo  Versuch mit L_aim korrigiert
 
-    max_dist = max(A_norm)
     avg_dist = sum(A_norm) / len(A[1])  # Comment_DB: always positive
 
-    """
-    ####Comment_DB: Avg of Avg Dist#####
-    p = Population(pop_size)
-    #p.replacementSize = p.numChromosomes
-    sum_avg_dist_selected = []
-    avg_avg_dist_selected = 0
-    # Comment_DB: print elite population members and their overall fitness, distance fit, and average distance
-    for j in range(p.selectionSize):
-        sum_avg_dist_selected.append(avg_dist)  # Comment_DB: append avg dist values into a list
-
-        if j == range(p.selectionSize)[-1]:  # Comment_DB: once reached last elite population member in generation, calculate the average of average distances
-            # avg_avg_dist = sum(sum_avg_dist)/len(sum_avg_dist)
-            avg_avg_dist_selected = sum(sum_avg_dist_selected) / len(sum_avg_dist_selected)
-
-    
-    """
-
     ###PARABOLIC###
-    # k_d = 10/2.25
     k_d = (100 - 90) / (0.005 ** 2)  # Comment_DB: k_d = 400000
     distance_fit = 100 - k_d * (avg_dist / L_aim) ** 2  # Comment_DB: max distance fitness is 100 (avg_dist = 0)
-    # if avg_avg_dist_selected < 12:
-    # distance_fit = 100-40000*abs(avg_dist/L_aim)
 
     ###LINEAR###
     # k_d_lin = (100 - 90) / 0.005
@@ -918,21 +864,6 @@ def Fitness(chromo):
     # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
 
-    # if length_fit < 0:
-    # length_fit = 0.1
-
-    # if length_fit > 100:
-    # length_fit = 100
-
-    """
-    if L < L_aim:
-        length_fit = 100 #Comment_DB: do not penalize longer lengths
-    else:
-        length_fit = 100 - ((L - L_aim) ** 2) * k_l
-
-        #length_fit = 0.1
-    """
-
     ###PARABOLIC###
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
     border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
@@ -947,7 +878,6 @@ def Fitness(chromo):
     # border_fit_end = 100 - 10 * abs(stlprep3_6.distance(LoP[2], patch_end))
     # border_fit_end = 100 * math.exp(-(stlprep3_6.distance(LoP[2], patch_end)/10) ** 2)  #Comment_DB: k_p = 0.4
 
-
     ###LINEAR###
     # k_p_lin = (100-90)/5
     # border_fit_start = 100 - abs((stlprep3_6.distance(LoP[1], patch_start)) * k_p_lin)
@@ -957,13 +887,6 @@ def Fitness(chromo):
     # k_p_gauss = -math.log(9 / 10) / (5 ** 2) #Comment_DB: deviation of 5 mm--> 90
     # border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[1], patch_start)) ** 2)
     # border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[2], patch_end)) ** 2)
-
-    # gamma_l = 1.3
-    # gamma_p = 1.3
-    # gamma_d = 10 - 3 * gamma_l
-    # gamma_d=weight_dist/10
-    # gamma_l=(10-gamma_d)/3
-    # gamma_p=gamma_l
 
     #####Comment_DB: different gammas!!#####
     global gamma_d
@@ -1035,7 +958,6 @@ print("\t\tStart Border Fit Start",Fitness(startchromo)[3])
 print("\t\tStart Border Fit End",Fitness(startchromo)[4])
 print("\t\tStart Average Distance", Fitness(startchromo)[5])
 """
-# if length_fit < 0:
 
 # Ergebnisse aus Vorverarbeitung visualisieren:
 stlprep3_6.show_startstrip(input_file, ListOfPoints(startchromo)[0], poly_order, window_quotient, max_distance,
@@ -1056,7 +978,6 @@ p.evalFunc = Fitness  # Comment_DB: The FUNCTION Fitness is assigned, not the lo
 ## Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
 p.chromoMinValues = [0] * (3 * AnzahlKnicke + 8)
 p.chromoMaxValues = [chromo_resolution] * (3 * AnzahlKnicke + 8)
-# print("p.chromoMaxValues", p.chromoMaxValues) #Comment_DB: [100, 100, 100, 100...] 3*AnzahlKnicke+8 times
 
 ## Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
 p.useInteger = useInteger
@@ -1068,9 +989,9 @@ p.useInteger = useInteger
 # p.selectFunc = p.select_EliteRanked #Comment_DB: function returns elites[k-1]
 p.selectFunc = p.select_Roulette  # MW: Convergenz problem mit Elite?
 
-## Wie viele Chromosome dürfen überleben?
-# p.replacementSize = p.numChromosomes #Comment_DB: all chromosomes in a population can survive
-p.replacementSize = p.numChromosomes * 5  # MW: Das ist die Anzahl an Kinder!!!
+## Wie viele Chromosome dürfen überleben? #Comment_DKu_Wenzel: Das ist die Anzahl an Kinder!!!
+# p.replacementSize = p.numChromosomes
+p.replacementSize = p.numChromosomes * 5
 ## Crossover Wahrscheinlichkeit
 p.crossoverRate = p_crossover
 ## Wahl der Crossoverfunktion -> Flat
@@ -1097,15 +1018,13 @@ p.replaceFunc = p.replace_SteadyStateNoDuplicates
 p.maxGenerations = num_gen
 
 
-def show_current_solution(
-        ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMOSOME DETERMINED FROM DATA FROM PREPROCESSOR. SHOWING THE "ListOfPoints"!
+def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMOSOME DETERMINED FROM DATA FROM PREPROCESSOR. SHOWING THE "ListOfPoints"!
     bestPatch = ListOfPoints[0]
     bestPatch_patternpoints = ListOfPoints[3]
     figure = pyplot.figure()
     axes = mplot3d.Axes3D(figure)
     your_mesh = mesh.Mesh.from_file(input_file)  # Comment_DB: This is the target shape!
     patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=3, alpha=0.5)
-    # axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors,linewidths=1, alpha=0.01))
     axes.scatter(bestPatch[:, 0], bestPatch[:, 1], bestPatch[:, 2], c='y')
 
     # Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
@@ -1113,34 +1032,29 @@ def show_current_solution(
     verts = [list(zip(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2]))]
     for i in range(len(bestPatch_patternpoints) - 2):
         verts = [list(
-            zip([bestPatch_patternpoints[i][0], bestPatch_patternpoints[i + 1][0], bestPatch_patternpoints[i + 2][0]], \
-                [bestPatch_patternpoints[i][1], bestPatch_patternpoints[i + 1][1], bestPatch_patternpoints[i + 2][1]], \
+            zip([bestPatch_patternpoints[i][0], bestPatch_patternpoints[i + 1][0], bestPatch_patternpoints[i + 2][0]],
+                [bestPatch_patternpoints[i][1], bestPatch_patternpoints[i + 1][1], bestPatch_patternpoints[i + 2][1]],
                 [bestPatch_patternpoints[i][2], bestPatch_patternpoints[i + 1][2], bestPatch_patternpoints[i + 2][2]]))]
         axes.add_collection3d(Poly3DCollection(verts), zs='z')
         patch_meshpoints.append(verts)
     # Biegestellen rot färben:
     axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
-
     axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
     axes.scatter(patch_end[0], patch_end[1], patch_end[2], c='black')
-
     face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
     patch_visual.set_facecolor(face_color)
     axes.add_collection3d(patch_visual)
-
     axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
     axes.set_xbound(-100, 100)
     axes.set_ybound(-50, 150)
     axes.set_zbound(-100, 100)
     pyplot.axis('off')
-    # plt.autoscale(enable=False)
     pyplot.show(figure)
     return
 
 
 ##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
 num_gen_list = np.array([])
-
 fitness_list = np.array([])
 distance_fit_list = np.array([])
 length_fit_list = np.array([])
@@ -1164,11 +1078,6 @@ if adap_mutation == 1:
     print("##########Adaptive Mutation Selected##########")
 # Comment_DB: EA Loop (Only this for loop determines the number of generations to iterate! This is not determined in galileo!)
 for i in range(num_gen):
-    # sum_avg_dist = [] #Comment_DB: initialize sum list and avg value
-    sum_avg_dist_selected = []
-    # avg_avg_dist = 0
-    avg_avg_dist_selected = 0
-
     if adap_mutation == 0:
         print("\n#####Elite Population Members of Generation", i, "\b#####")
     else:
@@ -1195,24 +1104,11 @@ for i in range(num_gen):
               Fitness(p.currentGeneration[j].genes)[5]
               )
 
-        # sum_avg_dist_selected.append(Fitness(p.currentGeneration[j].genes)[5]) #Comment_DB: append avg dist values into a list
-
     if adap_mutation == 1:
         if i == 0:
             mutation_rate_list = np.append(mutation_rate_list, [0])
         else:
             mutation_rate_list = np.append(mutation_rate_list, [p.mutationRate])
-
-        '''        
-        if j == range(p.selectionSize)[-1]: #Comment_DB: once reached last elite population member in generation, calculate the average of average distances
-            #avg_avg_dist = sum(sum_avg_dist)/len(sum_avg_dist)
-            avg_avg_dist_selected = sum(sum_avg_dist_selected)/len(sum_avg_dist_selected)
-            #print("\n\tAverage of Average Distance for Whole Population:",
-                  #avg_avg_dist)
-            print("\n\tAverage of Average Distance for Elite Members of Population:", avg_avg_dist_selected)
-            print("\n")
-        
-        '''
 
     # Comment_DB: Begin Evolutionary Algorithm
     if i != num_gen - 1:
@@ -1260,15 +1156,6 @@ for i in range(num_gen):
         if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 25 or p.generationNumber == 40:
             show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
 
-    """
-    ###Comment_DB: Show iteration at variable gamma sets###
-    if p.generationNumber == num_gen_set2 - 1 and p.generationNumber != num_gen:
-        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
-    if p.generationNumber == num_gen_set3 - 1 and p.generationNumber != num_gen:
-        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
-    if p.generationNumber == num_gen_set4 - 1 and p.generationNumber != num_gen:
-        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
-    """
     # Comment_DB: append determined values into arrays after each iteration
     num_gen_list = np.append(num_gen_list, [i])
 
@@ -1287,33 +1174,6 @@ border_fit_end_list_gen_index = np.stack((num_gen_list, border_fit_end_list))
 if adap_mutation == 1:
     mutation_rate_list_gen_index = np.stack((num_gen_list, mutation_rate_list))
 
-"""
-##### Writing to excel #####
-workbook = xlsxwriter.Workbook('Fitness_Function_Analysis_Python.xlsx')
-
-worksheet = workbook.add_worksheet()
-
-bold = workbook.add_format({'bold': 1})
-
-headings = ['Generation', 'Fitness']
-
-data = num_gen_list_fitness_list
-
-worksheet.write_row('A1', headings, bold)
-
-worksheet.write_column('A2', num_gen_list_fitness_list[0])
-worksheet.write_column('B2', num_gen_list_fitness_list[1])
-
-chart1 = workbook.add_chart({'type': 'line'})
-
-chart1.add_series({
-    'name':       '= Sheet1 !$B$1',
-    'categories': '=Sheet1 !$A$2:$A$7',
-    'values:':    '=Sheet1 !$B$2:$B$7',
-})
-
-"""
-
 print("\n\nEnd Patch length: ", PatchLength(p.bestFitIndividual.genes, AnzahlKnicke, l_factor),
       "L_Aim (From Preprocessor):", L_aim)
 print("End Fitness: ", p.bestFitIndividual.getFitness(),
@@ -1325,7 +1185,7 @@ print("End Fitness: ", p.bestFitIndividual.getFitness(),
 if adap_mutation == 1:
     print("\tEnd Mutation Rate: ", p.mutationRate)
 
-print("\nSettings Used: ")  # Comment_DB: print out settings used at the end
+print("\nSettings Used: ")
 print("Set 1 gamma_d: ", gamma_d, "\tSet 2 gamma_d: ", gamma_d2, "\tSet 3 gamma_d: ", gamma_d3, "\tSet 4 gamma_d: ",
       gamma_d4,
       "\nSet 1 gamma_l: ", gamma_l, "\tSet 2 gamma_l: ", gamma_l2, "\tSet 3 gamma_l: ", gamma_l3, "\tSet 4 gamma_l: ",
@@ -1343,9 +1203,7 @@ print("\nPop Size: ", pop_size,
       "\tMutation Range: ", p_mutate_range,
       "\nCrossover Rate: ", p_crossover if not p.crossoverFunc == p.crossover_Flat else "N/A")
 
-print("\n\nElapsed Time [s]: ", time_end - time_start)  # Comment_DB: Print elapsed time
-# TODO: print EA operators
-
+print("\n\nElapsed Time [s]: ", time_end - time_start)
 
 ##Comment_DB: Create plots for fitness and subfitnesses
 plt.figure(1)
@@ -1387,14 +1245,8 @@ if adap_mutation == 1:
 
 plt.show()
 
-# bestPatch = ListOfPoints(p.bestFitChromo.genes)[0]
 bestPatch = ListOfPoints(p.bestFitIndividual.genes)[0]
-# bestPatch_patternpoints=PatchPatternPoints(p.bestFitChromo.genes)
-# bestPatch_patternpoints=ListOfPoints(p.bestFitChromo.genes)[3]
 bestPatch_patternpoints = ListOfPoints(p.bestFitIndividual.genes)[3]
-# bestPatch_patternpoints = np.unique(bestPatch_patternpoints,axis=0)
-# bestPatch_patternpoints=ListOfPoints(p.bestFitChromo.genes)
-
 
 #############PLOTTING########### (#Comment_DB: Final patch)
 
@@ -1403,12 +1255,10 @@ axes = mplot3d.Axes3D(figure)
 your_mesh = mesh.Mesh.from_file(input_file)
 patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=1,
                                               alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
-# patch_visual.set_facecolor([0.5, 0.5, 1])
-# axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors,linewidths=1, alpha=0.01))
+
 testpatch_vector = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
 triangles = testpatch_vector.vectors
 patch_pc = stlprep3_6.patch_pointcloud(triangles)
-# axes.scatter(patch_pc[:,0],patch_pc[:,1],patch_pc[:,2],c='b') #Comment_DB: added to show point cloud
 axes.scatter(bestPatch[:, 0], bestPatch[:, 1], bestPatch[:, 2], c='y')
 
 # Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
@@ -1426,8 +1276,6 @@ for i in range(len(bestPatch_patternpoints) - 2):
 axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
 patch_meshpoints = np.concatenate(np.asarray(patch_meshpoints), axis=0)
-# print(patch_meshpoints[0][0])
-
 
 axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
 axes.scatter(patch_end[0], patch_end[1], patch_end[2], c='black')
@@ -1436,9 +1284,6 @@ face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 
 patch_visual.set_facecolor(face_color)
 axes.add_collection3d(patch_visual)
 
-# scale = your_mesh.points.flatten()
-# axes.auto_scale_xyz(scale, scale, scale)
-
 # Show the plot to the screen
 
 axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
@@ -1446,19 +1291,12 @@ axes.set_xbound(-100, 100)
 axes.set_ybound(-50, 150)
 axes.set_zbound(-100, 100)
 pyplot.axis('off')
-# plt.autoscale(enable=False)
-
 
 pyplot.show(figure)
 
-
-# plotly_fig = tls.mpl_to_plotly(figure)
-# plotly.offline.plot(plotly_fig) # Comment_DB: doesn't work, figure too complex
 ######## Abspeichern der Biegeparameter #########
 def save_patch_file():
     name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
-    # name = open("./patchparameter.txt","w+")
-
     bestPatch_parameter_l = ListOfPoints(p.bestFitIndividual.genes)[4]
     bestPatch_parameter_alpha = ListOfPoints(p.bestFitIndividual.genes)[5]
     bestPatch_parameter_beta = ListOfPoints(p.bestFitIndividual.genes)[6]
@@ -1469,33 +1307,22 @@ def save_patch_file():
     for i in range(AnzahlKnicke):
         l = int(l) + int(bestPatch_parameter_l[i])
         l = str(l)
-        # l = str(int(bestPatch_parameter_l[i]))
         if bestPatch_parameter_alpha[i] > 90 * 2 * math.pi / (360):
             alpha = str(int((bestPatch_parameter_alpha[i] - math.pi) * 360 / (2 * math.pi)))
         else:
             alpha = str(int(bestPatch_parameter_alpha[i] * 360 / (2 * math.pi)))
         beta = str(int(bestPatch_parameter_beta[i] * 360 / (2 * math.pi)))
         name.write(l + ";" + alpha + ";" + beta + "\n")
-    # name.write(str(int(bestPatch_parameter_l[-1]))+";"+"e"+";")
     name.close
     end.destroy()
 
-
 # TODO ####Comment_DB: Save End Fitness Values#####
-
-
-def restart():
-    # sys.stdout.flush()
-    python = sys.executable
-    os.execl(python, python, *sys.argv)
-
 
 end = Tk()
 
 Label(end, text="Sind Sie mit dem Patch zufrieden?").grid(row=10, column=1, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 Button(end, text="Abbrechen", command=sys.exit).grid(row=30, column=0, )
-# Button(end, text="Wiederholen",command = restart).grid(row = 30,column=1, )
 Button(end, text="Patchparameter speichern", command=save_patch_file).grid(row=30, column=2, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 mainloop()

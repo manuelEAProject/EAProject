@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Testgeometrien/patschpara.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Edit6.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/galileo_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/galileo_EA_Edit6.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -198,7 +193,14 @@
       <option name="project" value="LOCAL" />
       <updated>1588955752146</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel">
+      <created>1589192067680</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1589192067680</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -228,7 +230,8 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="get_Vars_from_GUI" />
     <MESSAGE value="Minor delets" />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor delets" />
+    <MESSAGE value="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel" />
+    <option name="LAST_COMMIT_MESSAGE" value="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -237,11 +240,6 @@
           <url>file://$PROJECT_DIR$/Tape_EA.py</url>
           <line>29</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Tape_EA_Edit6.py</url>
-          <line>1068</line>
-          <option name="timeStamp" value="23" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
