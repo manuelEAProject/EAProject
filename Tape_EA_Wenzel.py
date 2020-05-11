@@ -526,7 +526,6 @@ def preprocessed_chromo(startparameter, chromoresolution):
         preprocessed_chromo.append(int(chromo_resolution / 2))
     return preprocessed_chromo
 
-
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
     l_list = []  # Comment_DB: empty list
@@ -804,89 +803,25 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     return result, start, end, patch_visualisation_points, l_list, alpha_list, beta_list, Start_p, Start_r  # Comment_DB: Not dependent on preprocessed_chromo
 
 
-# Berechnung der Patchlänge (für Fitness)
-def PatchLength(chromo, AnzahlKnicke, l_factor):
-    # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
-
-    if inspect.isclass(chromo):
-        lengt = 0
-        for i in range(0, len(startchromo) - 5,3):  # Comment_DB: fixed to correspond to new ordered starting chromosome, however, this if statement is not used
-            lengt = lengt + chromo.genes[i] * l_factor
-    else:
-        lengt = 0
-        for i in range(0, len(startchromo) - 5,3):  # Comment_DB: fixed to correspond to new ordered starting chromosome
-            lengt = lengt + chromo[i] * l_factor
-    return lengt
-
-
 # Berechnung der Fitness eines Chromosoms
-def Fitness(chromo):
+def Fitness(chromo , l_factor_chromo_mm=l_factor):
 
     LoP = ListOfPoints(chromo)
-    A = trimesh.proximity.closest_point(testpatch, LoP[0])  # Comment_DB: LoP[0] refers to "result" returned from LoP
-    # print("for reordered chromo",A[1]) #Comment_DB: test
-    # print("for reordered chromo",LoP[0]) #Comment_DB: test
-    L = 0
-    for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: fixed to correspond to new orderd starting chromosome
-        L = L + chromo[i] * l_factor  # Comment_DB: patch length
-
-    A_norm = []
-
-    for i in range(len(A[1])):  # Comment_DB: A[1] is returned variable "result_distance" from proximity.py module
-        A_norm.append(math.sqrt((A[1][i]) ** 2))
 
     L_aim = start_parameter[4]  # Comment_DB: determined from Sav-Gol curve
-    L_aim = L_aim + 45  # todo  Versuch mit L_aim korrigiert
+    L_aim = L_aim + 45  # Comment_DKu_Wenzel todo  Versuch mit L_aim korrigiert
 
-    avg_dist = sum(A_norm) / len(A[1])  # Comment_DB: always positive
+    # Berechnung durchschnittlicher Abstand
+    avg_dist = calc_avg_dist(chromo)
 
-    ###PARABOLIC###
-    k_d = (100 - 90) / (0.005 ** 2)  # Comment_DB: k_d = 400000
-    distance_fit = 100 - k_d * (avg_dist / L_aim) ** 2  # Comment_DB: max distance fitness is 100 (avg_dist = 0)
+    # Distance_fitness
+    distance_fit = calc_distance_fittness(L_aim, avg_dist)
 
-    ###LINEAR###
-    # k_d_lin = (100 - 90) / 0.005
-    # distance_fit = 100 - abs(k_d_lin * (avg_dist/L_aim))
+    # Lenght_fittnes
+    length_fit = calc_length_fittness(L_aim, chromo, l_factor_chromo_mm)
 
-    ###GAUSSIAN###
-    # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
-    # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
-
-    ###PARABOLIC###
-    k_l = (100 - 50) / ((L_aim * 0.2) ** 2)  # Comment_DB: = 1/128 for L_aim = 400. Higher L_aim yields lower k_l
-    length_fit = 100 - ((L - L_aim) ** 2) * k_l
-
-    ###LINEAR###
-    # k_l_lin = (100-50)/(L_aim*0.2)
-    # length_fit = 100 - abs((L - L_aim) * k_l_lin)
-
-    ###GAUSSIAN###
-    # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
-    # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
-
-    ###PARABOLIC###
-    k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
-    border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
-    # border_fit_start = 100 - 10 * abs(stlprep3_6.distance(LoP[1], patch_start))
-
-    # Comment_DB: Removed k_p. LoP[1] is real patch, patch_start from preproc
-    # border_fit_start = 100 * math.exp(-(stlprep3_6.distance(LoP[1], patch_start)/10) ** 2)
-    # border_fit_start = abs(600/stlprep3_6.distance(LoP[1],patch_start))
-
-    border_fit_end = 100 - (stlprep3_6.distance(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
-    # border_fit_end = abs(600 / stlprep3_6.distance(LoP[2], patch_end))
-    # border_fit_end = 100 - 10 * abs(stlprep3_6.distance(LoP[2], patch_end))
-    # border_fit_end = 100 * math.exp(-(stlprep3_6.distance(LoP[2], patch_end)/10) ** 2)  #Comment_DB: k_p = 0.4
-
-    ###LINEAR###
-    # k_p_lin = (100-90)/5
-    # border_fit_start = 100 - abs((stlprep3_6.distance(LoP[1], patch_start)) * k_p_lin)
-    # border_fit_end = 100 - abs((stlprep3_6.distance(LoP[2], patch_end)) * k_p_lin)
-
-    ###GAUSSIAN###
-    # k_p_gauss = -math.log(9 / 10) / (5 ** 2) #Comment_DB: deviation of 5 mm--> 90
-    # border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[1], patch_start)) ** 2)
-    # border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[2], patch_end)) ** 2)
+    # Border_fittnes start and end
+    border_fit_end, border_fit_start = calc_border_fittness(LoP)
 
     #####Comment_DB: different gammas!!#####
     global gamma_d
@@ -940,6 +875,73 @@ def Fitness(chromo):
     # print("fitness",fitness, "border_fit_end", border_fit_end)
     return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist
 
+# Berechnungen in Fittness
+def patch_length_in_mm(chromo, l_factor_chromo_mm):
+    # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
+
+    if inspect.isclass(chromo):
+        lengt = 0
+        for i in range(0, len(startchromo) - 5, 3):
+            lengt = lengt + chromo.genes[i]
+    else:
+        lengt = 0
+        for i in range(0, len(startchromo) - 5, 3):
+            lengt = lengt + chromo[i]
+    return lengt * l_factor_chromo_mm
+
+def calc_border_fittness(LoP):
+    ###PARABOLIC###
+    k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
+    border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
+    # border_fit_start = 100 - 10 * abs(stlprep3_6.distance(LoP[1], patch_start))
+    # Comment_DB: Removed k_p. LoP[1] is real patch, patch_start from preproc
+    # border_fit_start = 100 * math.exp(-(stlprep3_6.distance(LoP[1], patch_start)/10) ** 2)
+    # border_fit_start = abs(600/stlprep3_6.distance(LoP[1],patch_start))
+    border_fit_end = 100 - (stlprep3_6.distance(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
+    # border_fit_end = abs(600 / stlprep3_6.distance(LoP[2], patch_end))
+    # border_fit_end = 100 - 10 * abs(stlprep3_6.distance(LoP[2], patch_end))
+    # border_fit_end = 100 * math.exp(-(stlprep3_6.distance(LoP[2], patch_end)/10) ** 2)  #Comment_DB: k_p = 0.4
+    ###LINEAR###
+    # k_p_lin = (100-90)/5
+    # border_fit_start = 100 - abs((stlprep3_6.distance(LoP[1], patch_start)) * k_p_lin)
+    # border_fit_end = 100 - abs((stlprep3_6.distance(LoP[2], patch_end)) * k_p_lin)
+    ###GAUSSIAN###
+    # k_p_gauss = -math.log(9 / 10) / (5 ** 2) #Comment_DB: deviation of 5 mm--> 90
+    # border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[1], patch_start)) ** 2)
+    # border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[2], patch_end)) ** 2)
+    return border_fit_end, border_fit_start
+
+def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
+    L = patch_length_in_mm(chromo, l_factor_chromo_mm)
+    ###PARABOLIC###
+    k_l = (100 - 50) / ((L_aim * 0.2) ** 2)  # Comment_DB: = 1/128 for L_aim = 400. Higher L_aim yields lower k_l
+    length_fit = 100 - ((L - L_aim) ** 2) * k_l
+    ###LINEAR###
+    # k_l_lin = (100-50)/(L_aim*0.2)
+    # length_fit = 100 - abs((L - L_aim) * k_l_lin)
+    ###GAUSSIAN###
+    # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
+    # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
+    return length_fit
+
+def calc_avg_dist(chromo):
+    distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[
+        1]  # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
+    avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
+    return avg_dist
+
+def calc_distance_fittness(L_aim, avg_dist):
+    ###PARABOLIC###
+    k_d = (100 - 90) / (0.005 ** 2)  # Comment_DB: k_d = 400000
+    distance_fit = 100 - k_d * (avg_dist / L_aim) ** 2  # Comment_DB: max distance fitness is 100 (avg_dist = 0)
+    ###LINEAR###
+    # k_d_lin = (100 - 90) / 0.005
+    # distance_fit = 100 - abs(k_d_lin * (avg_dist/L_aim))
+    ###GAUSSIAN###
+    # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
+    # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
+    return distance_fit
+
 
 # Erstellung Chromosom der Startlösung
 startchromo = preprocessed_chromo(start_parameter, chromo_resolution)
@@ -950,8 +952,8 @@ startchromo = preprocessed_chromo(start_parameter, chromo_resolution)
 print("Anzahl Biegestellen:", AnzahlKnicke)
 print("L_aim",L_aim)
 print("Start Chromo",startchromo)
-print("\tStart Length",PatchLength(startchromo,AnzahlKnicke,l_factor))
-print("\tStart Fitness", Fitness(startchromo)[0])
+print("\tStart Length",patch_length_in_mm(startchromo,l_factor))
+print("\tStart Fitness", Fitness(startchromo)[0],l_factor)
 print("\t\tStart Distance Fit",Fitness(startchromo)[1])
 print("\t\tStart Length Fit",Fitness(startchromo)[2])
 print("\t\tStart Border Fit Start",Fitness(startchromo)[3])
@@ -1174,7 +1176,7 @@ border_fit_end_list_gen_index = np.stack((num_gen_list, border_fit_end_list))
 if adap_mutation == 1:
     mutation_rate_list_gen_index = np.stack((num_gen_list, mutation_rate_list))
 
-print("\n\nEnd Patch length: ", PatchLength(p.bestFitIndividual.genes, AnzahlKnicke, l_factor),
+print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
       "L_Aim (From Preprocessor):", L_aim)
 print("End Fitness: ", p.bestFitIndividual.getFitness(),
       "\n\tEnd Distance Fit:", Fitness(p.bestFitIndividual.genes)[1],

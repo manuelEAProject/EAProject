@@ -200,7 +200,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589192067680</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Tape_EA_Wenzel:&#10;• Vieles Auskommentierte gelöscht&#10;• Settinglist direkt übergeben">
+      <created>1589203842317</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1589203842317</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -231,7 +238,8 @@
     <MESSAGE value="get_Vars_from_GUI" />
     <MESSAGE value="Minor delets" />
     <MESSAGE value="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel" />
-    <option name="LAST_COMMIT_MESSAGE" value="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel" />
+    <MESSAGE value="Tape_EA_Wenzel:&#10;• Vieles Auskommentierte gelöscht&#10;• Settinglist direkt übergeben" />
+    <option name="LAST_COMMIT_MESSAGE" value="Tape_EA_Wenzel:&#10;• Vieles Auskommentierte gelöscht&#10;• Settinglist direkt übergeben" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
