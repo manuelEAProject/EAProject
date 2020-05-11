@@ -621,6 +621,9 @@ class Population:
                 chromorange = self.chromoMaxValues[i] - self.chromoMinValues[i]
                 lowstop = max(self.chromoMinValues[i], chromo.genes[i] - self.mutationRange * chromorange)
                 highstop = min(self.chromoMaxValues[i], chromo.genes[i] + self.mutationRange * chromorange)
+
+                if lowstop > 100: lowstop = 100 # Comment_DKu_Wenzel: Fehler: lowstop > highstop. Highstop min() ist max 100. Lowstop max() kann höher sein. Problem?
+
                 if self.useInteger == 1:
                     f = self.generator.randint(int(lowstop), int(highstop))
                 else:

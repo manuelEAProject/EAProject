@@ -25,10 +25,14 @@ import plotly.graph_objects as go
 import xlsxwriter
 from timeit import default_timer as timer
 
+
+# TODO: STL Creater aus Chromo
+
 ############## GUI  &  SETTINGS #######################
+# GUI-Settings
+
 
 def callback(input_file):
-
     if os.path.isfile('./settingssheet.txt'):
         settingssheet = open('./settingssheet.txt')
         name = filedialog.askopenfilename(initialdir=settingssheet.readline(), title="Select file",
@@ -38,334 +42,362 @@ def callback(input_file):
                                           filetypes=(("stl files", "*.stl"), ("all files", "*.*")))
     input_file.delete(0, 'end')
     input_file.insert(0, name)
-
     if len(input_file.get()) < 1:
         input_file.insert(0, "Datei auswählen...")
 
     settingssheet = open('./settingssheet.txt', 'w+')
     settingssheet.write(input_file.get())
-    settingssheet.close
-
+    settingssheet.close()
 
 
 def save_settings(settings_list):
     settings_sheet = open('./settingssheet.txt', 'r+')
+
     for listitem in settings_list:
         settings_sheet.write('%s\n' % listitem)
-    settings_sheet.close
-
-def read_Input_from_settingssheet():
-    if os.path.isfile('./settingssheet.txt'):
-
-        t = "True" + '\n'
-        try:
-            settingssheet = open('./settingssheet.txt')
-            if not settingssheet.readline() == "Datei auswählen...":
-                settingssheet.seek(0)
-                input_file.delete(0, 'end')
-                input = settingssheet.readline()
-                input_file.insert(0, input[0:-1])
-                if settingssheet.readline() == t:
-                    init_preprocess.set(True)
-                else:
-                    init_preprocess.set(False)
-
-                if settingssheet.readline() == t:
-                    init_random.set(True)
-                else:
-                    init_random.set(False)
-
-                width.delete(0, 'end')
-                width.insert(0, float(settingssheet.readline()))
-                if settingssheet.readline() == t:
-                    fix_number_of_pts.set(True)
-                else:
-                    fix_number_of_pts.set(False)
-
-                pointspersection.delete(0, 'end')
-                pointspersection.insert(0, int(settingssheet.readline()))
-                if settingssheet.readline() == t:
-                    equidistant_pts_between_bendpts.set(True)
-                else:
-                    equidistant_pts_between_bendpts.set(False)
-
-                step_size.delete(0, 'end')
-                step_size.insert(0, float(settingssheet.readline()))
-
-                gamma_d.delete(0, 'end')  # Comment_DB: Adjusted for variable gammas
-                gamma_d.insert(0, float(settingssheet.readline()))
-                gamma_d2.delete(0, 'end')
-                gamma_d2.insert(0, float(settingssheet.readline()))
-                gamma_d3.delete(0, 'end')
-                gamma_d3.insert(0, float(settingssheet.readline()))
-                gamma_d4.delete(0, 'end')
-                gamma_d4.insert(0, float(settingssheet.readline()))
-
-                gamma_l.delete(0, 'end')
-                gamma_l.insert(0, float(settingssheet.readline()))
-                gamma_l2.delete(0, 'end')
-                gamma_l2.insert(0, float(settingssheet.readline()))
-                gamma_l3.delete(0, 'end')
-                gamma_l3.insert(0, float(settingssheet.readline()))
-                gamma_l4.delete(0, 'end')
-                gamma_l4.insert(0, float(settingssheet.readline()))
-
-                gamma_ps.delete(0, 'end')
-                gamma_ps.insert(0, float(settingssheet.readline()))
-                gamma_ps2.delete(0, 'end')
-                gamma_ps2.insert(0, float(settingssheet.readline()))
-                gamma_ps3.delete(0, 'end')
-                gamma_ps3.insert(0, float(settingssheet.readline()))
-                gamma_ps4.delete(0, 'end')
-                gamma_ps4.insert(0, float(settingssheet.readline()))
-
-                gamma_pe.delete(0, 'end')
-                gamma_pe.insert(0, float(settingssheet.readline()))
-                gamma_pe2.delete(0, 'end')
-                gamma_pe2.insert(0, float(settingssheet.readline()))
-                gamma_pe3.delete(0, 'end')
-                gamma_pe3.insert(0, float(settingssheet.readline()))
-                gamma_pe4.delete(0, 'end')
-                gamma_pe4.insert(0, float(settingssheet.readline()))
-
-                num_gen_set2.delete(0, 'end')
-                num_gen_set2.insert(0, float(settingssheet.readline()))
-                num_gen_set3.delete(0, 'end')
-                num_gen_set3.insert(0, float(settingssheet.readline()))
-                num_gen_set4.delete(0, 'end')
-                num_gen_set4.insert(0, float(settingssheet.readline()))
-
-                pop_size.delete(0, 'end')
-                pop_size.insert(0, int(settingssheet.readline()))
-                num_gen.delete(0, 'end')
-                num_gen.insert(0, int(settingssheet.readline()))
-                chromo_resolution.delete(0, 'end')
-                chromo_resolution.insert(0, int(settingssheet.readline()))
-                p_mutation.delete(0, 'end')
-                p_mutation.insert(0, float(settingssheet.readline()))
-
-                if settingssheet.readline() == t:  # Comment_DB: Adaptive mutation in settings list
-                    adap_mutation.set(True)
-                else:
-                    adap_mutation.set(False)
-
-                p_mutate_range.delete(0, 'end')
-                p_mutate_range.insert(0, float(settingssheet.readline()))
-                p_crossover.delete(0, 'end')
-                p_crossover.insert(0, float(settingssheet.readline()))
-                poly_order.delete(0, 'end')
-                poly_order.insert(0, int(settingssheet.readline()))
-                window_quotient.delete(0, 'end')
-                window_quotient.insert(0, int(settingssheet.readline()))
-                max_distance.delete(0, 'end')
-                max_distance.insert(0, int(settingssheet.readline()))
-                settingssheet.close()
-        except:
-            print("Bitte settingssheet.txt löschen")
-            settingssheet.close()
+    settings_sheet.close()
 
 
-def get_Vars_from_GUI():
-    global gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4
-    master = Tk()
-    master.protocol("WM_DELETE_WINDOW", sys.exit)
-    Label(master, text="Settings für Tape - Algorithmus").grid(row=10, sticky=W)
-    Label(master, justify=LEFT, text=" ").grid(row=11, sticky=W)
-    input_file = Entry(master)
-    if os.path.isfile('./settingssheet.txt'):
+master = Tk()
+master.protocol("WM_DELETE_WINDOW", sys.exit)
+
+Label(master, text="Settings für Tape - Algorithmus").grid(row=10, sticky=W)
+Label(master, justify=LEFT, text=" ").grid(row=11, sticky=W)
+
+input_file = Entry(master)
+
+if os.path.isfile('./settingssheet.txt'):
+    settingssheet = open('./settingssheet.txt')
+    input_file.insert(0, settingssheet.readline())
+    settingssheet.close()
+else:
+    input_file.insert(0, "Datei auswählen...")
+
+input_file.grid(row=20, columnspan=3, sticky=W + E + N + S)
+Button(text='Browse..', command=lambda: callback(input_file)).grid(row=20, column=3, sticky=W)
+
+Label(master, text="Verwendung des Preprozess oder Randominitialisierung").grid(row=30, sticky=W)
+init_preprocess = BooleanVar()
+init_preprocess.set(True)
+init_preprocess_cb = Checkbutton(master, text="Preprozess", variable=init_preprocess,
+                                 command=lambda: init_random.set(False))
+init_preprocess_cb.grid(row=31, column=0, sticky=W)
+init_random = BooleanVar()
+init_random_cb = Checkbutton(master, text="Random", variable=init_random, command=lambda: init_preprocess.set(False))
+init_random_cb.grid(row=31, column=1, sticky=W)
+Label(master, justify=LEFT, text=" ").grid(row=31, sticky=W)
+
+prep_start_end = BooleanVar()
+prep_start_end.set(False)  # Comment_DB: unchecked as default
+prep_start_end_cb = Checkbutton(master, text="Start/Endpunkt aus Präprozess", variable=prep_start_end,
+                                command=lambda: manual_start_end.set(False))
+prep_start_end_cb.grid(row=33, column=0, sticky=W)
+manual_start_end = BooleanVar()
+manual_start_end.set(False)
+manual_start_end_cb = Checkbutton(master, text="Start/Endpunkt manuell festlegen", variable=manual_start_end,
+                                  command=lambda: prep_start_end.set(False))
+manual_start_end_cb.grid(row=33, column=1, sticky=W)
+
+Label(master, text="Startpunkt [mm]").grid(row=34, column=2, sticky=W)
+Label(master, text="Endpunkt [mm]").grid(row=34, column=3, sticky=W)
+Label(master, text="x: ").grid(row=35, column=1, sticky=E)
+Label(master, text="y: ").grid(row=36, column=1, sticky=E)
+Label(master, text="z: ").grid(row=37, column=1, sticky=E)
+x_start = Entry(master)
+x_start.grid(row=35, column=2, sticky=W)
+y_start = Entry(master)
+y_start.grid(row=36, column=2, sticky=W)
+z_start = Entry(master)
+z_start.grid(row=37, column=2, sticky=W)
+x_end = Entry(master)
+x_end.grid(row=35, column=3, sticky=W)
+y_end = Entry(master)
+y_end.grid(row=36, column=3, sticky=W)
+z_end = Entry(master)
+z_end.grid(row=37, column=3, sticky=W)
+
+Label(master, text="Savitkzy-Golay").grid(row=42, sticky=W)
+Label(master, text="Ordnungsgrad").grid(row=43, sticky=W)
+poly_order = Entry(master)
+poly_order.insert(0, 3)
+poly_order.grid(row=43, column=1, sticky=W)
+Label(master, text="Fensterquotient").grid(row=43, column=2, sticky=W)
+window_quotient = Entry(master)
+window_quotient.insert(0, 5)
+window_quotient.grid(row=43, column=3, sticky=W)
+Label(master, text='Maximaler Abstand zur SavGol-Kurve (Zunaechst)').grid(row=44, sticky=W)
+max_distance = Entry(master)
+max_distance.insert(0, 10)  # Comment_DB: insert 10 at front of list
+max_distance.grid(row=44, column=1, sticky=W)
+Label(master, justify=LEFT, text=" ").grid(row=45, sticky=W)
+
+Label(master, text="Tape-Typ :").grid(row=46, sticky=W)
+tape_type = Entry(master)
+tape_type.insert(0, "BASF_CFK_Tape")
+tape_type.grid(row=46, column=1, sticky=W)
+Label(master, text="Tapebreite [mm]:").grid(row=47, sticky=W)
+width = Entry(master)
+width.insert(0, 20)
+width.grid(row=47, column=1, sticky=W)
+Label(master, justify=LEFT, text=" ").grid(row=48, sticky=W)
+
+Label(master, text="Punktauflösung Patch").grid(row=55, sticky=W)
+
+fix_number_of_pts = BooleanVar()
+fix_number_of_pts_cb = Checkbutton(master, text="Fixe Punktanzahl zwischen Biegestellen", variable=fix_number_of_pts,
+                                   command=lambda: equidistant_pts_between_bendpts.set(False))
+fix_number_of_pts_cb.grid(row=60, column=0, sticky=W)
+Label(master, text="Anzahl Punkte:").grid(row=60, column=1, sticky=W)
+fix_number_of_pts.set(True)
+pointspersection = Entry(master)
+pointspersection.insert(0, 7)
+pointspersection.grid(row=60, column=2, sticky=W)
+
+equidistant_pts_between_bendpts = BooleanVar()
+equidistant_pts_between_bendpts_cb = Checkbutton(master, text="Äquidistante Punkte",
+                                                 variable=equidistant_pts_between_bendpts,
+                                                 command=lambda: fix_number_of_pts.set(False),
+                                                 disabledforeground="gray")
+equidistant_pts_between_bendpts_cb.grid(row=70, column=0, sticky=W)
+Label(master, text="Abstand Punkte [mm]:").grid(row=70, column=1, sticky=W)
+step_size = Entry(master)
+step_size.insert(0, 6)
+step_size.grid(row=70, column=2, sticky=W)
+Label(master, justify=LEFT, text=" ").grid(row=71, sticky=W)
+
+#####Comment_DB: Different weightings for 4 equally-divided Population Sets!#####
+Label(master, text="Feintuning Fitnessfunktion (4 Population Sets)").grid(row=73, sticky=W)
+Label(master, text="Gewichtung Abstandsfitness [gamma_d]: ").grid(row=74, column=0, sticky=W)
+Label(master, text="Set 1").grid(row=73, column=1, sticky=W)
+gamma_d = Entry(master)
+gamma_d.insert(0, 5.8)
+gamma_d.grid(row=74, column=1, sticky=W)
+
+Label(master, text="Set 2").grid(row=73, column=2, sticky=W)
+gamma_d2 = Entry(master)
+gamma_d2.insert(0, 5.8)
+gamma_d2.grid(row=74, column=2, sticky=W)
+
+Label(master, text="Set 3").grid(row=73, column=3, sticky=W)
+gamma_d3 = Entry(master)
+gamma_d3.insert(0, 5.8)
+gamma_d3.grid(row=74, column=3, sticky=W)
+
+Label(master, text="Set 4").grid(row=73, column=4, sticky=W)
+gamma_d4 = Entry(master)
+gamma_d4.insert(0, 5.8)
+gamma_d4.grid(row=74, column=4, sticky=W)
+
+Label(master, text="Gewichtung Längenfitness [gamma_l] : ").grid(row=75, column=0, sticky=W)
+gamma_l = Entry(master)
+gamma_l.insert(0, 1.4)
+gamma_l.grid(row=75, column=1, sticky=W)
+
+gamma_l2 = Entry(master)
+gamma_l2.insert(0, 1.4)
+gamma_l2.grid(row=75, column=2, sticky=W)
+
+gamma_l3 = Entry(master)
+gamma_l3.insert(0, 1.4)
+gamma_l3.grid(row=75, column=3, sticky=W)
+
+gamma_l4 = Entry(master)
+gamma_l4.insert(0, 1.4)
+gamma_l4.grid(row=75, column=4, sticky=W)
+
+Label(master, text="Gewichtung Startfitness [gamma_ps] : ").grid(row=76, column=0, sticky=W)
+gamma_ps = Entry(master)
+gamma_ps.insert(0, 1)
+gamma_ps.grid(row=76, column=1, sticky=W)
+
+gamma_ps2 = Entry(master)
+gamma_ps2.insert(0, 1.4)
+gamma_ps2.grid(row=76, column=2, sticky=W)
+
+gamma_ps3 = Entry(master)
+gamma_ps3.insert(0, 1.4)
+gamma_ps3.grid(row=76, column=3, sticky=W)
+
+gamma_ps4 = Entry(master)
+gamma_ps4.insert(0, 1.4)
+gamma_ps4.grid(row=76, column=4, sticky=W)
+
+Label(master, text="Gewichtung Endfitness [gamma_pe] : ").grid(row=77, column=0, sticky=W)
+gamma_pe = Entry(master)
+gamma_pe.insert(0, 1.4)
+gamma_pe.grid(row=77, column=1, sticky=W)
+
+gamma_pe2 = Entry(master)
+gamma_pe2.insert(0, 1.4)
+gamma_pe2.grid(row=77, column=2, sticky=W)
+
+gamma_pe3 = Entry(master)
+gamma_pe3.insert(0, 1.4)
+gamma_pe3.grid(row=77, column=3, sticky=W)
+
+gamma_pe4 = Entry(master)
+gamma_pe4.insert(0, 1.4)
+gamma_pe4.grid(row=77, column=4, sticky=W)
+
+Label(master, text="Point of Change (# of Generations) : ").grid(row=78, column=0, sticky=W)
+num_gen_set2 = Entry(master)
+num_gen_set2.grid(row=78, column=2)
+
+num_gen_set3 = Entry(master)
+num_gen_set3.grid(row=78, column=3)
+
+num_gen_set4 = Entry(master)
+num_gen_set4.grid(row=78, column=4)
+
+Label(master, justify=LEFT, text=" ").grid(row=79, sticky=W)
+Label(master, text="Einstellungen für den Evolutionären Algorithmus").grid(row=80, sticky=W)
+
+Label(master, justify=LEFT, text="Populationsgröße:").grid(row=90, column=0, sticky=W)
+pop_size = Entry(master)
+pop_size.insert(0, 12)
+pop_size.grid(row=90, column=1, sticky=W)
+
+Label(master, text="Anzahl Generationen:").grid(row=100, column=0, sticky=W)
+num_gen = Entry(master)
+num_gen.insert(0, 80)
+num_gen.grid(row=100, column=1, sticky=W)
+
+Label(master, text="Auflösung der Allelparameter:").grid(row=110, column=0, sticky=W)
+chromo_resolution = Entry(master)
+chromo_resolution.insert(0, 100)
+chromo_resolution.grid(row=110, column=1, sticky=W)
+
+Label(master, text="Mutation Rate:").grid(row=120, sticky=W)
+p_mutation = Entry(master)
+p_mutation.insert(0, 0.1)
+p_mutation.grid(row=120, column=1, sticky=W)
+Label(master, text="Mutationsrange:").grid(row=120, column=2, sticky=W)
+p_mutate_range = Entry(master)
+p_mutate_range.insert(0, 0.05)
+p_mutate_range.grid(row=120, column=3, sticky=W)
+
+adap_mutation = BooleanVar()
+adap_mutation.set(False)
+adap_mutation_cb = Checkbutton(master, text="Adaptive Mutation", variable=adap_mutation)
+adap_mutation_cb.grid(row=110, column=3, sticky=W)
+
+Label(master, text="Crossoverrate:").grid(row=130, sticky=W)
+p_crossover = Entry(master)
+p_crossover.insert(0, 0.7)
+p_crossover.grid(row=130, column=1, sticky=W)
+
+if os.path.isfile('./settingssheet.txt'):
+
+    t = "True" + '\n'
+    try:
         settingssheet = open('./settingssheet.txt')
-        input_file.insert(0, settingssheet.readline())
+        if not settingssheet.readline() == "Datei auswählen...":
+            settingssheet.seek(0)
+            input_file.delete(0, 'end')
+            input = settingssheet.readline()
+            input_file.insert(0, input[0:-1])
+            if settingssheet.readline() == t:
+                init_preprocess.set(True)
+            else:
+                init_preprocess.set(False)
+
+            if settingssheet.readline() == t:
+                init_random.set(True)
+            else:
+                init_random.set(False)
+
+            width.delete(0, 'end')
+            width.insert(0, float(settingssheet.readline()))
+            if settingssheet.readline() == t:
+                fix_number_of_pts.set(True)
+            else:
+                fix_number_of_pts.set(False)
+
+            pointspersection.delete(0, 'end')
+            pointspersection.insert(0, int(settingssheet.readline()))
+            if settingssheet.readline() == t:
+                equidistant_pts_between_bendpts.set(True)
+            else:
+                equidistant_pts_between_bendpts.set(False)
+
+            step_size.delete(0, 'end')
+            step_size.insert(0, float(settingssheet.readline()))
+
+            gamma_d.delete(0, 'end')
+            gamma_d.insert(0, float(settingssheet.readline()))
+            gamma_d2.delete(0, 'end')
+            gamma_d2.insert(0, float(settingssheet.readline()))
+            gamma_d3.delete(0, 'end')
+            gamma_d3.insert(0, float(settingssheet.readline()))
+            gamma_d4.delete(0, 'end')
+            gamma_d4.insert(0, float(settingssheet.readline()))
+
+            gamma_l.delete(0, 'end')
+            gamma_l.insert(0, float(settingssheet.readline()))
+            gamma_l2.delete(0, 'end')
+            gamma_l2.insert(0, float(settingssheet.readline()))
+            gamma_l3.delete(0, 'end')
+            gamma_l3.insert(0, float(settingssheet.readline()))
+            gamma_l4.delete(0, 'end')
+            gamma_l4.insert(0, float(settingssheet.readline()))
+
+            gamma_ps.delete(0, 'end')
+            gamma_ps.insert(0, float(settingssheet.readline()))
+            gamma_ps2.delete(0, 'end')
+            gamma_ps2.insert(0, float(settingssheet.readline()))
+            gamma_ps3.delete(0, 'end')
+            gamma_ps3.insert(0, float(settingssheet.readline()))
+            gamma_ps4.delete(0, 'end')
+            gamma_ps4.insert(0, float(settingssheet.readline()))
+
+            gamma_pe.delete(0, 'end')
+            gamma_pe.insert(0, float(settingssheet.readline()))
+            gamma_pe2.delete(0, 'end')
+            gamma_pe2.insert(0, float(settingssheet.readline()))
+            gamma_pe3.delete(0, 'end')
+            gamma_pe3.insert(0, float(settingssheet.readline()))
+            gamma_pe4.delete(0, 'end')
+            gamma_pe4.insert(0, float(settingssheet.readline()))
+
+            num_gen_set2.delete(0, 'end')
+            num_gen_set2.insert(0, float(settingssheet.readline()))
+            num_gen_set3.delete(0, 'end')
+            num_gen_set3.insert(0, float(settingssheet.readline()))
+            num_gen_set4.delete(0, 'end')
+            num_gen_set4.insert(0, float(settingssheet.readline()))
+
+            pop_size.delete(0, 'end')
+            pop_size.insert(0, int(settingssheet.readline()))
+            num_gen.delete(0, 'end')
+            num_gen.insert(0, int(settingssheet.readline()))
+            chromo_resolution.delete(0, 'end')
+            chromo_resolution.insert(0, int(settingssheet.readline()))
+            p_mutation.delete(0, 'end')
+            p_mutation.insert(0, float(settingssheet.readline()))
+
+            if settingssheet.readline() == t:
+                adap_mutation.set(True)
+            else:
+                adap_mutation.set(False)
+
+            p_mutate_range.delete(0, 'end')
+            p_mutate_range.insert(0, float(settingssheet.readline()))
+            p_crossover.delete(0, 'end')
+            p_crossover.insert(0, float(settingssheet.readline()))
+            poly_order.delete(0, 'end')
+            poly_order.insert(0, int(settingssheet.readline()))
+            window_quotient.delete(0, 'end')
+            window_quotient.insert(0, int(settingssheet.readline()))
+            max_distance.delete(0, 'end')
+            max_distance.insert(0, int(settingssheet.readline()))
+            settingssheet.close()
+    except:
+        print("Bitte settingssheet.txt löschen")
         settingssheet.close()
-    else:
-        input_file.insert(0, "Datei auswählen...")
-    input_file.grid(row=20, columnspan=3, sticky=W + E + N + S)
-    Button(text='Browse..', command=lambda: callback(input_file)).grid(row=20, column=3, sticky=W)
-    Label(master, text="Verwendung des Preprozess oder Randominitialisierung").grid(row=30, sticky=W)
-    init_preprocess = BooleanVar()
-    init_preprocess.set(True)
-    init_preprocess_cb = Checkbutton(master, text="Preprozess", variable=init_preprocess,
-                                     command=lambda: init_random.set(False))
-    init_preprocess_cb.grid(row=31, column=0, sticky=W)
-    init_random = BooleanVar()
-    init_random_cb = Checkbutton(master, text="Random", variable=init_random,
-                                 command=lambda: init_preprocess.set(False))
-    init_random_cb.grid(row=31, column=1, sticky=W)
-    Label(master, justify=LEFT, text=" ").grid(row=31, sticky=W)
-    prep_start_end = BooleanVar()
-    prep_start_end.set(False)  # Comment_DB: unchecked as default
-    prep_start_end_cb = Checkbutton(master, text="Start/Endpunkt aus Präprozess", variable=prep_start_end,
-                                    command=lambda: manual_start_end.set(False))
-    prep_start_end_cb.grid(row=33, column=0, sticky=W)
-    manual_start_end = BooleanVar()
-    manual_start_end.set(False)
-    manual_start_end_cb = Checkbutton(master, text="Start/Endpunkt manuell festlegen", variable=manual_start_end,
-                                      command=lambda: prep_start_end.set(False))
-    manual_start_end_cb.grid(row=33, column=1, sticky=W)
-    Label(master, text="Startpunkt [mm]").grid(row=34, column=2, sticky=W)
-    Label(master, text="Endpunkt [mm]").grid(row=34, column=3, sticky=W)
-    Label(master, text="x: ").grid(row=35, column=1, sticky=E)
-    Label(master, text="y: ").grid(row=36, column=1, sticky=E)
-    Label(master, text="z: ").grid(row=37, column=1, sticky=E)
-    x_start = Entry(master)
-    x_start.grid(row=35, column=2, sticky=W)
-    y_start = Entry(master)
-    y_start.grid(row=36, column=2, sticky=W)
-    z_start = Entry(master)
-    z_start.grid(row=37, column=2, sticky=W)
-    x_end = Entry(master)
-    x_end.grid(row=35, column=3, sticky=W)
-    y_end = Entry(master)
-    y_end.grid(row=36, column=3, sticky=W)
-    z_end = Entry(master)
-    z_end.grid(row=37, column=3, sticky=W)
-    Label(master, text="Savitkzy-Golay").grid(row=42, sticky=W)
-    Label(master, text="Ordnungsgrad").grid(row=43, sticky=W)
-    poly_order = Entry(master)
-    poly_order.insert(0, 3)
-    poly_order.grid(row=43, column=1, sticky=W)
-    Label(master, text="Fensterquotient").grid(row=43, column=2, sticky=W)
-    window_quotient = Entry(master)
-    window_quotient.insert(0, 5)
-    window_quotient.grid(row=43, column=3, sticky=W)
-    Label(master, text='Maximaler Abstand zur SavGol-Kurve (Zunaechst)').grid(row=44, sticky=W)
-    max_distance = Entry(master)
-    max_distance.insert(0, 10)  # Comment_DB: insert 10 at front of list
-    max_distance.grid(row=44, column=1, sticky=W)
-    Label(master, justify=LEFT, text=" ").grid(row=45, sticky=W)
-    Label(master, text="Tape-Typ :").grid(row=46, sticky=W)
-    tape_type = Entry(master)
-    tape_type.insert(0, "BASF_CFK_Tape")
-    tape_type.grid(row=46, column=1, sticky=W)
-    Label(master, text="Tapebreite [mm]:").grid(row=47, sticky=W)
-    width = Entry(master)
-    width.insert(0, 20)
-    width.grid(row=47, column=1, sticky=W)
-    Label(master, justify=LEFT, text=" ").grid(row=48, sticky=W)
-    Label(master, text="Punktauflösung Patch").grid(row=55, sticky=W)
-    fix_number_of_pts = BooleanVar()
-    fix_number_of_pts_cb = Checkbutton(master, text="Fixe Punktanzahl zwischen Biegestellen",
-                                       variable=fix_number_of_pts,
-                                       command=lambda: equidistant_pts_between_bendpts.set(False))
-    fix_number_of_pts_cb.grid(row=60, column=0, sticky=W)
-    Label(master, text="Anzahl Punkte:").grid(row=60, column=1, sticky=W)
-    fix_number_of_pts.set(True)
-    pointspersection = Entry(master)
-    pointspersection.insert(0, 7)
-    pointspersection.grid(row=60, column=2, sticky=W)
-    equidistant_pts_between_bendpts = BooleanVar()
-    equidistant_pts_between_bendpts_cb = Checkbutton(master, text="Äquidistante Punkte",
-                                                     variable=equidistant_pts_between_bendpts,
-                                                     command=lambda: fix_number_of_pts.set(False),
-                                                     disabledforeground="gray")
-    equidistant_pts_between_bendpts_cb.grid(row=70, column=0, sticky=W)
-    Label(master, text="Abstand Punkte [mm]:").grid(row=70, column=1, sticky=W)
-    step_size = Entry(master)
-    step_size.insert(0, 6)
-    step_size.grid(row=70, column=2, sticky=W)
-    Label(master, justify=LEFT, text=" ").grid(row=71, sticky=W)
-    #####Comment_DB: Different weightings for 4 equally-divided Population Sets!#####
-    Label(master, text="Feintuning Fitnessfunktion (4 Population Sets)").grid(row=73, sticky=W)
-    Label(master, text="Gewichtung Abstandsfitness [gamma_d]: ").grid(row=74, column=0, sticky=W)
-    Label(master, text="Set 1").grid(row=73, column=1, sticky=W)
-    gamma_d = Entry(master)
-    gamma_d.insert(0, 5.8)
-    gamma_d.grid(row=74, column=1, sticky=W)
-    Label(master, text="Set 2").grid(row=73, column=2, sticky=W)
-    gamma_d2 = Entry(master)
-    gamma_d2.insert(0, 5.8)
-    gamma_d2.grid(row=74, column=2, sticky=W)
-    Label(master, text="Set 3").grid(row=73, column=3, sticky=W)
-    gamma_d3 = Entry(master)
-    gamma_d3.insert(0, 5.8)
-    gamma_d3.grid(row=74, column=3, sticky=W)
-    Label(master, text="Set 4").grid(row=73, column=4, sticky=W)
-    gamma_d4 = Entry(master)
-    gamma_d4.insert(0, 5.8)
-    gamma_d4.grid(row=74, column=4, sticky=W)
-    Label(master, text="Gewichtung Längenfitness [gamma_l] : ").grid(row=75, column=0, sticky=W)
-    gamma_l = Entry(master)
-    gamma_l.insert(0, 1.4)
-    gamma_l.grid(row=75, column=1, sticky=W)
-    gamma_l2 = Entry(master)
-    gamma_l2.insert(0, 1.4)
-    gamma_l2.grid(row=75, column=2, sticky=W)
-    gamma_l3 = Entry(master)
-    gamma_l3.insert(0, 1.4)
-    gamma_l3.grid(row=75, column=3, sticky=W)
-    gamma_l4 = Entry(master)
-    gamma_l4.insert(0, 1.4)
-    gamma_l4.grid(row=75, column=4, sticky=W)
-    Label(master, text="Gewichtung Startfitness [gamma_ps] : ").grid(row=76, column=0, sticky=W)
-    gamma_ps = Entry(master)
-    gamma_ps.insert(0, 1)
-    gamma_ps.grid(row=76, column=1, sticky=W)
-    gamma_ps2 = Entry(master)
-    gamma_ps2.insert(0, 1.4)
-    gamma_ps2.grid(row=76, column=2, sticky=W)
-    gamma_ps3 = Entry(master)
-    gamma_ps3.insert(0, 1.4)
-    gamma_ps3.grid(row=76, column=3, sticky=W)
-    gamma_ps4 = Entry(master)
-    gamma_ps4.insert(0, 1.4)
-    gamma_ps4.grid(row=76, column=4, sticky=W)
-    Label(master, text="Gewichtung Endfitness [gamma_pe] : ").grid(row=77, column=0, sticky=W)
-    gamma_pe = Entry(master)
-    gamma_pe.insert(0, 1.4)
-    gamma_pe.grid(row=77, column=1, sticky=W)
-    gamma_pe2 = Entry(master)
-    gamma_pe2.insert(0, 1.4)
-    gamma_pe2.grid(row=77, column=2, sticky=W)
-    gamma_pe3 = Entry(master)
-    gamma_pe3.insert(0, 1.4)
-    gamma_pe3.grid(row=77, column=3, sticky=W)
-    gamma_pe4 = Entry(master)
-    gamma_pe4.insert(0, 1.4)
-    gamma_pe4.grid(row=77, column=4, sticky=W)
-    Label(master, text="Point of Change (# of Generations) : ").grid(row=78, column=0, sticky=W)
-    num_gen_set2 = Entry(master)
-    num_gen_set2.grid(row=78, column=2)
-    num_gen_set3 = Entry(master)
-    num_gen_set3.grid(row=78, column=3)
-    num_gen_set4 = Entry(master)
-    num_gen_set4.grid(row=78, column=4)
-    Label(master, justify=LEFT, text=" ").grid(row=79, sticky=W)
-    Label(master, text="Einstellungen für den Evolutionären Algorithmus").grid(row=80, sticky=W)
-    Label(master, justify=LEFT, text="Populationsgröße:").grid(row=90, column=0, sticky=W)
-    pop_size = Entry(master)
-    pop_size.insert(0, 12)
-    pop_size.grid(row=90, column=1, sticky=W)
-    Label(master, text="Anzahl Generationen:").grid(row=100, column=0, sticky=W)
-    num_gen = Entry(master)
-    num_gen.insert(0, 80)
-    num_gen.grid(row=100, column=1, sticky=W)
-    Label(master, text="Auflösung der Allelparameter:").grid(row=110, column=0, sticky=W)
-    chromo_resolution = Entry(master)
-    chromo_resolution.insert(0, 100)
-    chromo_resolution.grid(row=110, column=1, sticky=W)
-    Label(master, text="Mutation Rate:").grid(row=120, sticky=W)
-    p_mutation = Entry(master)
-    p_mutation.insert(0, 0.1)
-    p_mutation.grid(row=120, column=1, sticky=W)
-    Label(master, text="Mutationsrange:").grid(row=120, column=2, sticky=W)
-    p_mutate_range = Entry(master)
-    p_mutate_range.insert(0, 0.05)
-    p_mutate_range.grid(row=120, column=3, sticky=W)
-    adap_mutation = BooleanVar()
-    adap_mutation.set(False)  # Comment_DB: unchecked as default
-    adap_mutation_cb = Checkbutton(master, text="Adaptive Mutation", variable=adap_mutation)
-    adap_mutation_cb.grid(row=110, column=3, sticky=W)
-    Label(master, text="Crossoverrate:").grid(row=130, sticky=W)
-    p_crossover = Entry(master)
-    p_crossover.insert(0, 0.7)
-    p_crossover.grid(row=130, column=1, sticky=W)
-    Button(master, text='Abbrechen', command=sys.exit).grid(row=1000, column=0, pady=4)
-    Button(master, text='Start', command=master.quit).grid(row=1000, column=1, pady=4)
-    read_Input_from_settingssheet()
-    mainloop()  # führt das GUI aus
-    return adap_mutation, chromo_resolution, equidistant_pts_between_bendpts, fix_number_of_pts, init_preprocess, init_random, input_file, manual_start_end, master, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pointspersection, poly_order, pop_size, step_size, tape_type, width, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start
 
-
-adap_mutation, chromo_resolution, equidistant_pts_between_bendpts, fix_number_of_pts, init_preprocess, init_random, input_file, manual_start_end, master, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pointspersection, poly_order, pop_size, step_size, tape_type, width, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start = get_Vars_from_GUI()
+Button(master, text='Abbrechen', command=sys.exit).grid(row=1000, column=0, pady=4)
+Button(master, text='Start', command=master.quit).grid(row=1000, column=1, pady=4)
+mainloop()  # führt das GUI aus
 
 settings_list = [input_file.get(), init_preprocess.get(), init_random.get(), width.get(), fix_number_of_pts.get(), \
                  pointspersection.get(), equidistant_pts_between_bendpts.get(), step_size.get(), \
@@ -376,16 +408,15 @@ settings_list = [input_file.get(), init_preprocess.get(), init_random.get(), wid
                  num_gen_set2.get(), num_gen_set3.get(), num_gen_set4.get(), \
                  pop_size.get(), num_gen.get(), chromo_resolution.get(), \
                  p_mutation.get(), adap_mutation.get(), p_mutate_range.get(), p_crossover.get(), poly_order.get(),
-                 window_quotient.get(), max_distance.get()]  # Comment_DB: removed gamma_p.get()
+                 window_quotient.get(), max_distance.get()]
 
 input_file = input_file.get()
-
 testpatch = trimesh.load(input_file)
 
 tape_type = tape_type.get()
 width = float(width.get())  # Tapebreite
 # Sollen die Punkte zwischen den Biegestellen gleichmäßigverteilt werden (True,-> step_size) oder eine fixe Anzahl an Punkten
-# zwischen den Biegestellen gewählt werden (False,-> pointspersection)
+# Zwischen den Biegestellen gewählt werden (False,-> pointspersection)
 equidistant_pts_between_bendpts = float(equidistant_pts_between_bendpts.get())
 step_size = float(step_size.get())  # Abstand zwischen den Patchpunkten - NUR FALLS equidist_pts_between_bendpts=True
 
@@ -420,7 +451,6 @@ gamma_d_hat = 0.0
 gamma_l_hat = 0.0
 gamma_ps_hat = 0.0
 gamma_pe_hat = 0.0
-
 
 manual_start_end = bool(manual_start_end.get())  # Comment_DB: "Start/Endpunkt aus Praeprozess"
 if manual_start_end:  # Comment_DB: If true
@@ -465,8 +495,7 @@ start_parameter = stlprep3_6.startparam(input_file, poly_order, window_quotient,
 Start_p_prep = start_parameter[0]
 Start_r_prep = start_parameter[1]
 Start_n = start_parameter[2]
-Start_p_id = start_parameter[
-    6]  # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
+Start_p_id = start_parameter[6]  # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
 L_aim = start_parameter[4]  # Comment_DB: already in [mm]
 patch_start = start_parameter[7]
 patch_end = start_parameter[8]
@@ -506,6 +535,7 @@ def preprocessed_chromo(startparameter, chromoresolution):
         preprocessed_chromo.append(int(chromo_resolution / 2))
     return preprocessed_chromo
 
+
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
     l_list = []  # Comment_DB: empty list
@@ -531,7 +561,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     for i in range(2, len(startchromo) - 3, 3):  # Comment_DB: adjusted for reordered startchromo (betas)
         beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
         beta_list.append(beta)
-
+    # print("beta_list in LoP", beta_list) #Comment_DB: compare with preprocessor beta_list. LoP one is in radians.
     # Variabler Startpunkt
     var_range = 0.8
     var_start_pt_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[
@@ -570,6 +600,13 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     # Parametrisierung des Tapes ab Startpunkt in Trendlinienrichtung
     # Start_p_id sagt uns wie viele tape-Teilabschnitte (L1-L?) sich vor dem Startpunkt befinden
     Start_v = np.array([0, 0, 0])
+    # l_list_a = l_list[Start_p_id:]  # Längen der Teilabschnitte nach dem Startpunkt
+    # alpha_list_a = alpha_list[Start_p_id:] # Alphas nach dem Startpunkt
+
+    # beta_list_a = beta_list[Start_p_id:]    # Betas nach dem Startpunkt
+    # r_list_a = [Start_r]     # Die Richtungsvektoren/Normalenvektoren werden ebenfalls vor und nach Start_p aufgeteilt
+    # v_list_a = [Start_v]
+    # n_list_a = [Start_n_strich]
 
     r_list = [Start_r]
     v_list = [Start_v]
@@ -578,9 +615,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     ##########################COMMENT_DB: FROM HERE, WILL NOT KEEP ORIGINAL CODE##########################
     #### Vektorenberechnung für Tapeseite nach dem Startpunkt
     if not len(alpha_list) == 0:
-
         for i in range(1, len(l_list)):
-
             if alpha_list[i - 1] < math.pi / 2:
                 v_new = Quaternion(axis=n_list[i - 1], angle=(alpha_list[i - 1] - (math.pi) / 2)).rotate(
                     r_list[i - 1])
@@ -592,18 +627,16 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
             r_list.append(r_rotated)
             n_new = Quaternion(axis=v_list[i], angle=beta_list[i - 1]).rotate(n_list[i - 1])
             n_list.append(n_new)
-
     else:
         print("lenalpha0")
 
     # print("unstacked r_list", r_list) #Comment_DB: TEST
     r_list = np.stack(r_list)
     # print("stacked r_list", r_list) #Comment_DB: TEST
-    # Mittellinie after startpoint
+    ## Mittellinie after startpoint
     p_list = [Start_p]
     old_p = Start_p
     # new_p = Start_p
-
     for i, l in enumerate(l_list):
         dist = l * r_list[i, :]
         new_p = old_p + dist
@@ -640,7 +673,6 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     l_left_list = []
     if len(alpha_list) == 0:
         l_left_list = [l_list[0]]
-
     for i in range(1, len(l_list)):
         if alpha_list[i - 1] > math.pi / 2:
             delta_l_l = (width / 2) * math.tan(math.pi - alpha_list[i - 1])
@@ -671,13 +703,11 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                                       Start_n_strich) * width / 2 + delta_l_l_start * Start_r  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
     p_left_list = [Start_p_left]
     old_p_left = Start_p_left
-
     for i, l in enumerate(l_left_list):
         dist = l * r_list[i, :]
         new_p_left = old_p_left + dist
         p_left_list.append(new_p_left)
         old_p_left = new_p_left
-
     # Auffüllen mit Punkten ( Fixe Punktanzahl oder fixer Punktabstand):
     if equidistant_pts_between_bendpts:
         left_pts = []
@@ -690,7 +720,9 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_p)
-
+            # left_pts = np.asarray(left_pts)
+        # else:
+        # left_pts = np.concatenate(left_pts)
     else:
         left_pts = []
         for i, l in enumerate(l_left_list):
@@ -702,9 +734,10 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_p)
-
+            # left_pts = np.asarray(left_pts)
+        # else:
+        # left_pts = np.concatenate(left_pts)
     left_pts = np.concatenate(left_pts)
-
     ######################## Rechter Rand nach Startpunkt######################
     ## Anpassung Startpunkt Seitenrand rechts
     alpha_start = alpha_list[Start_p_id_fromstart - 1]  # Comment_DB: Might not be necessary
@@ -800,6 +833,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     return result, start, end, patch_visualisation_points, l_list, alpha_list, beta_list, Start_p, Start_r  # Comment_DB: Not dependent on preprocessed_chromo
 
+
 # Berechnung der Patchlänge (für Fitness)
 def PatchLength(chromo, AnzahlKnicke, l_factor):
     # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
@@ -817,18 +851,20 @@ def PatchLength(chromo, AnzahlKnicke, l_factor):
             L = L + chromo[i] * l_factor
     return L
 
+
 # Berechnung der Fitness eines Chromosoms
 def Fitness(chromo):
     genes = chromo
     LoP = ListOfPoints(chromo)
     A = trimesh.proximity.closest_point(testpatch, LoP[0])  # Comment_DB: LoP[0] refers to "result" returned from LoP
-
+    # print("for reordered chromo",A[1]) #Comment_DB: test
+    # print("for reordered chromo",LoP[0]) #Comment_DB: test
     L = 0
     for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: fixed to correspond to new orderd starting chromosome
         L = L + genes[i] * l_factor  # Comment_DB: patch length
 
     A_norm = []
-
+    A_end = []
     for i in range(len(A[1])):  # Comment_DB: A[1] is returned variable "result_distance" from proximity.py module
         A_norm.append(math.sqrt((A[1][i]) ** 2))
 
@@ -837,7 +873,6 @@ def Fitness(chromo):
 
     max_dist = max(A_norm)
     avg_dist = sum(A_norm) / len(A[1])  # Comment_DB: always positive
-    print(A_norm)
 
     """
     ####Comment_DB: Avg of Avg Dist#####
@@ -902,16 +937,16 @@ def Fitness(chromo):
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
     border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
     # border_fit_start = 100 - 10 * abs(stlprep3_6.distance(LoP[1], patch_start))
-    # border_fit_start = 100 * math.exp(-(stlprep3_6.distance(LoP[1], patch_start)/10) ** 2) #Comment_DB: Removed k_p. LoP[1] is real patch, patch_start from preproc
-    ##border_fit_start = abs(600/stlprep3_6.distance(LoP[1],patch_start))
-    # if border_fit_start < 0:
-    # border_fit_start = 0.1
+
+    # Comment_DB: Removed k_p. LoP[1] is real patch, patch_start from preproc
+    # border_fit_start = 100 * math.exp(-(stlprep3_6.distance(LoP[1], patch_start)/10) ** 2)
+    # border_fit_start = abs(600/stlprep3_6.distance(LoP[1],patch_start))
+
     border_fit_end = 100 - (stlprep3_6.distance(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
     # border_fit_end = abs(600 / stlprep3_6.distance(LoP[2], patch_end))
     # border_fit_end = 100 - 10 * abs(stlprep3_6.distance(LoP[2], patch_end))
     # border_fit_end = 100 * math.exp(-(stlprep3_6.distance(LoP[2], patch_end)/10) ** 2)  #Comment_DB: k_p = 0.4
-    # if border_fit_end < 0:
-    # border_fit_end = 0.1
+
 
     ###LINEAR###
     # k_p_lin = (100-90)/5
@@ -1000,55 +1035,49 @@ print("\t\tStart Border Fit Start",Fitness(startchromo)[3])
 print("\t\tStart Border Fit End",Fitness(startchromo)[4])
 print("\t\tStart Average Distance", Fitness(startchromo)[5])
 """
-
+# if length_fit < 0:
 
 # Ergebnisse aus Vorverarbeitung visualisieren:
 stlprep3_6.show_startstrip(input_file, ListOfPoints(startchromo)[0], poly_order, window_quotient, max_distance,
                            ListOfPoints(startchromo)[3], patch_start, patch_end)
 
 ####################Evolutionärer Algorithmus####################
-
-# Erzeuge ein Objekt der Klasse Population:
+## Erzeuge ein Objekt der Klasse Population:
 p = Population(pop_size)  # Comment_DB: pop_size is user input in dialog box
-
-# Startwerte aus Preprocessing werden an die Population gegeben
+## Startwerte aus Preprocessing werden an die Population gegeben
 p.startchromo = startchromo
-
 # Soll die Initialisierung mit den Startwerten des Preprozesses erfolgen?
 p.preprocessedInit = init_preprocess  # Comment_DB: init_preprocess also user input, preprocessedInit is from chromosome class in Galileo module
 p.initrange = 10  # Comment_DB: in chromosome class in Galileo module. Interval for variation of preprocessed gene
 p.p_randInit = 8
 p.p_prepInit = 70
-
 # Festlegen der Fitnessfunktion
 p.evalFunc = Fitness  # Comment_DB: The FUNCTION Fitness is assigned, not the lowercase equation fitness! Stores the function. p.evalFunc = Fitness() stores the return value
-
-# Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
+## Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
 p.chromoMinValues = [0] * (3 * AnzahlKnicke + 8)
 p.chromoMaxValues = [chromo_resolution] * (3 * AnzahlKnicke + 8)
+# print("p.chromoMaxValues", p.chromoMaxValues) #Comment_DB: [100, 100, 100, 100...] 3*AnzahlKnicke+8 times
 
-# Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
+## Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
 p.useInteger = useInteger
 # p.useInteger = 0
 
-# Wahl der Selektionsmethode -> Rouletterad, Rankedselect, Eliteranked
+## Wahl der Selektionsmethode -> Rouletterad, Rankedselect, Eliteranked
 # p.selectFunc = p.select_Roulette
 # p.selectFunc = p.select_Ranked
 # p.selectFunc = p.select_EliteRanked #Comment_DB: function returns elites[k-1]
 p.selectFunc = p.select_Roulette  # MW: Convergenz problem mit Elite?
 
-# Wie viele Chromosome dürfen überleben?
+## Wie viele Chromosome dürfen überleben?
 # p.replacementSize = p.numChromosomes #Comment_DB: all chromosomes in a population can survive
 p.replacementSize = p.numChromosomes * 5  # MW: Das ist die Anzahl an Kinder!!!
-
-# Crossover Wahrscheinlichkeit
+## Crossover Wahrscheinlichkeit
 p.crossoverRate = p_crossover
-
-# Wahl der Crossoverfunktion -> Flat
+## Wahl der Crossoverfunktion -> Flat
 p.crossoverFunc = p.crossover_Flat
 # p.crossoverFunc = p.crossover_Uniform
-
-# Mutations Wahrscheinlichkeit
+# p.crossoverFunc = p.crossover_Uniform
+## Mutations Wahrscheinlichkeit
 p.mutationRate = p_mutation
 
 ## Wahl der Mutationsfunktion
@@ -1061,22 +1090,22 @@ else:
     # p.mutateFunc = p.mutate_Gauss
     p.mutationRange = p_mutate_range
 
-# Replacementfunktion: SteadyState, SteadyState ohne doppelten Chromosome & Generationell(nur Kinder überleben)
+## Replacementfunktion: SteadyState, SteadyState ohne doppelten Chromosome & Generationell(nur Kinder überleben)
 # p.replaceFunc = p.replace_SteadyState
 p.replaceFunc = p.replace_SteadyStateNoDuplicates
 # p.replaceFunc = p.replace_Generational
-
-# Anzahl an Generationen
 p.maxGenerations = num_gen
 
 
-def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMOSOME DETERMINED FROM DATA FROM PREPROCESSOR. SHOWING THE "ListOfPoints"!
+def show_current_solution(
+        ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMOSOME DETERMINED FROM DATA FROM PREPROCESSOR. SHOWING THE "ListOfPoints"!
     bestPatch = ListOfPoints[0]
     bestPatch_patternpoints = ListOfPoints[3]
     figure = pyplot.figure()
     axes = mplot3d.Axes3D(figure)
     your_mesh = mesh.Mesh.from_file(input_file)  # Comment_DB: This is the target shape!
     patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=3, alpha=0.5)
+    # axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors,linewidths=1, alpha=0.01))
     axes.scatter(bestPatch[:, 0], bestPatch[:, 1], bestPatch[:, 2], c='y')
 
     # Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
@@ -1089,7 +1118,6 @@ def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMO
                 [bestPatch_patternpoints[i][2], bestPatch_patternpoints[i + 1][2], bestPatch_patternpoints[i + 2][2]]))]
         axes.add_collection3d(Poly3DCollection(verts), zs='z')
         patch_meshpoints.append(verts)
-
     # Biegestellen rot färben:
     axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
@@ -1104,7 +1132,6 @@ def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMO
     axes.set_xbound(-100, 100)
     axes.set_ybound(-50, 150)
     axes.set_zbound(-100, 100)
-
     pyplot.axis('off')
     # plt.autoscale(enable=False)
     pyplot.show(figure)
@@ -1120,8 +1147,7 @@ length_fit_list = np.array([])
 border_fit_start_list = np.array([])
 border_fit_end_list = np.array([])
 mutation_rate_list = np.array([])
-
-# Initialisierung
+## Initialisierung
 time_start = timer()  # Comment_DB: start timer
 p.prepPopulation()
 p.currentGeneration.sort()  # Comment_DB: sort and reverse randomly initialized pop from best fit to worst
@@ -1177,6 +1203,17 @@ for i in range(num_gen):
         else:
             mutation_rate_list = np.append(mutation_rate_list, [p.mutationRate])
 
+        '''        
+        if j == range(p.selectionSize)[-1]: #Comment_DB: once reached last elite population member in generation, calculate the average of average distances
+            #avg_avg_dist = sum(sum_avg_dist)/len(sum_avg_dist)
+            avg_avg_dist_selected = sum(sum_avg_dist_selected)/len(sum_avg_dist_selected)
+            #print("\n\tAverage of Average Distance for Whole Population:",
+                  #avg_avg_dist)
+            print("\n\tAverage of Average Distance for Elite Members of Population:", avg_avg_dist_selected)
+            print("\n")
+        
+        '''
+
     # Comment_DB: Begin Evolutionary Algorithm
     if i != num_gen - 1:
         # Bewertung
@@ -1223,6 +1260,15 @@ for i in range(num_gen):
         if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 25 or p.generationNumber == 40:
             show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
 
+    """
+    ###Comment_DB: Show iteration at variable gamma sets###
+    if p.generationNumber == num_gen_set2 - 1 and p.generationNumber != num_gen:
+        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
+    if p.generationNumber == num_gen_set3 - 1 and p.generationNumber != num_gen:
+        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
+    if p.generationNumber == num_gen_set4 - 1 and p.generationNumber != num_gen:
+        show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
+    """
     # Comment_DB: append determined values into arrays after each iteration
     num_gen_list = np.append(num_gen_list, [i])
 
@@ -1357,7 +1403,8 @@ axes = mplot3d.Axes3D(figure)
 your_mesh = mesh.Mesh.from_file(input_file)
 patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=1,
                                               alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
-
+# patch_visual.set_facecolor([0.5, 0.5, 1])
+# axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors,linewidths=1, alpha=0.01))
 testpatch_vector = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
 triangles = testpatch_vector.vectors
 patch_pc = stlprep3_6.patch_pointcloud(triangles)
@@ -1375,12 +1422,11 @@ for i in range(len(bestPatch_patternpoints) - 2):
                   bestPatch_patternpoints[i + 2][2]]))]
     axes.add_collection3d(Poly3DCollection(verts), zs='z')
     patch_meshpoints.append(verts)
-
 # Biegestellen rot färben:
 axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
 patch_meshpoints = np.concatenate(np.asarray(patch_meshpoints), axis=0)
-
+# print(patch_meshpoints[0][0])
 
 
 axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
@@ -1390,6 +1436,9 @@ face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 
 patch_visual.set_facecolor(face_color)
 axes.add_collection3d(patch_visual)
 
+# scale = your_mesh.points.flatten()
+# axes.auto_scale_xyz(scale, scale, scale)
+
 # Show the plot to the screen
 
 axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
@@ -1397,10 +1446,14 @@ axes.set_xbound(-100, 100)
 axes.set_ybound(-50, 150)
 axes.set_zbound(-100, 100)
 pyplot.axis('off')
+# plt.autoscale(enable=False)
+
 
 pyplot.show(figure)
 
 
+# plotly_fig = tls.mpl_to_plotly(figure)
+# plotly.offline.plot(plotly_fig) # Comment_DB: doesn't work, figure too complex
 ######## Abspeichern der Biegeparameter #########
 def save_patch_file():
     name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
@@ -1442,7 +1495,7 @@ end = Tk()
 Label(end, text="Sind Sie mit dem Patch zufrieden?").grid(row=10, column=1, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 Button(end, text="Abbrechen", command=sys.exit).grid(row=30, column=0, )
-Button(end, text="Wiederholen",command = restart).grid(row = 30,column=1, )
+# Button(end, text="Wiederholen",command = restart).grid(row = 30,column=1, )
 Button(end, text="Patchparameter speichern", command=save_patch_file).grid(row=30, column=2, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 mainloop()

@@ -377,10 +377,6 @@ if os.path.isfile('./settingssheet.txt'):
             num_gen_set4.delete(0, 'end')
             num_gen_set4.insert(0, float(settingssheet.readline()))
 
-            """
-            gamma_p.delete(0, 'end')
-            gamma_p.insert(0, float(settingssheet.readline()))
-            """
             pop_size.delete(0, 'end')
             pop_size.insert(0, int(settingssheet.readline()))
             num_gen.delete(0, 'end')
@@ -433,7 +429,7 @@ testpatch = trimesh.load(input_file)
 tape_type = tape_type.get()
 width = float(width.get())  # Tapebreite
 # Sollen die Punkte zwischen den Biegestellen gleichmäßigverteilt werden (True,-> step_size) oder eine fixe Anzahl an Punkten
-# zwischen den Biegestellen gewählt werden (False,-> pointspersection)
+# Zwischen den Biegestellen gewählt werden (False,-> pointspersection)
 equidistant_pts_between_bendpts = float(equidistant_pts_between_bendpts.get())
 step_size = float(step_size.get())  # Abstand zwischen den Patchpunkten - NUR FALLS equidist_pts_between_bendpts=True
 
@@ -527,8 +523,7 @@ start_parameter = stlprep3_6.startparam(input_file, poly_order, window_quotient,
 Start_p_prep = start_parameter[0]
 Start_r_prep = start_parameter[1]
 Start_n = start_parameter[2]
-Start_p_id = start_parameter[
-    6]  # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
+Start_p_id = start_parameter[6]  # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
 L_aim = start_parameter[4]  # Comment_DB: already in [mm]
 patch_start = start_parameter[7]
 patch_end = start_parameter[8]
@@ -970,16 +965,16 @@ def Fitness(chromo):
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
     border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
     # border_fit_start = 100 - 10 * abs(stlprep3_6.distance(LoP[1], patch_start))
-    # border_fit_start = 100 * math.exp(-(stlprep3_6.distance(LoP[1], patch_start)/10) ** 2) #Comment_DB: Removed k_p. LoP[1] is real patch, patch_start from preproc
-    ##border_fit_start = abs(600/stlprep3_6.distance(LoP[1],patch_start))
-    # if border_fit_start < 0:
-    # border_fit_start = 0.1
+
+    # Comment_DB: Removed k_p. LoP[1] is real patch, patch_start from preproc
+    # border_fit_start = 100 * math.exp(-(stlprep3_6.distance(LoP[1], patch_start)/10) ** 2)
+    # border_fit_start = abs(600/stlprep3_6.distance(LoP[1],patch_start))
+
     border_fit_end = 100 - (stlprep3_6.distance(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
     # border_fit_end = abs(600 / stlprep3_6.distance(LoP[2], patch_end))
     # border_fit_end = 100 - 10 * abs(stlprep3_6.distance(LoP[2], patch_end))
     # border_fit_end = 100 * math.exp(-(stlprep3_6.distance(LoP[2], patch_end)/10) ** 2)  #Comment_DB: k_p = 0.4
-    # if border_fit_end < 0:
-    # border_fit_end = 0.1
+
 
     ###LINEAR###
     # k_p_lin = (100-90)/5

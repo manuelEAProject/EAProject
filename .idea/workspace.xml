@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="Minor delets">
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Testgeometrien/patschpara.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/galileo_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/galileo_EA_Edit6.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,9 +31,12 @@
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="ProjectId" id="1Q8N3ROX4xIQ5czZeRDZvIYHRCu" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$USER_HOME$/AppData/Local/GitHubDesktop/app-2.4.3/resources/app/git/cmd/git.exe" />
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/Tape_EA_Wenzel.py" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="PyConsoleOptionsProvider">
@@ -57,7 +65,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Tape_EA_Edit6">
+  <component name="RunManager" selected="Python.Tape_EA_Wenzel">
     <configuration name="Tape_EA" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="ud_tape_optimization" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -79,7 +87,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Tape_EA_Edit6" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="Tape_EA_Wenzel" type="PythonConfigurationType" factoryName="Python">
+      <module name="ud_tape_optimization" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Manu\Uni\HIWI\WBK\DKu_Arbeit\KI_Evo_Project\Masterarbeit_Lukas_Biergans\Code\Virtual Environment\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Tape_EA_Wenzel.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Tape_EA_Wenzel1" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="ud_tape_optimization" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -91,7 +120,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Tape_EA_Edit6.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Tape_EA_Wenzel1.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -121,8 +150,15 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.Tape_EA_Wenzel" />
+      <item itemvalue="Python.Test_file" />
+      <item itemvalue="Python.Tape_EA" />
+      <item itemvalue="Python.Tape_EA_Wenzel1" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Tape_EA_Wenzel1" />
         <item itemvalue="Python.Tape_EA" />
       </list>
     </recent_temporary>
@@ -155,7 +191,14 @@
       <option name="project" value="LOCAL" />
       <updated>1588955470953</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Minor delets">
+      <created>1588955752146</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1588955752146</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -182,6 +225,7 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="get_Vars_from_GUI" />
     <MESSAGE value="Minor delets" />
     <option name="LAST_COMMIT_MESSAGE" value="Minor delets" />
@@ -196,7 +240,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Tape_EA_Edit6.py</url>
-          <line>1073</line>
+          <line>1068</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
       </breakpoints>
