@@ -26,8 +26,8 @@ import xlsxwriter
 from timeit import default_timer as timer
 
 ############## GUI  &  SETTINGS #######################
-# GUI-Settings
 
+# GUI-Settings
 def get_Vars_from_GUI():
     master = Tk()
     master.protocol("WM_DELETE_WINDOW", sys.exit)
@@ -232,7 +232,7 @@ def get_Vars_from_GUI():
                                         gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, init_random, input_file,
                                         max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover,
                                         p_mutate_range, p_mutation, pointspersection, poly_order, pop_size,
-                                        settingssheet, step_size, width, window_quotient)
+                                        step_size, width, window_quotient)
 
 
 
@@ -317,8 +317,9 @@ def get_Vars_from_GUI():
                    window_quotient, max_distance])  # Speichert die gewählten Einstellungen
 
     master.destroy()  # Schließt das Settings Fenster
-    return testpatch, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, poly_order, pop_size, useInteger, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start
+    return step_size, testpatch, tape_type,width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, poly_order, pop_size, useInteger, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start
 
+# functions for GUI-Settings
 def select_stl_file(input_file):
     if os.path.isfile('./settingssheet.txt'):
         settingssheet = open('./settingssheet.txt')
@@ -335,21 +336,19 @@ def select_stl_file(input_file):
     settingssheet = open('./settingssheet.txt', 'w+')
     settingssheet.write(input_file.get())
     settingssheet.close()
-
 def save_settings(settings_list):
-    settings_sheet = open('./settingssheet.txt', 'r+')
+    settingssheet = open('./settingssheet.txt', 'r+')
 
     for listitem in settings_list:
-        settings_sheet.write('%s\n' % listitem)
-    settings_sheet.close()
-
+        settingssheet.write('%s\n' % listitem)
+    settingssheet.close()
 def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidistant_pts_between_bendpts,
                                         fix_number_of_pts, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2,
                                         gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
                                         gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, init_random, input_file,
                                         max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover,
                                         p_mutate_range, p_mutation, pointspersection, poly_order, pop_size,
-                                        settingssheet, step_size, width, window_quotient):
+                                        step_size, width, window_quotient):
     if os.path.isfile('./settingssheet.txt'):
 
         t = "True" + '\n'
@@ -459,7 +458,9 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
             print("Bitte settingssheet.txt löschen")
             settingssheet.close()
 
-[testpatch, width, pointspersection, equidistant_pts_between_bendpts,adap_mutation, chromo_resolution,
+[step_size, testpatch, tape_type, width,
+ pointspersection, equidistant_pts_between_bendpts,
+ adap_mutation, chromo_resolution,
  gamma_d, gamma_d2, gamma_d3, gamma_d4,
  gamma_l, gamma_l2, gamma_l3, gamma_l4,
  gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4,
@@ -476,7 +477,6 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
 # Ruft das stl_preprocessing modul auf und übergibt die stl-Datei an die Funktion startparam
 # Startparam gibt eine Liste mit den berechneten Startparametern zurück:
 # STARTPARAMETER: [Start_p_mid, Start_r_mid, Start_n_mid, l_list, totallength, beta_list[°], Start_p_ID]
-start_parameter = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
 
 [Start_p_prep, # Comment_DKu_Wenzel: No usage anymore!!
 Start_r_prep, # Comment_DKu_Wenzel: No usage anymore!!
@@ -496,7 +496,6 @@ AnzahlKnicke_too     # Comment_DKu_Wenzel: Verschieden von AnzahlKnicke(+2) und 
 ] = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
 
 AnzahlKnicke = len(start_lengths) - 1
-
 
 if manual_start_end:
     patch_start = np.asarray([x_start, y_start, z_start])
@@ -530,8 +529,9 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     l_list = []  # Comment_DB: empty list
     alpha_list = []  # Comment_DB: empty list
     beta_list = []  # Comment_DB: empty list
+
     for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: adjusted for reordered startchromo (lengths)
-        if chromo[i] == 0:  # Comment_DB: chromo[i] is the "c" variable!
+        if chromo[i] == 0:  # Comment_DB: chromo[i] is the "c" variable!    #Comment_DKu_Wenzel: why should a length be 0? Just error handling? necessary?
             l_list.append(1)
         else:
             l_list.append(chromo[i] * l_factor)
@@ -549,6 +549,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
         beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
         beta_list.append(beta)
     # print("beta_list in LoP", beta_list) #Comment_DB: compare with preprocessor beta_list. LoP one is in radians.
+
     # Variabler Startpunkt
     var_range = 0.8
     var_start_pt_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[
@@ -838,7 +839,6 @@ def patch_length_in_mm(chromo, l_factor_chromo_mm):
         for i in range(0, len(startchromo) - 5, 3):
             lengt = lengt + chromo[i]
     return lengt * l_factor_chromo_mm
-
 def calc_border_fittness(chromo):
     LoP=ListOfPoints(chromo)
     ###PARABOLIC###
@@ -861,7 +861,6 @@ def calc_border_fittness(chromo):
     # border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[1], patch_start)) ** 2)
     # border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[2], patch_end)) ** 2)
     return border_fit_end, border_fit_start
-
 def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
     L = patch_length_in_mm(chromo, l_factor_chromo_mm)
     ###PARABOLIC###
@@ -874,13 +873,11 @@ def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
     # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
     return length_fit
-
 def calc_avg_dist(chromo):
     distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[
         1]  # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
     return avg_dist
-
 def calc_distance_fittness(L_aim, chromo):
     # Berechnung durchschnittlicher Abstand
     avg_dist = calc_avg_dist(chromo)
@@ -894,7 +891,6 @@ def calc_distance_fittness(L_aim, chromo):
     # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
     # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
     return distance_fit, avg_dist
-
 def evalute_adaptiv_gamma_():
     if not 'p' in globals():
         pass

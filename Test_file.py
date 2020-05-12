@@ -1,6 +1,10 @@
 from tkinter import *
 
+for i in range(5): print(i)
 
+l=list(range(5))*3
+for i in l: print(i)
+"""
 def wechsleFarbe():
     lab1["bg"] = "#FFFF00"
     return
@@ -29,3 +33,4 @@ c.grid(row=1, column=1)
 
 
 main.mainloop()
+"""
