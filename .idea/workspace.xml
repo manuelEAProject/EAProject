@@ -4,6 +4,7 @@
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Test_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test_file.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -228,7 +229,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589277432300</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="alpha beta lenght function in ListofPoints()">
+      <created>1589288177874</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1589288177874</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -263,7 +271,8 @@
     <MESSAGE value="Fragmentieren der Fittnesfunktion" />
     <MESSAGE value="Änderungen von Namen:&#10;callback = get_Vars_from_GUI&#10;&#10;preprocessed_chromo = create_start_chromo&#10;&#10;Startparameter vereinfacht deklariert" />
     <MESSAGE value="settings_sheet = settingsshet" />
-    <option name="LAST_COMMIT_MESSAGE" value="settings_sheet = settingsshet" />
+    <MESSAGE value="alpha beta lenght function in ListofPoints()" />
+    <option name="LAST_COMMIT_MESSAGE" value="alpha beta lenght function in ListofPoints()" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

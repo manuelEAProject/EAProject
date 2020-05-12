@@ -1,10 +1,23 @@
-from tkinter import *
 
-for i in range(5): print(i)
 
-l=list(range(5))*3
-for i in l: print(i)
+
+var_range = 1
+
+chromo_resolution=100
+
+chromo=[51,52,53,54]
+var_range = 0.8
+variation_start = [(1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value) for gen_value in chromo[-3:-1:1]]
+
+print (variation_start)
+
+variation_start.append(55)
+print (variation_start)
 """
+variation_start = 1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value
+
+print(variation_start)
+
 def wechsleFarbe():
     lab1["bg"] = "#FFFF00"
     return
