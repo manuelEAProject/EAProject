@@ -509,45 +509,24 @@ l_factor = 0.5 * L_aim / chromo_resolution  # Comment_DB: already in [mm]
 def create_start_chromo():
     # Nimmt die Startparameter aus der Geometriedatenvorverarbeitung und wandelt diese in ein Chromosom mit der
     # entsprechenden Auflösung um. Rückgabewert ist das Chromosom der Startlösung.
-    preprocessed_chromo = []
+    start_chromo = []
 
     # Fill length1, alpha1, beta1, length2...
     for i in range(len(start_lengths)):
-        preprocessed_chromo.append(int(start_lengths[i] / l_factor))
+        start_chromo.append(int(start_lengths[i] / l_factor))
         if i < len(start_betas):  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
-            preprocessed_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
+            start_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
             beta_chromo = (start_betas[i] + 90) * chromo_resolution / 180
-            preprocessed_chromo.append(int(beta_chromo))
+            start_chromo.append(int(beta_chromo))
 
     # Variable Startparameter werden standardmäßig auf chromo_resolution/2 gesetzt
     for i in range(7):
-        preprocessed_chromo.append(int(chromo_resolution / 2))
-    return preprocessed_chromo
+        start_chromo.append(int(chromo_resolution / 2))
+    return start_chromo
 
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
-    l_list = []  # Comment_DB: empty list
-    alpha_list = []  # Comment_DB: empty list
-    beta_list = []  # Comment_DB: empty list
-
-    for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: adjusted for reordered startchromo (lengths)
-        if chromo[i] == 0:  # Comment_DB: chromo[i] is the "c" variable!    #Comment_DKu_Wenzel: why should a length be 0? Just error handling? necessary?
-            l_list.append(1)
-        else:
-            l_list.append(chromo[i] * l_factor)
-
-    for i in range(1, len(startchromo) - 4, 3):  # Comment_DB: adjusted for reordered startchromo (alphas)
-        alpha = 0
-        if chromo[i] < chromo_resolution / 2:
-            alpha = (135 + (chromo[i] * 45 / (chromo_resolution / 2))) * 2 * math.pi / 360
-        else:
-            alpha = ((chromo[i] - chromo_resolution / 2) * 45 / (
-                    chromo_resolution / 2)) * 2 * math.pi / 360  # Quadratische Vert. von 135°-180°
-        alpha_list.append(alpha)
-
-    for i in range(2, len(startchromo) - 3, 3):  # Comment_DB: adjusted for reordered startchromo (betas)
-        beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
-        beta_list.append(beta)
+    alpha_list, beta_list, l_list = get_alpha_beta_length(chromo)
     # print("beta_list in LoP", beta_list) #Comment_DB: compare with preprocessor beta_list. LoP one is in radians.
 
     # Variabler Startpunkt
@@ -802,6 +781,27 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     return result, start, end, patch_visualisation_points, l_list, alpha_list, beta_list, Start_p, Start_r  # Comment_DB: Not dependent on preprocessed_chromo
 
+# beta in radians, length in mm
+def get_alpha_beta_length(chromo):
+    l_list = []  # Comment_DB: empty list
+    alpha_list = []  # Comment_DB: empty list
+    beta_list = []  # Comment_DB: empty list
+    for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: adjusted for reordered startchromo (lengths)
+        l_list.append(chromo[i] * l_factor)
+    for i in range(1, len(startchromo) - 4, 3):  # Comment_DB: adjusted for reordered startchromo (alphas)
+        alpha = 0
+        if chromo[i] < chromo_resolution / 2:
+            alpha = (135 + (chromo[i] * 45 / (chromo_resolution / 2))) * 2 * math.pi / 360
+        else:
+            alpha = ((chromo[i] - chromo_resolution / 2) * 45 / (
+                    chromo_resolution / 2)) * 2 * math.pi / 360  # Quadratische Vert. von 135°-180°
+        alpha_list.append(alpha)
+    for i in range(2, len(startchromo) - 3, 3):  # Comment_DB: adjusted for reordered startchromo (betas)
+        beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
+        beta_list.append(beta)
+    return alpha_list, beta_list, l_list
+
+
 # Berechnung der Fitness eines Chromosoms
 def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim): # Comment DKu_Wenzel L_aim=L_aim
 
@@ -844,14 +844,7 @@ def calc_border_fittness(chromo):
     ###PARABOLIC###
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
     border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
-    # border_fit_start = 100 - 10 * abs(stlprep3_6.distance(LoP[1], patch_start))
-    # Comment_DB: Removed k_p. LoP[1] is real patch, patch_start from preproc
-    # border_fit_start = 100 * math.exp(-(stlprep3_6.distance(LoP[1], patch_start)/10) ** 2)
-    # border_fit_start = abs(600/stlprep3_6.distance(LoP[1],patch_start))
     border_fit_end = 100 - (stlprep3_6.distance(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
-    # border_fit_end = abs(600 / stlprep3_6.distance(LoP[2], patch_end))
-    # border_fit_end = 100 - 10 * abs(stlprep3_6.distance(LoP[2], patch_end))
-    # border_fit_end = 100 * math.exp(-(stlprep3_6.distance(LoP[2], patch_end)/10) ** 2)  #Comment_DB: k_p = 0.4
     ###LINEAR###
     # k_p_lin = (100-90)/5
     # border_fit_start = 100 - abs((stlprep3_6.distance(LoP[1], patch_start)) * k_p_lin)
