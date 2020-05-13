@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/galileo_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/galileo_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -273,7 +272,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589375773487</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end">
+      <created>1589381734510</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1589381734510</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -314,7 +320,8 @@
     <MESSAGE value="calc_midpoints&#10;calc_filled_up_points" />
     <MESSAGE value="length left and right put together" />
     <MESSAGE value="List of Points done" />
-    <option name="LAST_COMMIT_MESSAGE" value="List of Points done" />
+    <MESSAGE value="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end" />
+    <option name="LAST_COMMIT_MESSAGE" value="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

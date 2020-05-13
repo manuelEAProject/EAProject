@@ -44,7 +44,7 @@ def tri_normals(ID_list,triangles,stl_normals):
         normals.append(n)
 
     normals=np.asarray(normals)
-    # check if the generated tri_normals point at the outside of the patch
+
     # the following average stl_normal always point at the outside of the object:
     avg_stl_normal = sum(stl_normals) / len(stl_normals)
     # average of the created normals:
@@ -61,11 +61,11 @@ def normal_angles(tri_normals):
     normal_angles=[]
     for i in range(len(tri_normals)-1):
         n1=tri_normals[i]
-        n1_len=np.linalg.norm(n1)
+
         n2=tri_normals[i+1]
-        n2_len = np.linalg.norm(n2)
+
         dot=np.dot(n1,n2)
-        eta=math.sqrt((1-dot)**2)
+
         if (1-dot)<0.0002:
             dot=1
         angle = np.arccos(dot)*180/math.pi
@@ -103,18 +103,8 @@ def patch_pointcloud(patchvectors):
     #1) Berechnung der Dreiecksflächen und Speichern in einer Liste
     tri_surface_list= tri_surface(patchvectors)
 
-    #print("q10",np.percentile(tri_surface_list,5))
-    #print(min(tri_surface_list))
 
-    total_surface=sum(tri_surface_list)
 
-    surface_share_list=[]
-    """
-    for i in range(len(tri_surface_list)):
-        surface_share_list.append(math.ceil(((tri_surface_list[i]/total_surface)*len(tri_surface_list))**2))
-    surface_share_list=np.asarray(surface_share_list)
-    #print("surface_share",surface_share_list)
-    """
     # 2) Die Dreiecksflächen werden miteinander verglichen, um später große Dreiecke gegenüber kleinen stärker zu
     # gewichten. Als "kleinste" Referenzfläche wird das 10-er Quantil der Flächen genommen (90% aller anderen Dreiecke
     # sind größer). In surface_share_list wird für jedes Dreieck berechnet, um welchen Faktor es größer als das
@@ -123,7 +113,7 @@ def patch_pointcloud(patchvectors):
     # Um zu große Rechenzeiten zu vermeiden wird im Vorhinein abgeschätzt wie viele Punkte die Punktwolke
     # haben wird und bei Überschreiten eines Grenzwerts( max_points_in_pc) wird das Programm abgebrochen.
     #
-    #smallest_tri_surface = min(tri_surface_list)
+    surface_share_list = []
     smallest_tri_surface = np.percentile(tri_surface_list, percentile_pc)
     points_in_pc = math.ceil((sum(tri_surface_list)/len(tri_surface_list))/smallest_tri_surface)*len(patchvectors)
 
@@ -142,16 +132,14 @@ def patch_pointcloud(patchvectors):
     # für jedes Dreieck werden die Mittelpunkte so oft gewertet (in die Punktwolke getan) wie es in surface_share steht
     pointcloud=[]
 
-    #pointcloud.append(patchvectors)
+
     for i in range(len(tri_surface_list)):
         for j in range(surface_share_list[i]):
             pointcloud.append(tri_centerpoints(patchvectors)[i])
-            #pointcloud.append(patchvectors[i][0])
-            #pointcloud.append(patchvectors[i][1])
-            #pointcloud.append(patchvectors[i][2])
+
 
     pointcloud=np.asarray(pointcloud)
-    #pointcloud=np.stack(pointcloud)
+
 
     return pointcloud
 
@@ -163,11 +151,7 @@ def pc_trendline(pointcloud):
     #SOURCE: https://stackoverflow.com/questions/2298390/fitting-a-line-in-3d
     #Explanation: https://www.tutorialspoint.com/scipy/scipy_linalg.htm
     maxvals = np.amax(pointcloud, axis=0)
-    #print("maxvals",maxvals)
-    min = np.amin(pointcloud, axis=0)
-
     data = pointcloud
-
     # Calculate the mean of the points, i.e. the 'center' of the cloud
     datamean = data.mean(axis=0)
 
@@ -182,10 +166,9 @@ def pc_trendline(pointcloud):
     # It's a straight line, so we only need 2 points.
     linepts = vv[0] * np.mgrid[-max(maxvals):max(maxvals):2j][:, np.newaxis]
 
-
     # shift by the mean to get the line in the right place
     linepts += datamean #COMMENT_DB: linepts = linepts + datamean (shifting it in the same direction as the vv[0] direction vector)
-    #print("linepts", linepts)
+
     return linepts
 
 #Hauptachsen der Punktwolke
@@ -194,8 +177,6 @@ def pc_axes(pointcloud):
     #SOURCE: https://stackoverflow.com/questions/2298390/fitting-a-line-in-3d
     #Explanation: https://www.tutorialspoint.com/scipy/scipy_linalg.htm
     maxvals = np.amax(pointcloud, axis=0)
-    #print("maxvals",-1*max(maxvals))
-    min = np.amin(pointcloud, axis=0)
 
     data = pointcloud
 
@@ -222,7 +203,7 @@ def pc_trendline_projection(pointcloud,triangle_centerpoints):
     # SOURCE: https://stackoverflow.com/questions/2298390/fitting-a-line-in-3d
     # Explanation: https://www.tutorialspoint.com/scipy/scipy_linalg.htm
     maxvals = np.amax(pointcloud, axis=0)
-    min = np.amin(pointcloud, axis=0)
+
 
     data = pointcloud
     # Calculate the mean of the points, i.e. the 'center' of the cloud
@@ -283,9 +264,8 @@ def sorted_trendline_projection(unsorted_trendline, sorted_tri_ids):
 
 #SAVITZKY-GOLAY-GLÄTTUNG
 def smooth_savgol(equidistant_data_set,polynom_order,savgol_window_quotient):
-    savgol_window = int(len(equidistant_data_set)/5)
     savgol_window = int(len(equidistant_data_set) / savgol_window_quotient)
-    polynom_order = 3
+    #polynom_order = 3 # Comment_DKu_Wenzel: Warum?
     # window must be impair:
     if savgol_window % 2 == 0:
         savgol_window += 1
@@ -325,14 +305,10 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     testpatch_vector = mesh.Mesh.from_file(input_file) #Comment_DB: stl mesh
     triangles = testpatch_vector.vectors #Comment_DB: triangle edges (wireframe)
     stl_normals = testpatch_vector.normals
-    #print(triangles)
+
 
     triangles_newshape = np.reshape(triangles, (-1, 3))
-    #print(triangles_newshape)
-    #triangles_list = triangles.tolist()
-    #print(triangles_list)
-    #triangles_points = testpatch_vector.points
-    #print(triangles_points)
+
 
     #Creating pointcloud:
     patch_pc = patch_pointcloud(triangles) #!!!!!Comment_DB: The blue points!
@@ -387,7 +363,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     # bei den Randdreiecken noch die Eckpunkte miteinbezogen
     startverts = triangles[sort_tri_id_by_trendline(trendline)[0]] #Comment_DB: startverts is start vertices
     endverts = triangles[sort_tri_id_by_trendline(trendline)[-1]]
-    #print("startverts", startverts)
+
     dist_startverts = []
     dist_endverts = []
     for i in range(3):
@@ -395,27 +371,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
         dist_endverts.append(distance(endverts[i], datamean))
     startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
     endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
-    #print("startvert_3d", startvert_3d)
-
-
-    triangle_verts_pc = []
-    for i in range(len(triangles_newshape)):
-        triangle_verts_pc.append(project_pointtoplane(triangles_newshape[i], trendline_z_axis, datamean))
-    triangle_verts_pc = np.asarray(triangle_verts_pc)
-
-    #projectedtrianglepoints = project_pointtoplane(triangles_newshape[i], trendline_z_axis, datamean)
-    #pyplot.show(projectedtrianglepoints)
-    #projectedtrianglepoints = trimesh.points.project_to_plane(triangles[0], trendline_z_axis, datamean, transform = None, return_transform = False, return_planar = True)
-
-
-
-    #figure = pyplot.figure()  # Comment_DB: 3D plot of objective shape
-    #axes = mplot3d.Axes3D(figure)
-    #your_mesh = mesh.Mesh.from_file(input_file)
-    #patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=1, alpha=0.5, edgecolor=[1, 1, 1], label='Geometriebereich')
-    #axes.add_collection3d(patch_visual)
-    #axes.scatter(projectedtrianglepoints[:, 0], projectedtrianglepoints[:, 1])
-    #pyplot.show(figure)
 
     # In Ebene projiziert:
     startvert_proj = project_pointtoplane(startvert_3d, trendline_z_axis, datamean)
@@ -442,7 +397,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
     # Die Dreiecksmittelpunkte werden in x-y-Ebene der Trendline projiziert, um ein 2D Abstandsprofil zu erhalten
     tri_distance_xy_point = [startvert_proj]
-    # tri_distance_xy_point = []
+
     for i in range(len(sorted_centerpoints)):
         tri_distance_xy_point.append(project_pointtoplane(sorted_centerpoints[i], trendline_z_axis,
                                                           datamean))
@@ -457,8 +412,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     for i in range(len(tri_distance_xy_point)):
         dist = np.linalg.norm(sorted_projection_points[i] - tri_distance_xy_point[i])
 
-        # if i == len(tri_distance_xy_point)-1:
-        # print()
         # Vorzeichen ermitteln:
         if ((sorted_projection_points[i] + dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2 < \
                 ((sorted_projection_points[i] - dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2:
@@ -479,29 +432,25 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
         x_dist = xy_patch_curve[i][0] - xy_patch_curve[i - 1][0]
         if x_dist > xy_patch_curve_step_size:
             additional_steps = math.floor(x_dist / xy_patch_curve_step_size)
-            # print(additional_steps)
 
             for j in range(1, additional_steps + 1):
-                # print((xy_patch_curve[i-1][0]+additional_steps*j))
 
                 xy_patch_curve.append([xy_patch_curve[i - 1][0] + j * xy_patch_curve_step_size, \
                                        (xy_patch_curve[i - 1][1] + (xy_patch_curve[i][1] - xy_patch_curve[i - 1][1]) \
                                         / (x_dist) * j * xy_patch_curve_step_size)])
 
     xy_patch_curve = np.asarray(xy_patch_curve)
-    #print("xy_patch_curve", xy_patch_curve)
+
     # Entlang der x-Werte sortieren
     xy_patch_curve = xy_patch_curve[xy_patch_curve[:, 0].argsort()]
-    #print("xy_patch_curve arg sorted", xy_patch_curve)
+
     # Geglättete y-Werte mit SavitzkyGolay
     y_smooth = smooth_savgol(xy_patch_curve,poly_order,savgol_window_quotient)
 
     # 2D Knicklinie: Start - und Endpunkte;
     bend_pts_xy = []
     bend_pts_xy.append([xy_patch_curve[0][0], y_smooth[0]]) #Comment_DB: start point 2D (x coord, y coord)
-    #print("xy_patch_curve[0][0]",xy_patch_curve[0][0])
-    #print("startvert_proj",startvert_proj)
-    #print("bend_pts_xy", bend_pts_xy)
+
     bend_pts_xy.append([xy_patch_curve[-1][0], y_smooth[-1]]) #Comment_DB: end point 2D (x coord, y coord)
     bend_pts_xy = np.asarray(bend_pts_xy)
     bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()] #Comment_DB: sorted start and endpoints of 2D line that shows bends
@@ -513,9 +462,9 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     while insert_pts: #Comment_DB: this while loop goes all the way till "startparameter extrahieren"
         bend_pts_xy_curve = []
         bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]]) #Comment_DB: only the first bend point (starting point at edge) appended to bend points curve list
-        #print("bend_pts_xy_curve", bend_pts_xy_curve)
+
         j = 1 #Comment_DB: at this point, bend_pts_xy curve only has the starting point in it, thus j = 1 is the number of points in the list. j = 1 is also the index of the NEXT point!
-        #print("len(bend_pts_xy)", len(bend_pts_xy))
+
         for i in range(1, len(bend_pts_xy)): #Comment_DB: len(bend_pts_xy) is 2 for first iteration
             while bend_pts_xy_curve[-1][0] < bend_pts_xy[i][0]: #Comment_DB: while last x coord VALUE less than ith x coord VALUE in bend_pts_xy (If greater, then that means last point is reached)
                 y_add = bend_pts_xy_curve[-1][1] + (bend_pts_xy[i - 1][1] - bend_pts_xy[i][1]) / \
@@ -527,18 +476,12 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
         #Comment_DB: x,y coordinates of sav-gol curve in an array
         xy_savgol_curve = np.column_stack((xy_patch_curve[:, 0], y_smooth))
-        #local_maxima_y_smooth = argrelextrema(y_smooth, np.greater)
-        #local_minima_y_smooth = argrelextrema(y_smooth, np.less)
-
-
-
 
         #Comment_DB: curve_divergence in terms of y-distance # Größte Abweichung von geglätteter Kurve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
         curve_divergence_y = []
         for i in range(len(bend_pts_xy_curve)):
             curve_divergence_y.append([bend_pts_xy_curve[i][0], ((bend_pts_xy_curve[i][0]-xy_patch_curve[i][0])**2+(bend_pts_xy_curve[i][1]-y_smooth[i])**2)**0.5]) #Comment_DB: (x-coord vs. change in y-coord) take the x coord and y-distance between linear curve and sav-gol curve and append
         curve_divergence_y = np.asarray(curve_divergence_y)
-
 
         #Comment_DB: curve_divergence in terms of euclidean distance
         curve_divergence_list = distancelist.cdist(bend_pts_xy_curve, xy_savgol_curve).min(axis=1) #Comment_DB: min dist of each point in bend_pts_xy_curve to any point in xy_savgol_curvehttps://stackoverflow.com/questions/48887912/find-minimum-distance-between-points-of-two-lists-in-python
@@ -549,13 +492,8 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
 
         max_divergence = max([(v, i) for i, v in enumerate(curve_divergence_y[:, 1])]) #Comment_DB: returns distance, counter (Uses new curve_divergence)
-        #print("max_divergence",max_divergence)
-        #print("max_divergence[0]",max_divergence[0])
-        #print("max_divergence[1][0]",max_divergence[1][0])
 
         #Comment_DB: We know at which x-coord of bend_pts_xy_curve the max_divergence happens --> counter i
-
-
 
         bend_pts_xy = np.insert(bend_pts_xy, -1,
                                 np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]), axis=0) #Comment_DB: insert a corner at x coord (counter i) and y coord (counter i) of max divergence
@@ -936,29 +874,13 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
 
 
 
-        """
-        # Comment_DB: curve_divergence in terms of euclidean distance
-        curve_divergence_list = distancelist.cdist(bend_pts_xy_curve, xy_savgol_curve).min(axis=1)  # Comment_DB: min dist of each point in bend_pts_xy_curve to any point in xy_savgol_curvehttps://stackoverflow.com/questions/48887912/find-minimum-distance-between-points-of-two-lists-in-python
-        curve_divergence = []
-        for i in range(len(bend_pts_xy_curve)):
-            curve_divergence.append([bend_pts_xy_curve[i][0], curve_divergence_list[i]])
-        curve_divergence = np.asarray(curve_divergence)
-        
-        max_divergence = max([(v, i) for i, v in enumerate(curve_divergence[:, 1])])  # Comment_DB: returns distance, counter (Uses new curve_divergence)
-        """
+
         bend_pts_xy = np.insert(bend_pts_xy, -1,
                                 np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]), axis=0)
         bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]
         # no further points, if the chosen maximum distance is not surpassed
         if max_divergence[0] < set_max_divergence:
             insert_pts = False
-
-
-
-
-
-
-
 
         # Aktualisieren der Kurvenfunktion
         bend_pts_xy_curve = []

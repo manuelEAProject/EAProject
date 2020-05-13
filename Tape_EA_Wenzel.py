@@ -1053,6 +1053,7 @@ for i in range(num_gen):
     border_fit_end_list = np.append(border_fit_end_list, [Fitness(p.bestFitIndividual.genes)[4]])
 
 time_end = timer()  # Comment_DB: end timer
+
 fitness_list_gen_index = np.stack((num_gen_list, fitness_list))  # Comment_DB: stack gen_list with list of fitnesses
 distance_fit_list_gen_index = np.stack((num_gen_list, distance_fit_list))
 length_fit_list_gen_index = np.stack((num_gen_list, length_fit_list))
@@ -1092,7 +1093,7 @@ def print_consol_output_end():
           "\tMutation Range: ", p_mutate_range,
           "\nCrossover Rate: ", p_crossover if not p.crossoverFunc == p.crossover_Flat else "N/A")
     print("\n\nElapsed Time [s]: ", time_end - time_start)
-def show_fitness_and_subfitness():
+def show_fitness_and_subfitness_over_generations_end():
     ##Comment_DB: Create plots for fitness and subfitnesses
     plt.figure(1)
     plt.plot(fitness_list_gen_index[0], fitness_list_gen_index[1], linewidth=2)
@@ -1148,7 +1149,7 @@ def save_patch_file():
     end.destroy()
 
 print_consol_output_end()
-show_fitness_and_subfitness()
+show_fitness_and_subfitness_over_generations_end()
 show_chromo(p.bestFitIndividual.genes)
 
 
