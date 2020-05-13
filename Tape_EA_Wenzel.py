@@ -527,83 +527,38 @@ def create_start_chromo():
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
     # Alpha_beta_length aus Chromosom und Übersetzt
-    alpha_list, beta_list, length_list = calc_alpha_beta_length_from_chromo(chromo)
-
-    # Startpunktvariation aus Chromosom und Übersetzt
-    [var_start_pt_x, var_start_pt_y, var_start_pt_z,
-     var_start_r_x, var_start_r_y, var_start_r_z,
-     var_start_n_gamma]= calc_start_varriation_from_chomo(chromo)
-
-    #patch_start von Startpara
-    Start_point = np.concatenate(np.array(
-        [[patch_start[0] * var_start_pt_x], [patch_start[1] * var_start_pt_y],
-         [patch_start[2] * var_start_pt_z]]))  # Comment_DB: AMENDED
-
-    Start_direction = np.concatenate(np.array(
-        [[Start_r_prep_fromstart[0] * var_start_r_x], [Start_r_prep_fromstart[1] * var_start_r_y],
-         [Start_r_prep_fromstart[2] * var_start_r_z]]))
-
-    Start_direction = 1 / np.linalg.norm(Start_direction) * Start_direction #Comment_DKu_Wenzel: todo check if normizing?
-
-    Start_quer_zu_direction = np.cross(Start_direction, Start_n_atstart)
-    Start_quer_zu_direction = 1 / np.linalg.norm(Start_quer_zu_direction) * Start_quer_zu_direction
-
-    Start_normale = np.cross(Start_quer_zu_direction, Start_direction)
-
-    Start_normale_rotation_gamma = Quaternion(axis=Start_direction, angle=(var_start_n_gamma)).rotate(
-        Start_normale)  # Comment_DB: start_n_strich rotated about start_r
-    Start_normale_rotation_gamma = 1 / np.linalg.norm(Start_normale_rotation_gamma) * Start_normale_rotation_gamma
-
-    Start_v = np.array([0, 0, 0])
-
-    direction_vector_list = [Start_direction]
-    v_list = [Start_v]
-    normal_vector_list = [Start_normale_rotation_gamma]
-
-    #### Vektorenberechnung für Tapeseite nach dem Startpunkt
-    for i in range(1, len(length_list)):
-        if alpha_list[i - 1] < math.pi / 2:
-            direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1], angle=(alpha_list[i - 1] - (math.pi) / 2)).rotate(
-                direction_vector_list[i - 1])
-        else:
-            direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1], angle=(alpha_list[i - 1] - 3 * (math.pi) / 2)).rotate(
-                direction_vector_list[i - 1])
-        v_list.append(direction_rotation_alpha)
-        r_rotated = Quaternion(axis=v_list[i], angle=beta_list[i - 1]).rotate(direction_vector_list[i - 1])
-        direction_vector_list.append(r_rotated)
-        n_new = Quaternion(axis=v_list[i], angle=beta_list[i - 1]).rotate(normal_vector_list[i - 1])
-        normal_vector_list.append(n_new)
-
-
-
-    direction_vector_list = np.stack(direction_vector_list)
+    alpha_list, beta_list, length_list = translate_alpha_beta_length_from_chromo(chromo)
+    # Start point and direction
+    Start_direction, Start_normale_strich, Start_point = calc_start_point_direction_normal_vector(chromo)
+    # Direction vector at each beding point
+    direction_vector_list = calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, beta_list, length_list)
 
     ## Mittellinie after startpoint
-    p_list = [Start_point]
+    midpoint_list = [Start_point]
     old_p = Start_point
 
-    for i, l in enumerate(length_list):
-        dist = l * direction_vector_list[i, :]
-        new_p = old_p + dist
-        p_list.append(new_p)
+    for i, length in enumerate(length_list):
+        direction_vector_length = length * direction_vector_list[i, :]
+        new_p = old_p + direction_vector_length
+        midpoint_list.append(new_p)
         old_p = new_p
 
     # Auffüllen von Punkten zwischen den Biegestellen auf Mittellinie. Entweder fixe Anzahl an Punkten oder äquidistant
     if equidistant_pts_between_bendpts:
-        middle_pts = []
-        for i, l in enumerate(length_list):
-            a_new = p_list[i][np.newaxis, :] + np.outer(
-                np.linspace(0, l, math.floor(l / step_size), endpoint=True),
+        midpoint_filled_up_list = []
+        for i, length in enumerate(length_list):
+            a_new = midpoint_list[i][np.newaxis, :] + np.outer(
+                np.linspace(0, length, math.floor(length / step_size), endpoint=True),
                 direction_vector_list[i])
-            middle_pts.append(a_new)
+            midpoint_filled_up_list.append(a_new)
     else:
-        middle_pts = []
-        for i, l in enumerate(length_list):
-            a_new = p_list[i][np.newaxis, :] + np.outer(np.linspace(0, l, pointspersection, endpoint=True),
+        midpoint_filled_up_list = []
+        for i, length in enumerate(length_list):
+            a_new = midpoint_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True),
                                                         direction_vector_list[i])
-            middle_pts.append(a_new)
+            midpoint_filled_up_list.append(a_new)
 
-    middle_pts = np.concatenate(middle_pts)
+    midpoint_filled_up_list = np.concatenate(midpoint_filled_up_list)
 
     ########## Linker Rand nach Startpunkt ######################
     ## Anpassung Startpunkt Seitenrand links
@@ -643,14 +598,14 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     if len(length_list) == 1:
         l_left_list.append((length_list[-1]) + delta_l_l_start)
 
-    # Eckpunkte Left (COMMENT_DB: Misleading comment. This is the modeling of left edge bend points, just like the middle_pts portion above)
+    # Eckpunkte Left (COMMENT_DB: Misleading comment. This is the modeling of left edge bend points, just like the midpoint_filled_up_list portion above)
     Start_p_left = Start_point - np.cross(Start_direction,
-                                      Start_normale_rotation_gamma) * width / 2 + delta_l_l_start * Start_direction  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
+                                      Start_normale_strich) * width / 2 + delta_l_l_start * Start_direction  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
     p_left_list = [Start_p_left]
     old_p_left = Start_p_left
-    for i, l in enumerate(l_left_list):
-        dist = l * direction_vector_list[i, :]
-        new_p_left = old_p_left + dist
+    for i, length in enumerate(l_left_list):
+        direction_vector_length = length * direction_vector_list[i, :]
+        new_p_left = old_p_left + direction_vector_length
         p_left_list.append(new_p_left)
         old_p_left = new_p_left
 
@@ -658,11 +613,11 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     left_pts = []
     if equidistant_pts_between_bendpts:
 
-        for i, l in enumerate(l_left_list):
-            if l < 0:
+        for i, length in enumerate(l_left_list):
+            if length < 0:
                 continue
             else:
-                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, l, math.floor(l / step_size),
+                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, math.floor(length / step_size),
                                                                                endpoint=False), direction_vector_list[i])
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
@@ -670,11 +625,11 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     else:
 
-        for i, l in enumerate(l_left_list):
-            if l < 0:
+        for i, length in enumerate(l_left_list):
+            if length < 0:
                 continue
             else:
-                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, l, pointspersection,
+                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection,
                                                                                endpoint=False), direction_vector_list[i])
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
@@ -720,44 +675,44 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     # print("längen", l_left_list_a,'\n',l_list_a,'\n', l_right_list_a)
 
     # Eckpunkte Rechts
-    Start_p_right = Start_point + np.cross(Start_direction, Start_normale_rotation_gamma) * width / 2 + delta_l_r_start * Start_direction
+    Start_p_right = Start_point + np.cross(Start_direction, Start_normale_strich) * width / 2 + delta_l_r_start * Start_direction
     p_right_list = [Start_p_right]
     old_p_right = Start_p_right
-    for i, l in enumerate(l_right_list):
-        dist = l * direction_vector_list[i, :]
-        new_p_right = old_p_right + dist
+    for i, length in enumerate(l_right_list):
+        direction_vector_length = length * direction_vector_list[i, :]
+        new_p_right = old_p_right + direction_vector_length
         p_right_list.append(new_p_right)
         old_p_right = new_p_right
 
     right_pts = []
     if equidistant_pts_between_bendpts:
 
-        for i, l in enumerate(l_right_list):
-            if l < 0:
+        for i, length in enumerate(l_right_list):
+            if length < 0:
                 continue
             else:
                 a_new_r = p_right_list[i][np.newaxis, :] + np.outer(
-                    np.linspace(0, l, math.floor(l / step_size), endpoint=False), direction_vector_list[i])
+                    np.linspace(0, length, math.floor(length / step_size), endpoint=False), direction_vector_list[i])
                 right_pts.append(a_new_r)
         if len(right_pts) == 0:
             right_pts.append(Start_point)
     else:
 
-        for i, l in enumerate(l_right_list):
-            if l < 0:
+        for i, length in enumerate(l_right_list):
+            if length < 0:
                 continue
             else:
                 a_new_r = p_right_list[i][np.newaxis, :] + np.outer(
-                    np.linspace(0, l, pointspersection, endpoint=False), direction_vector_list[i])
+                    np.linspace(0, length, pointspersection, endpoint=False), direction_vector_list[i])
                 right_pts.append(a_new_r)
         if len(right_pts) == 0:
             right_pts.append(Start_point)
 
     right_pts = np.concatenate(right_pts)
 
-    result = np.concatenate((middle_pts, left_pts, right_pts), axis=0)
-    start = middle_pts[0]  # Comment_DB: Change to beginning of list
-    end = middle_pts[-1]
+    result = np.concatenate((midpoint_filled_up_list, left_pts, right_pts), axis=0)
+    start = midpoint_filled_up_list[0]  # Comment_DB: Change to beginning of list
+    end = midpoint_filled_up_list[-1]
 
     # Nur Eck- und Biegepunkte des Tapes für einfache Visualisierung
     patch_visualisation_points = []
@@ -770,17 +725,69 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     return result, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
 
-def calc_start_varriation_from_chomo(chromo):
+
+def calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, beta_list, length_list):
+    direction_vector_list = [Start_direction]
+    normal_vector_list = [Start_normale_strich]
+    #### Vektorenberechnung für Tapeseite nach dem Startpunkt
+    for i in range(1, len(length_list)):
+
+        # Rotate Direction Vector around alpha
+        if alpha_list[i - 1] < math.pi / 2:
+            direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
+                                                  angle=(alpha_list[i - 1] - (math.pi) / 2)).rotate(direction_vector_list[i - 1])
+        else:
+            direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
+                                                  angle=(alpha_list[i - 1] - 3 * (math.pi) / 2)).rotate(direction_vector_list[i - 1])
+
+        # Rotate new Direction Vector around beta
+        direction_rotation_alpha_beta = Quaternion(axis=direction_rotation_alpha, angle=beta_list[i - 1]).rotate(
+            direction_vector_list[i - 1])
+        # Save Direction vector
+        direction_vector_list.append(direction_rotation_alpha_beta)
+        n_new = Quaternion(axis=direction_rotation_alpha, angle=beta_list[i - 1]).rotate(normal_vector_list[i - 1])
+        normal_vector_list.append(n_new)
+    # Comment_DKu_Wenzel: Direction Vectors easy xyz?
+    direction_vector_list = np.stack(direction_vector_list)
+    return direction_vector_list
+def calc_start_point_direction_normal_vector(chromo):
+    # Startpunktvariation aus Chromosom und Übersetzt
+    [var_start_pt_x, var_start_pt_y, var_start_pt_z,
+     var_start_r_x, var_start_r_y, var_start_r_z,
+     var_start_n_gamma] = translate_start_varriation_from_chomo(chromo)
+
+    # patch_start von Startpara
+    Start_point = np.concatenate(np.array(
+        [[patch_start[0] * var_start_pt_x], [patch_start[1] * var_start_pt_y],
+         [patch_start[2] * var_start_pt_z]]))  # Comment_DB: AMENDED
+
+    Start_direction = np.concatenate(np.array(
+        [[Start_r_prep_fromstart[0] * var_start_r_x], [Start_r_prep_fromstart[1] * var_start_r_y],
+         [Start_r_prep_fromstart[2] * var_start_r_z]]))
+    Start_direction = 1 / np.linalg.norm(
+        Start_direction) * Start_direction  # Comment_DKu_Wenzel: todo check if normizing?
+
+    Start_quer_zu_direction = np.cross(Start_direction, Start_n_atstart)
+    Start_quer_zu_direction = 1 / np.linalg.norm(Start_quer_zu_direction) * Start_quer_zu_direction
+
+    Start_normale_strich = np.cross(Start_quer_zu_direction, Start_direction)
+    Start_normale_strich = Quaternion(axis=Start_direction, angle=(var_start_n_gamma)).rotate(
+        Start_normale_strich)  # Comment_DB: start_n_strich rotated about start_r
+    Start_normale_strich = 1 / np.linalg.norm(Start_normale_strich) * Start_normale_strich
+    return Start_direction, Start_normale_strich, Start_point
+def translate_start_varriation_from_chomo(chromo):
     #From Gen Value(0-100) to Startvariation (1 +/- var_range)
     var_range = 0.8
+    #Last vales in chromo ar start variation variables
     variation_start = [(1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value) for gen_value in chromo[-7:-1:1]]
 
     gamma_max = 10  # [Grad] Maximaler Kippwinkel für Start_n
     gamma_max_rad = gamma_max * (2 * math.pi / 360)
+
     var_start_n_gamma = -gamma_max_rad + gamma_max_rad / (chromo_resolution / 2) * chromo[-1]
     variation_start.append(var_start_n_gamma)
     return variation_start
-def calc_alpha_beta_length_from_chromo(chromo):
+def translate_alpha_beta_length_from_chromo(chromo):
     l_list = []  # Comment_DB: empty list
     alpha_list = []  # Comment_DB: empty list
     beta_list = []  # Comment_DB: empty list
