@@ -4,7 +4,6 @@
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test_file.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -64,7 +63,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Test_file">
+  <component name="RunManager" selected="Python.Tape_EA_Wenzel">
     <configuration name="Tape_EA" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="ud_tape_optimization" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -243,7 +242,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589295856230</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="translate_start_varriation_from_chromo()&#10;translate_alpha_beta_length_from_chromo()&#10;calc_start_point_direction()">
+      <created>1589356063478</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1589356063478</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -280,7 +286,8 @@
     <MESSAGE value="settings_sheet = settingsshet" />
     <MESSAGE value="alpha beta lenght function in ListofPoints()" />
     <MESSAGE value="calc_start_varriation_from_chromo&#10;&#10;change parameternames&#10;Start_point&#10;Start_direction&#10;Start_quer_zu_direction&#10;..." />
-    <option name="LAST_COMMIT_MESSAGE" value="calc_start_varriation_from_chromo&#10;&#10;change parameternames&#10;Start_point&#10;Start_direction&#10;Start_quer_zu_direction&#10;..." />
+    <MESSAGE value="translate_start_varriation_from_chromo()&#10;translate_alpha_beta_length_from_chromo()&#10;calc_start_point_direction()" />
+    <option name="LAST_COMMIT_MESSAGE" value="translate_start_varriation_from_chromo()&#10;translate_alpha_beta_length_from_chromo()&#10;calc_start_point_direction()" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

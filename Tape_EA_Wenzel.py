@@ -534,31 +534,10 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     direction_vector_list = calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, beta_list, length_list)
 
     ## Mittellinie after startpoint
-    midpoint_list = [Start_point]
-    old_p = Start_point
-
-    for i, length in enumerate(length_list):
-        direction_vector_length = length * direction_vector_list[i, :]
-        new_p = old_p + direction_vector_length
-        midpoint_list.append(new_p)
-        old_p = new_p
+    midpoint_list = calc_midpoints(Start_point, direction_vector_list, length_list)
 
     # Auffüllen von Punkten zwischen den Biegestellen auf Mittellinie. Entweder fixe Anzahl an Punkten oder äquidistant
-    if equidistant_pts_between_bendpts:
-        midpoint_filled_up_list = []
-        for i, length in enumerate(length_list):
-            a_new = midpoint_list[i][np.newaxis, :] + np.outer(
-                np.linspace(0, length, math.floor(length / step_size), endpoint=True),
-                direction_vector_list[i])
-            midpoint_filled_up_list.append(a_new)
-    else:
-        midpoint_filled_up_list = []
-        for i, length in enumerate(length_list):
-            a_new = midpoint_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True),
-                                                        direction_vector_list[i])
-            midpoint_filled_up_list.append(a_new)
-
-    midpoint_filled_up_list = np.concatenate(midpoint_filled_up_list)
+    midpoint_filled_up_list = calc_filled_up_points(direction_vector_list, length_list, midpoint_list)
 
     ########## Linker Rand nach Startpunkt ######################
     ## Anpassung Startpunkt Seitenrand links
@@ -570,40 +549,40 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     # Linker Rand
     delta_l_list = [delta_l_l_start]
-    l_left_list = []
+    length_left_list = []
     if len(alpha_list) == 0:
-        l_left_list = [length_list[0]]
+        length_left_list = [length_list[0]]
     for i in range(1, len(length_list)):
         if alpha_list[i - 1] > math.pi / 2:
             delta_l_l = (width / 2) * math.tan(math.pi - alpha_list[i - 1])
             l_left_new = length_list[i - 1] + delta_l_l - delta_l_list[i - 1]
-            l_left_list.append(l_left_new)
+            length_left_list.append(l_left_new)
             delta_l_list.append(delta_l_l)
             # falls keine weiteren Knicke:
             delta_l_end = - delta_l_l
             if i == len(length_list) - 1:
-                l_left_list.append((length_list[-1] + delta_l_end))
+                length_left_list.append((length_list[-1] + delta_l_end))
 
         if alpha_list[i - 1] < math.pi / 2:
             delta_l_l = - (width / 2) * math.tan(alpha_list[i - 1])
             l_left_new = length_list[i - 1] + delta_l_l - delta_l_list[i - 1]
-            l_left_list.append(l_left_new)
+            length_left_list.append(l_left_new)
             delta_l_list.append(delta_l_l)
             # falls keine weiteren Knicke:
             delta_l_end = - delta_l_l
             if i == len(length_list) - 1:
-                l_left_list.append((length_list[-1] + delta_l_end))
+                length_left_list.append((length_list[-1] + delta_l_end))
 
     # Ausnahme für keinen Knick nach Start:
     if len(length_list) == 1:
-        l_left_list.append((length_list[-1]) + delta_l_l_start)
+        length_left_list.append((length_list[-1]) + delta_l_l_start)
 
     # Eckpunkte Left (COMMENT_DB: Misleading comment. This is the modeling of left edge bend points, just like the midpoint_filled_up_list portion above)
     Start_p_left = Start_point - np.cross(Start_direction,
                                       Start_normale_strich) * width / 2 + delta_l_l_start * Start_direction  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
     p_left_list = [Start_p_left]
     old_p_left = Start_p_left
-    for i, length in enumerate(l_left_list):
+    for i, length in enumerate(length_left_list):
         direction_vector_length = length * direction_vector_list[i, :]
         new_p_left = old_p_left + direction_vector_length
         p_left_list.append(new_p_left)
@@ -613,24 +592,22 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     left_pts = []
     if equidistant_pts_between_bendpts:
 
-        for i, length in enumerate(l_left_list):
+        for i, length in enumerate(length_left_list):
             if length < 0:
                 continue
             else:
-                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, math.floor(length / step_size),
-                                                                               endpoint=False), direction_vector_list[i])
+                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, math.floor(length / step_size), endpoint=True), direction_vector_list[i])
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_point)
 
     else:
 
-        for i, length in enumerate(l_left_list):
+        for i, length in enumerate(length_left_list):
             if length < 0:
                 continue
             else:
-                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection,
-                                                                               endpoint=False), direction_vector_list[i])
+                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True), direction_vector_list[i])
                 left_pts.append(a_new_l)
         if len(left_pts) == 0:
             left_pts.append(Start_point)
@@ -724,6 +701,35 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
     return result, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
+
+
+def calc_filled_up_points(direction_vector_list, length_list, midpoint_list):
+    midpoint_filled_up_list = []
+    if equidistant_pts_between_bendpts:
+
+        for i, length in enumerate(length_list):
+            a_new = midpoint_list[i][np.newaxis, :] + np.outer(
+                np.linspace(0, length, math.floor(length / step_size), endpoint=True), direction_vector_list[i])
+            midpoint_filled_up_list.append(a_new)
+    else:
+
+        for i, length in enumerate(length_list):
+            a_new = midpoint_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True),
+                                                               direction_vector_list[i])
+            midpoint_filled_up_list.append(a_new)
+    midpoint_filled_up_list = np.concatenate(midpoint_filled_up_list)
+    return midpoint_filled_up_list
+
+
+def calc_midpoints(Start_point, direction_vector_list, length_list):
+    midpoint_list = [Start_point]
+    old_p = Start_point
+    for i, length in enumerate(length_list):
+        direction_vector_length = length * direction_vector_list[i, :]
+        new_p = old_p + direction_vector_length
+        midpoint_list.append(new_p)
+        old_p = new_p
+    return midpoint_list
 
 
 def calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, beta_list, length_list):
