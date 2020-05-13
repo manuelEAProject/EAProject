@@ -1,10 +1,10 @@
-C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Testgeometrien/test3.stl
+C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Testgeometrien/003.stl
 True
 False
 20.0
-False
-7
-1.0
+True
+3
+0.0
 6.0
 5.8
 5.8
@@ -35,6 +35,3 @@ False
 3
 5
 10
-10
-
-

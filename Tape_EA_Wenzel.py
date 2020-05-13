@@ -489,7 +489,7 @@ patch_start,
 patch_end,
 
 # COMMENT_DB: New parameters
-Start_p_id_fromstart,
+Start_p_id_fromstart, # Comment_DKu_Wenzel: Nutzen Fraglich
 Start_r_prep_fromstart,
 Start_n_atstart,
 AnzahlKnicke_too     # Comment_DKu_Wenzel: Verschieden von AnzahlKnicke(+2) und keine Benutzung
@@ -529,199 +529,116 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     # Alpha_beta_length aus Chromosom und Übersetzt
     alpha_list, beta_list, length_list = translate_alpha_beta_length_from_chromo(chromo)
     # Start point and direction
-    Start_direction, Start_normale_strich, Start_point = calc_start_point_direction_normal_vector(chromo)
+    Start_direction, Start_normale_gamma, Start_point = calc_start_point_direction_normal_vector(chromo)
     # Direction vector at each beding point
-    direction_vector_list = calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, beta_list, length_list)
+    direction_vector_list = calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, beta_list, length_list)
 
     ## Mittellinie after startpoint
-    midpoint_list = calc_midpoints(Start_point, direction_vector_list, length_list)
+    mid_point_list = calc_points_from_start_directions_lengths(Start_point, direction_vector_list, length_list)
 
     # Auffüllen von Punkten zwischen den Biegestellen auf Mittellinie. Entweder fixe Anzahl an Punkten oder äquidistant
-    midpoint_filled_up_list = calc_filled_up_points(direction_vector_list, length_list, midpoint_list)
+    mid_point_filled_up_list = calc_filled_up_points(direction_vector_list, length_list, mid_point_list)
 
+    # Comment_DKu_Wenzel: delta_left_length=-delta_right_length  !!!!!!!!!!!!!!!
     ########## Linker Rand nach Startpunkt ######################
     ## Anpassung Startpunkt Seitenrand links
-    alpha_start = alpha_list[Start_p_id_fromstart - 1]  # Comment_DB: Might not be necessary
+    alpha_start = alpha_list[0]  # Comment_DB: Might not be necessary
     if alpha_start > math.pi / 2:
-        delta_l_l_start = (width / 2) * math.tan(math.pi - alpha_start)
+        delta_left_length_start = (width / 2) * math.tan(math.pi - alpha_start)
+
     if alpha_start < math.pi / 2:
-        delta_l_l_start = - (width / 2) * math.tan(alpha_start)
+        delta_left_length_start = - (width / 2) * math.tan(alpha_start)
+
+    delta_right_length_start = -delta_left_length_start
 
     # Linker Rand
-    delta_l_list = [delta_l_l_start]
+    delta_left_length = [delta_left_length_start]
     length_left_list = []
-    if len(alpha_list) == 0:
-        length_left_list = [length_list[0]]
+    length_right_list = []
+
     for i in range(1, len(length_list)):
-        if alpha_list[i - 1] > math.pi / 2:
-            delta_l_l = (width / 2) * math.tan(math.pi - alpha_list[i - 1])
-            l_left_new = length_list[i - 1] + delta_l_l - delta_l_list[i - 1]
-            length_left_list.append(l_left_new)
-            delta_l_list.append(delta_l_l)
-            # falls keine weiteren Knicke:
-            delta_l_end = - delta_l_l
-            if i == len(length_list) - 1:
-                length_left_list.append((length_list[-1] + delta_l_end))
+        if alpha_list[i] > math.pi / 2:
+            #Delta at bend i
+            delta_left_length_i = (width / 2) * math.tan(math.pi - alpha_list[i])
+        else:  #alpha_list[i] < math.pi / 2:
+            # Delta at bend i
+            delta_left_length_i = - (width / 2) * math.tan(alpha_list[i])
 
-        if alpha_list[i - 1] < math.pi / 2:
-            delta_l_l = - (width / 2) * math.tan(alpha_list[i - 1])
-            l_left_new = length_list[i - 1] + delta_l_l - delta_l_list[i - 1]
-            length_left_list.append(l_left_new)
-            delta_l_list.append(delta_l_l)
-            # falls keine weiteren Knicke:
-            delta_l_end = - delta_l_l
-            if i == len(length_list) - 1:
-                length_left_list.append((length_list[-1] + delta_l_end))
+        # Length
+        length_left_new = length_list[i - 1] + delta_left_length_i - delta_left_length[i - 1]
+        length_right_new = length_list[i - 1] - delta_left_length_i + delta_left_length[i - 1]
 
-    # Ausnahme für keinen Knick nach Start:
-    if len(length_list) == 1:
-        length_left_list.append((length_list[-1]) + delta_l_l_start)
+        length_left_list.append(length_left_new)
+        length_right_list.append(length_right_new)
 
-    # Eckpunkte Left (COMMENT_DB: Misleading comment. This is the modeling of left edge bend points, just like the midpoint_filled_up_list portion above)
+        delta_left_length.append(delta_left_length_i)
+
+        # falls keine weiteren Knicke:
+        delta_l_end = - delta_left_length_i
+        if i == len(length_list) - 1:
+            length_left_list.append((length_list[-1] + delta_l_end))
+            length_right_list.append((length_list[-1] - delta_l_end))
+
+
+
+
+    # Eckpunkte Left
     Start_p_left = Start_point - np.cross(Start_direction,
-                                      Start_normale_strich) * width / 2 + delta_l_l_start * Start_direction  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
-    p_left_list = [Start_p_left]
-    old_p_left = Start_p_left
-    for i, length in enumerate(length_left_list):
-        direction_vector_length = length * direction_vector_list[i, :]
-        new_p_left = old_p_left + direction_vector_length
-        p_left_list.append(new_p_left)
-        old_p_left = new_p_left
+                                      Start_normale_gamma) * width / 2 + delta_left_length_start * Start_direction  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
+
+    left_point_list = calc_points_from_start_directions_lengths(Start_p_left, direction_vector_list, length_left_list)
 
     # Auffüllen mit Punkten ( Fixe Punktanzahl oder fixer Punktabstand):
-    left_pts = []
-    if equidistant_pts_between_bendpts:
+    left_points_filled_up_list = calc_filled_up_points(direction_vector_list, length_left_list, left_point_list)
 
-        for i, length in enumerate(length_left_list):
-            if length < 0:
-                continue
-            else:
-                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, math.floor(length / step_size), endpoint=True), direction_vector_list[i])
-                left_pts.append(a_new_l)
-        if len(left_pts) == 0:
-            left_pts.append(Start_point)
 
-    else:
-
-        for i, length in enumerate(length_left_list):
-            if length < 0:
-                continue
-            else:
-                a_new_l = p_left_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True), direction_vector_list[i])
-                left_pts.append(a_new_l)
-        if len(left_pts) == 0:
-            left_pts.append(Start_point)
-
-    left_pts = np.concatenate(left_pts)
     ######################## Rechter Rand nach Startpunkt######################
     ## Anpassung Startpunkt Seitenrand rechts
-    alpha_start = alpha_list[Start_p_id_fromstart - 1]  # Comment_DB: Might not be necessary
-    if alpha_start > math.pi / 2:
-        delta_l_r_start = -(width / 2) * math.tan(math.pi - alpha_start)
-    if alpha_start < math.pi / 2:
-        delta_l_r_start = (width / 2) * math.tan(alpha_start)
 
-    delta_r_list = [delta_l_r_start]
-    l_right_list = []
-    if len(alpha_list) == 0:
-        l_right_list = [length_list[0]]
-    for i in range(1, len(length_list)):
-        if alpha_list[i - 1] > math.pi / 2:
-            delta_l_r = - (width / 2) * math.tan(math.pi - alpha_list[i - 1])
-            l_right_new = length_list[i - 1] + delta_l_r - delta_r_list[i - 1]
-            l_right_list.append(l_right_new)
-            delta_r_list.append(delta_l_r)
-            # falls keine weiteren Knicke:
-            delta_l_end = - delta_l_r
-            if i == len(length_list) - 1:
-                l_right_list.append((length_list[-1] + delta_l_end))
 
-        if alpha_list[i - 1] < math.pi / 2:
-            delta_l_r = (width / 2) * math.tan(alpha_list[i - 1])
-            l_right_new = length_list[i - 1] + delta_l_r - delta_r_list[i - 1]
-            l_right_list.append(l_right_new)
-            delta_r_list.append(delta_l_r)
-            # falls keine weiteren Knicke:
-            delta_l_end = - delta_l_r
-            if i == len(length_list) - 1:
-                l_right_list.append((length_list[-1] + delta_l_end))
-
-    # Ausnahme für keinen Knick nach Start:
-    if len(length_list) == 1:
-        l_right_list.append((length_list[-1]) + delta_l_r_start)
-    # print("längen", l_left_list_a,'\n',l_list_a,'\n', l_right_list_a)
 
     # Eckpunkte Rechts
-    Start_p_right = Start_point + np.cross(Start_direction, Start_normale_strich) * width / 2 + delta_l_r_start * Start_direction
-    p_right_list = [Start_p_right]
-    old_p_right = Start_p_right
-    for i, length in enumerate(l_right_list):
-        direction_vector_length = length * direction_vector_list[i, :]
-        new_p_right = old_p_right + direction_vector_length
-        p_right_list.append(new_p_right)
-        old_p_right = new_p_right
+    Start_p_right = Start_point + np.cross(Start_direction, Start_normale_gamma) * width / 2 + delta_right_length_start * Start_direction
+    right_point_list = calc_points_from_start_directions_lengths(Start_p_right, direction_vector_list, length_right_list)
 
-    right_pts = []
-    if equidistant_pts_between_bendpts:
+    # Auffüllen Rechts
+    right_points_filled_up_list = calc_filled_up_points(direction_vector_list, length_right_list, right_point_list)
 
-        for i, length in enumerate(l_right_list):
-            if length < 0:
-                continue
-            else:
-                a_new_r = p_right_list[i][np.newaxis, :] + np.outer(
-                    np.linspace(0, length, math.floor(length / step_size), endpoint=False), direction_vector_list[i])
-                right_pts.append(a_new_r)
-        if len(right_pts) == 0:
-            right_pts.append(Start_point)
-    else:
 
-        for i, length in enumerate(l_right_list):
-            if length < 0:
-                continue
-            else:
-                a_new_r = p_right_list[i][np.newaxis, :] + np.outer(
-                    np.linspace(0, length, pointspersection, endpoint=False), direction_vector_list[i])
-                right_pts.append(a_new_r)
-        if len(right_pts) == 0:
-            right_pts.append(Start_point)
 
-    right_pts = np.concatenate(right_pts)
-
-    result = np.concatenate((midpoint_filled_up_list, left_pts, right_pts), axis=0)
-    start = midpoint_filled_up_list[0]  # Comment_DB: Change to beginning of list
-    end = midpoint_filled_up_list[-1]
+    result = np.concatenate((mid_point_filled_up_list, left_points_filled_up_list, right_points_filled_up_list), axis=0)
+    start = mid_point_filled_up_list[0]  # Comment_DB: Change to beginning of list
+    end = mid_point_filled_up_list[-1]
 
     # Nur Eck- und Biegepunkte des Tapes für einfache Visualisierung
     patch_visualisation_points = []
 
-    for i in range(len(p_left_list)):
-        patch_visualisation_points.append(p_left_list[i])
-        patch_visualisation_points.append(p_right_list[i])
+    for i in range(len(left_point_list)):
+        patch_visualisation_points.append(left_point_list[i])
+        patch_visualisation_points.append(right_point_list[i])
 
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
     return result, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
 
 
-def calc_filled_up_points(direction_vector_list, length_list, midpoint_list):
-    midpoint_filled_up_list = []
+def calc_filled_up_points(direction_vector_list, length_list, point_list):
+    filled_up_list = []
     if equidistant_pts_between_bendpts:
 
         for i, length in enumerate(length_list):
-            a_new = midpoint_list[i][np.newaxis, :] + np.outer(
+            a_new = point_list[i][np.newaxis, :] + np.outer(
                 np.linspace(0, length, math.floor(length / step_size), endpoint=True), direction_vector_list[i])
-            midpoint_filled_up_list.append(a_new)
+            filled_up_list.append(a_new)
     else:
 
         for i, length in enumerate(length_list):
-            a_new = midpoint_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True),
+            a_new = point_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True),
                                                                direction_vector_list[i])
-            midpoint_filled_up_list.append(a_new)
-    midpoint_filled_up_list = np.concatenate(midpoint_filled_up_list)
-    return midpoint_filled_up_list
-
-
-def calc_midpoints(Start_point, direction_vector_list, length_list):
+            filled_up_list.append(a_new)
+    filled_up_list = np.concatenate(filled_up_list)
+    return filled_up_list
+def calc_points_from_start_directions_lengths(Start_point, direction_vector_list, length_list):
     midpoint_list = [Start_point]
     old_p = Start_point
     for i, length in enumerate(length_list):
@@ -730,8 +647,6 @@ def calc_midpoints(Start_point, direction_vector_list, length_list):
         midpoint_list.append(new_p)
         old_p = new_p
     return midpoint_list
-
-
 def calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, beta_list, length_list):
     direction_vector_list = [Start_direction]
     normal_vector_list = [Start_normale_strich]

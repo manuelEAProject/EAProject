@@ -4,6 +4,7 @@
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -249,7 +250,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589356063478</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="calc_midpoints&#10;calc_filled_up_points">
+      <created>1589357904349</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1589357904349</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -287,7 +295,8 @@
     <MESSAGE value="alpha beta lenght function in ListofPoints()" />
     <MESSAGE value="calc_start_varriation_from_chromo&#10;&#10;change parameternames&#10;Start_point&#10;Start_direction&#10;Start_quer_zu_direction&#10;..." />
     <MESSAGE value="translate_start_varriation_from_chromo()&#10;translate_alpha_beta_length_from_chromo()&#10;calc_start_point_direction()" />
-    <option name="LAST_COMMIT_MESSAGE" value="translate_start_varriation_from_chromo()&#10;translate_alpha_beta_length_from_chromo()&#10;calc_start_point_direction()" />
+    <MESSAGE value="calc_midpoints&#10;calc_filled_up_points" />
+    <option name="LAST_COMMIT_MESSAGE" value="calc_midpoints&#10;calc_filled_up_points" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
