@@ -25,6 +25,7 @@ import plotly.graph_objects as go
 import xlsxwriter
 from timeit import default_timer as timer
 
+
 ############## GUI  &  SETTINGS #######################
 
 # GUI-Settings
@@ -234,12 +235,10 @@ def get_Vars_from_GUI():
                                         p_mutate_range, p_mutation, pointspersection, poly_order, pop_size,
                                         step_size, width, window_quotient)
 
-
-
     mainloop()  # führt das GUI aus
 
     input_file = input_file.get()
-    testpatch = trimesh.load(input_file)  #Comment_DKu_Wenzel: Eventuell wo anders? Gehört nicht in die GUI!
+    testpatch = trimesh.load(input_file)  # Comment_DKu_Wenzel: Eventuell wo anders? Gehört nicht in die GUI!
     tape_type = tape_type.get()
     width = float(width.get())  # Tapebreite
 
@@ -317,17 +316,18 @@ def get_Vars_from_GUI():
                    window_quotient, max_distance])  # Speichert die gewählten Einstellungen
 
     master.destroy()  # Schließt das Settings Fenster
-    return step_size, testpatch, tape_type,width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, poly_order, pop_size, useInteger, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start
+    return step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, poly_order, pop_size, useInteger, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start
+
 
 # functions for GUI-Settings
 def select_stl_file(input_file):
     if os.path.isfile('./settingssheet.txt'):
         settingssheet = open('./settingssheet.txt')
         name_of_stl_file = filedialog.askopenfilename(initialdir=settingssheet.readline(), title="Select file",
-                                          filetypes=(("stl files", "*.stl"), ("all files", "*.*")))
+                                                      filetypes=(("stl files", "*.stl"), ("all files", "*.*")))
     else:
         name_of_stl_file = filedialog.askopenfilename(initialdir="/", title="Select file",
-                                          filetypes=(("stl files", "*.stl"), ("all files", "*.*")))
+                                                      filetypes=(("stl files", "*.stl"), ("all files", "*.*")))
     input_file.delete(0, 'end')
     input_file.insert(0, name_of_stl_file)
     if len(input_file.get()) < 1:
@@ -336,12 +336,16 @@ def select_stl_file(input_file):
     settingssheet = open('./settingssheet.txt', 'w+')
     settingssheet.write(input_file.get())
     settingssheet.close()
+
+
 def save_settings(settings_list):
     settingssheet = open('./settingssheet.txt', 'r+')
 
     for listitem in settings_list:
         settingssheet.write('%s\n' % listitem)
     settingssheet.close()
+
+
 def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidistant_pts_between_bendpts,
                                         fix_number_of_pts, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2,
                                         gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
@@ -458,6 +462,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
             print("Bitte settingssheet.txt löschen")
             settingssheet.close()
 
+
 [step_size, testpatch, tape_type, width,
  pointspersection, equidistant_pts_between_bendpts,
  adap_mutation, chromo_resolution,
@@ -471,29 +476,26 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  poly_order, pop_size, useInteger, window_quotient,
  x_end, x_start, y_end, y_start, z_end, z_start] = get_Vars_from_GUI()
 
-
 ############Vorverarbeitung der Geometriedaten###################
 
 # Ruft das stl_preprocessing modul auf und übergibt die stl-Datei an die Funktion startparam
 # Startparam gibt eine Liste mit den berechneten Startparametern zurück:
-# STARTPARAMETER: [Start_p_mid, Start_r_mid, Start_n_mid, l_list, totallength, beta_list[°], Start_p_ID]
 
-[Start_p_prep, # Comment_DKu_Wenzel: No usage anymore!!
-Start_r_prep, # Comment_DKu_Wenzel: No usage anymore!!
-Start_n, # Comment_DKu_Wenzel: No usage anymore!!
-start_lengths,
-L_aim,  # Comment_DB: already in [mm]
-start_betas,
-Start_p_id,  # Comment_DKu_Wenzel: No usage anymore!! # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
-patch_start,
-patch_end,
+[Start_p_prep,  # Comment_DKu_Wenzel: No usage anymore!!
+ Start_r_prep,  # Comment_DKu_Wenzel: No usage anymore!!
+ Start_n,  # Comment_DKu_Wenzel: No usage anymore!!
+ start_lengths,
+ L_aim,  # Comment_DB: already in [mm]
+ start_betas,
+ Start_p_id,# Comment_DKu_Wenzel: No usage anymore!! # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
+ patch_start,
+ patch_end,
 
-# COMMENT_DB: New parameters
-Start_p_id_fromstart, # Comment_DKu_Wenzel: Nutzen Fraglich
-Start_r_prep_fromstart,
-Start_n_atstart,
-AnzahlKnicke_too     # Comment_DKu_Wenzel: Verschieden von AnzahlKnicke(+2) und keine Benutzung
-] = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
+ Start_p_id_fromstart,  # Comment_DKu_Wenzel: No usage anymore!!
+ Start_direction_prep_fromstart,
+ Start_normal_atstart,
+ AnzahlKnicke_too  # Comment_DKu_Wenzel: Verschieden von AnzahlKnicke(+2) und keine Benutzung
+ ] = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
 
 AnzahlKnicke = len(start_lengths) - 1
 
@@ -524,89 +526,50 @@ def create_start_chromo():
         start_chromo.append(int(chromo_resolution / 2))
     return start_chromo
 
+
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
     # Alpha_beta_length aus Chromosom und Übersetzt
-    alpha_list, beta_list, length_list = translate_alpha_beta_length_from_chromo(chromo)
+    [alpha_list,
+     beta_list,
+     length_list] = translate_alpha_beta_length_from_chromo(chromo)
+
     # Start point and direction
-    Start_direction, Start_normale_gamma, Start_point = calc_start_point_direction_normal_vector(chromo)
+    [Start_direction,
+     Start_normale_gamma,
+     Start_point] = calc_start_point_direction_normal_vector(chromo)
+
     # Direction vector at each beding point
-    direction_vector_list = calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, beta_list, length_list)
+    direction_vector_list = calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, beta_list,
+                                                   length_list)
+
+    # Lengths of left and right side from tape,
+    [delta_length_start_bend,
+     length_left_list,
+     length_right_list] = calc_delta_length_start_and_side_lengths(alpha_list, length_list)
+
+    # Eckpunkte
+    Start_point_left = Start_point - np.cross(Start_direction,
+                                              Start_normale_gamma) * width / 2 + delta_length_start_bend * Start_direction
+    Start_point_right = Start_point + np.cross(Start_direction,
+                                               Start_normale_gamma) * width / 2 - delta_length_start_bend * Start_direction
+    # Comment_DB: np.cross(Start_direction, Start_normale_gamma) == -Start_quer rotated
 
     ## Mittellinie after startpoint
     mid_point_list = calc_points_from_start_directions_lengths(Start_point, direction_vector_list, length_list)
+    left_point_list = calc_points_from_start_directions_lengths(Start_point_left, direction_vector_list,
+                                                                length_left_list)
+    right_point_list = calc_points_from_start_directions_lengths(Start_point_right, direction_vector_list,
+                                                                 length_right_list)
 
     # Auffüllen von Punkten zwischen den Biegestellen auf Mittellinie. Entweder fixe Anzahl an Punkten oder äquidistant
     mid_point_filled_up_list = calc_filled_up_points(direction_vector_list, length_list, mid_point_list)
-
-    # Comment_DKu_Wenzel: delta_left_length=-delta_right_length  !!!!!!!!!!!!!!!
-    ########## Linker Rand nach Startpunkt ######################
-    ## Anpassung Startpunkt Seitenrand links
-    alpha_start = alpha_list[0]  # Comment_DB: Might not be necessary
-    if alpha_start > math.pi / 2:
-        delta_left_length_start = (width / 2) * math.tan(math.pi - alpha_start)
-
-    if alpha_start < math.pi / 2:
-        delta_left_length_start = - (width / 2) * math.tan(alpha_start)
-
-    delta_right_length_start = -delta_left_length_start
-
-    # Linker Rand
-    delta_left_length = [delta_left_length_start]
-    length_left_list = []
-    length_right_list = []
-
-    for i in range(1, len(length_list)):
-        if alpha_list[i] > math.pi / 2:
-            #Delta at bend i
-            delta_left_length_i = (width / 2) * math.tan(math.pi - alpha_list[i])
-        else:  #alpha_list[i] < math.pi / 2:
-            # Delta at bend i
-            delta_left_length_i = - (width / 2) * math.tan(alpha_list[i])
-
-        # Length
-        length_left_new = length_list[i - 1] + delta_left_length_i - delta_left_length[i - 1]
-        length_right_new = length_list[i - 1] - delta_left_length_i + delta_left_length[i - 1]
-
-        length_left_list.append(length_left_new)
-        length_right_list.append(length_right_new)
-
-        delta_left_length.append(delta_left_length_i)
-
-        # falls keine weiteren Knicke:
-        delta_l_end = - delta_left_length_i
-        if i == len(length_list) - 1:
-            length_left_list.append((length_list[-1] + delta_l_end))
-            length_right_list.append((length_list[-1] - delta_l_end))
-
-
-
-
-    # Eckpunkte Left
-    Start_p_left = Start_point - np.cross(Start_direction,
-                                      Start_normale_gamma) * width / 2 + delta_left_length_start * Start_direction  # Comment_DB: np.cross(Start_r, Start_n_strich) == -Start_q rotated
-
-    left_point_list = calc_points_from_start_directions_lengths(Start_p_left, direction_vector_list, length_left_list)
-
-    # Auffüllen mit Punkten ( Fixe Punktanzahl oder fixer Punktabstand):
     left_points_filled_up_list = calc_filled_up_points(direction_vector_list, length_left_list, left_point_list)
-
-
-    ######################## Rechter Rand nach Startpunkt######################
-    ## Anpassung Startpunkt Seitenrand rechts
-
-
-
-    # Eckpunkte Rechts
-    Start_p_right = Start_point + np.cross(Start_direction, Start_normale_gamma) * width / 2 + delta_right_length_start * Start_direction
-    right_point_list = calc_points_from_start_directions_lengths(Start_p_right, direction_vector_list, length_right_list)
-
-    # Auffüllen Rechts
     right_points_filled_up_list = calc_filled_up_points(direction_vector_list, length_right_list, right_point_list)
 
+    all_patch_points_filled_up = np.concatenate(
+        (mid_point_filled_up_list, left_points_filled_up_list, right_points_filled_up_list), axis=0)
 
-
-    result = np.concatenate((mid_point_filled_up_list, left_points_filled_up_list, right_points_filled_up_list), axis=0)
     start = mid_point_filled_up_list[0]  # Comment_DB: Change to beginning of list
     end = mid_point_filled_up_list[-1]
 
@@ -619,7 +582,42 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
-    return result, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
+    return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
+
+
+# Berechnungen in ListofPoints
+def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
+    if alpha_list[0] > math.pi / 2:
+        delta_length_start_bend = (width / 2) * math.tan(math.pi - alpha_list[0])
+
+    else:  # alpha_list[0] < math.pi / 2:
+        delta_length_start_bend = - (width / 2) * math.tan(alpha_list[0])
+    delta_length_at_bendpoint = [delta_length_start_bend]
+    length_left_list = []
+    length_right_list = []
+    for i in range(1, len(length_list)):
+        if alpha_list[i] > math.pi / 2:
+            # Delta at bend i
+            delta_length_at_bendpoint_i = (width / 2) * math.tan(math.pi - alpha_list[i])
+        else:  # alpha_list[i] < math.pi / 2:
+            # Delta at bend i
+            delta_length_at_bendpoint_i = - (width / 2) * math.tan(alpha_list[i])
+
+        # Length
+        length_left_new = length_list[i - 1] + delta_length_at_bendpoint_i - delta_length_at_bendpoint[i - 1]
+        length_right_new = length_list[i - 1] - delta_length_at_bendpoint_i + delta_length_at_bendpoint[i - 1]
+
+        length_left_list.append(length_left_new)
+        length_right_list.append(length_right_new)
+
+        delta_length_at_bendpoint.append(delta_length_at_bendpoint_i)
+
+        # falls keine weiteren Knicke:
+        delta_l_end = - delta_length_at_bendpoint_i
+        if i == len(length_list) - 1:
+            length_left_list.append((length_list[-1] + delta_l_end))
+            length_right_list.append((length_list[-1] - delta_l_end))
+    return delta_length_start_bend, length_left_list, length_right_list
 
 
 def calc_filled_up_points(direction_vector_list, length_list, point_list):
@@ -634,10 +632,12 @@ def calc_filled_up_points(direction_vector_list, length_list, point_list):
 
         for i, length in enumerate(length_list):
             a_new = point_list[i][np.newaxis, :] + np.outer(np.linspace(0, length, pointspersection, endpoint=True),
-                                                               direction_vector_list[i])
+                                                            direction_vector_list[i])
             filled_up_list.append(a_new)
     filled_up_list = np.concatenate(filled_up_list)
     return filled_up_list
+
+
 def calc_points_from_start_directions_lengths(Start_point, direction_vector_list, length_list):
     midpoint_list = [Start_point]
     old_p = Start_point
@@ -647,19 +647,23 @@ def calc_points_from_start_directions_lengths(Start_point, direction_vector_list
         midpoint_list.append(new_p)
         old_p = new_p
     return midpoint_list
-def calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, beta_list, length_list):
+
+
+def calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, beta_list, length_list):
     direction_vector_list = [Start_direction]
-    normal_vector_list = [Start_normale_strich]
+    normal_vector_list = [Start_normale_gamma]
     #### Vektorenberechnung für Tapeseite nach dem Startpunkt
     for i in range(1, len(length_list)):
 
         # Rotate Direction Vector around alpha
         if alpha_list[i - 1] < math.pi / 2:
             direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
-                                                  angle=(alpha_list[i - 1] - (math.pi) / 2)).rotate(direction_vector_list[i - 1])
+                                                  angle=(alpha_list[i - 1] - (math.pi) / 2)).rotate(
+                direction_vector_list[i - 1])
         else:
             direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
-                                                  angle=(alpha_list[i - 1] - 3 * (math.pi) / 2)).rotate(direction_vector_list[i - 1])
+                                                  angle=(alpha_list[i - 1] - 3 * (math.pi) / 2)).rotate(
+                direction_vector_list[i - 1])
 
         # Rotate new Direction Vector around beta
         direction_rotation_alpha_beta = Quaternion(axis=direction_rotation_alpha, angle=beta_list[i - 1]).rotate(
@@ -668,11 +672,13 @@ def calc_direction_vectors(Start_direction, Start_normale_strich, alpha_list, be
         direction_vector_list.append(direction_rotation_alpha_beta)
         n_new = Quaternion(axis=direction_rotation_alpha, angle=beta_list[i - 1]).rotate(normal_vector_list[i - 1])
         normal_vector_list.append(n_new)
-    # Comment_DKu_Wenzel: Direction Vectors easy xyz?
+
     direction_vector_list = np.stack(direction_vector_list)
     return direction_vector_list
+
+
 def calc_start_point_direction_normal_vector(chromo):
-    # Startpunktvariation aus Chromosom und Übersetzt
+    # Startpunktvariation aus Chromosom übersetzt
     [var_start_pt_x, var_start_pt_y, var_start_pt_z,
      var_start_r_x, var_start_r_y, var_start_r_z,
      var_start_n_gamma] = translate_start_varriation_from_chomo(chromo)
@@ -683,24 +689,27 @@ def calc_start_point_direction_normal_vector(chromo):
          [patch_start[2] * var_start_pt_z]]))  # Comment_DB: AMENDED
 
     Start_direction = np.concatenate(np.array(
-        [[Start_r_prep_fromstart[0] * var_start_r_x], [Start_r_prep_fromstart[1] * var_start_r_y],
-         [Start_r_prep_fromstart[2] * var_start_r_z]]))
+        [[Start_direction_prep_fromstart[0] * var_start_r_x], [Start_direction_prep_fromstart[1] * var_start_r_y],
+         [Start_direction_prep_fromstart[2] * var_start_r_z]]))
     Start_direction = 1 / np.linalg.norm(
         Start_direction) * Start_direction  # Comment_DKu_Wenzel: todo check if normizing?
 
-    Start_quer_zu_direction = np.cross(Start_direction, Start_n_atstart)
+    Start_quer_zu_direction = np.cross(Start_direction, Start_normal_atstart)
     Start_quer_zu_direction = 1 / np.linalg.norm(Start_quer_zu_direction) * Start_quer_zu_direction
 
-    Start_normale_strich = np.cross(Start_quer_zu_direction, Start_direction)
-    Start_normale_strich = Quaternion(axis=Start_direction, angle=(var_start_n_gamma)).rotate(
-        Start_normale_strich)  # Comment_DB: start_n_strich rotated about start_r
-    Start_normale_strich = 1 / np.linalg.norm(Start_normale_strich) * Start_normale_strich
-    return Start_direction, Start_normale_strich, Start_point
+    Start_normale_gamma = np.cross(Start_quer_zu_direction, Start_direction)
+    Start_normale_gamma = Quaternion(axis=Start_direction, angle=(var_start_n_gamma)).rotate(
+        Start_normale_gamma)  # Comment_DB: start_n_strich rotated about start_r
+    Start_normale_gamma = 1 / np.linalg.norm(Start_normale_gamma) * Start_normale_gamma
+    return Start_direction, Start_normale_gamma, Start_point
+
+
 def translate_start_varriation_from_chomo(chromo):
-    #From Gen Value(0-100) to Startvariation (1 +/- var_range)
+    # From Gen Value(0-100) to Startvariation (1 +/- var_range)
     var_range = 0.8
-    #Last vales in chromo ar start variation variables
-    variation_start = [(1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value) for gen_value in chromo[-7:-1:1]]
+    # Last vales in chromo ar start variation variables
+    variation_start = [(1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value) for gen_value in
+                       chromo[-7:-1:1]]
 
     gamma_max = 10  # [Grad] Maximaler Kippwinkel für Start_n
     gamma_max_rad = gamma_max * (2 * math.pi / 360)
@@ -708,6 +717,8 @@ def translate_start_varriation_from_chomo(chromo):
     var_start_n_gamma = -gamma_max_rad + gamma_max_rad / (chromo_resolution / 2) * chromo[-1]
     variation_start.append(var_start_n_gamma)
     return variation_start
+
+
 def translate_alpha_beta_length_from_chromo(chromo):
     l_list = []  # Comment_DB: empty list
     alpha_list = []  # Comment_DB: empty list
@@ -725,15 +736,15 @@ def translate_alpha_beta_length_from_chromo(chromo):
     for i in range(2, len(startchromo) - 3, 3):  # Comment_DB: adjusted for reordered startchromo (betas)
         beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
         beta_list.append(beta)
-    return alpha_list, beta_list, l_list # beta in radians, length in mm
+    return alpha_list, beta_list, l_list  # beta in radians, length in mm
 
 
 # Berechnung der Fitness eines Chromosoms
-def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim): # Comment DKu_Wenzel L_aim=L_aim
+def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim):  # Comment DKu_Wenzel L_aim=L_aim
 
-    L_aim # Comment DKu_Wenzel: Lokales L_aim für Versuch korrigieren
-    #L_aim = L_aim + 45  # Comment_DKu_Wenzel todo  Versuch mit L_aim korrigiert
-                        # Erste Beobachtung: Auch großen Einfluss auf dist_fit
+    L_aim  # Comment DKu_Wenzel: Lokales L_aim für Versuch korrigieren
+    # L_aim = L_aim + 45  # Comment_DKu_Wenzel todo  Versuch mit L_aim korrigiert
+    # Erste Beobachtung: Auch großen Einfluss auf dist_fit
 
     # Distance_fitness
     distance_fit, avg_dist = calc_distance_fittness(L_aim, chromo)
@@ -752,6 +763,7 @@ def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim): # Comment DKu_Wen
 
     return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist
 
+
 # Berechnungen in Fittness
 def patch_length_in_mm(chromo, l_factor_chromo_mm):
     # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
@@ -765,8 +777,10 @@ def patch_length_in_mm(chromo, l_factor_chromo_mm):
         for i in range(0, len(startchromo) - 5, 3):
             lengt = lengt + chromo[i]
     return lengt * l_factor_chromo_mm
+
+
 def calc_border_fittness(chromo):
-    LoP=ListOfPoints(chromo)
+    LoP = ListOfPoints(chromo)
     ###PARABOLIC###
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
     border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
@@ -780,6 +794,8 @@ def calc_border_fittness(chromo):
     # border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[1], patch_start)) ** 2)
     # border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[2], patch_end)) ** 2)
     return border_fit_end, border_fit_start
+
+
 def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
     L = patch_length_in_mm(chromo, l_factor_chromo_mm)
     ###PARABOLIC###
@@ -792,11 +808,15 @@ def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
     # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
     return length_fit
+
+
 def calc_avg_dist(chromo):
     distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[
         1]  # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
     return avg_dist
+
+
 def calc_distance_fittness(L_aim, chromo):
     # Berechnung durchschnittlicher Abstand
     avg_dist = calc_avg_dist(chromo)
@@ -810,6 +830,8 @@ def calc_distance_fittness(L_aim, chromo):
     # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
     # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
     return distance_fit, avg_dist
+
+
 def evalute_adaptiv_gamma_():
     if not 'p' in globals():
         pass
@@ -835,6 +857,7 @@ def evalute_adaptiv_gamma_():
             gamma_ps_hat = gamma_ps
             gamma_pe_hat = gamma_pe
     return gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat
+
 
 # Erstellung Chromosom der Startlösung
 startchromo = create_start_chromo()
@@ -1190,6 +1213,7 @@ pyplot.axis('off')
 
 pyplot.show(figure)
 
+
 ######## Abspeichern der Biegeparameter #########
 def save_patch_file():
     name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
@@ -1211,6 +1235,7 @@ def save_patch_file():
         name.write(l + ";" + alpha + ";" + beta + "\n")
     name.close
     end.destroy()
+
 
 # TODO ####Comment_DB: Save End Fitness Values#####
 
