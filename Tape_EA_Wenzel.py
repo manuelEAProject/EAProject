@@ -18,7 +18,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
 import matplotlib.ticker as ticker
-import stl_preprocessing_Edit3_Tape_EA_Edit6 as stlprep3_6
+import stl_preprocessing_Wenzel as stlprep3_6
 from tkinter import *
 from tkinter import filedialog
 import plotly.graph_objects as go
@@ -336,16 +336,12 @@ def select_stl_file(input_file):
     settingssheet = open('./settingssheet.txt', 'w+')
     settingssheet.write(input_file.get())
     settingssheet.close()
-
-
 def save_settings(settings_list):
     settingssheet = open('./settingssheet.txt', 'r+')
 
     for listitem in settings_list:
         settingssheet.write('%s\n' % listitem)
     settingssheet.close()
-
-
 def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidistant_pts_between_bendpts,
                                         fix_number_of_pts, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2,
                                         gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
@@ -507,26 +503,6 @@ if manual_start_end:
 l_factor = 0.5 * L_aim / chromo_resolution  # Comment_DB: already in [mm]
 
 
-# Chromosom der Startlösung (Comment_DB: independent of chromominmaxvalue limitation from galileo)
-def create_start_chromo():
-    # Nimmt die Startparameter aus der Geometriedatenvorverarbeitung und wandelt diese in ein Chromosom mit der
-    # entsprechenden Auflösung um. Rückgabewert ist das Chromosom der Startlösung.
-    start_chromo = []
-
-    # Fill length1, alpha1, beta1, length2...
-    for i in range(len(start_lengths)):
-        start_chromo.append(int(start_lengths[i] / l_factor))
-        if i < len(start_betas):  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
-            start_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
-            beta_chromo = (start_betas[i] + 90) * chromo_resolution / 180
-            start_chromo.append(int(beta_chromo))
-
-    # Variable Startparameter werden standardmäßig auf chromo_resolution/2 gesetzt
-    for i in range(7):
-        start_chromo.append(int(chromo_resolution / 2))
-    return start_chromo
-
-
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
     # Alpha_beta_length aus Chromosom und Übersetzt
@@ -618,8 +594,6 @@ def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
             length_left_list.append((length_list[-1] + delta_l_end))
             length_right_list.append((length_list[-1] - delta_l_end))
     return delta_length_start_bend, length_left_list, length_right_list
-
-
 def calc_filled_up_points(direction_vector_list, length_list, point_list):
     filled_up_list = []
     if equidistant_pts_between_bendpts:
@@ -636,8 +610,6 @@ def calc_filled_up_points(direction_vector_list, length_list, point_list):
             filled_up_list.append(a_new)
     filled_up_list = np.concatenate(filled_up_list)
     return filled_up_list
-
-
 def calc_points_from_start_directions_lengths(Start_point, direction_vector_list, length_list):
     midpoint_list = [Start_point]
     old_p = Start_point
@@ -647,8 +619,6 @@ def calc_points_from_start_directions_lengths(Start_point, direction_vector_list
         midpoint_list.append(new_p)
         old_p = new_p
     return midpoint_list
-
-
 def calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, beta_list, length_list):
     direction_vector_list = [Start_direction]
     normal_vector_list = [Start_normale_gamma]
@@ -675,8 +645,6 @@ def calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, bet
 
     direction_vector_list = np.stack(direction_vector_list)
     return direction_vector_list
-
-
 def calc_start_point_direction_normal_vector(chromo):
     # Startpunktvariation aus Chromosom übersetzt
     [var_start_pt_x, var_start_pt_y, var_start_pt_z,
@@ -702,8 +670,6 @@ def calc_start_point_direction_normal_vector(chromo):
         Start_normale_gamma)  # Comment_DB: start_n_strich rotated about start_r
     Start_normale_gamma = 1 / np.linalg.norm(Start_normale_gamma) * Start_normale_gamma
     return Start_direction, Start_normale_gamma, Start_point
-
-
 def translate_start_varriation_from_chomo(chromo):
     # From Gen Value(0-100) to Startvariation (1 +/- var_range)
     var_range = 0.8
@@ -717,8 +683,6 @@ def translate_start_varriation_from_chomo(chromo):
     var_start_n_gamma = -gamma_max_rad + gamma_max_rad / (chromo_resolution / 2) * chromo[-1]
     variation_start.append(var_start_n_gamma)
     return variation_start
-
-
 def translate_alpha_beta_length_from_chromo(chromo):
     l_list = []  # Comment_DB: empty list
     alpha_list = []  # Comment_DB: empty list
@@ -777,8 +741,6 @@ def patch_length_in_mm(chromo, l_factor_chromo_mm):
         for i in range(0, len(startchromo) - 5, 3):
             lengt = lengt + chromo[i]
     return lengt * l_factor_chromo_mm
-
-
 def calc_border_fittness(chromo):
     LoP = ListOfPoints(chromo)
     ###PARABOLIC###
@@ -794,8 +756,6 @@ def calc_border_fittness(chromo):
     # border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[1], patch_start)) ** 2)
     # border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[2], patch_end)) ** 2)
     return border_fit_end, border_fit_start
-
-
 def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
     L = patch_length_in_mm(chromo, l_factor_chromo_mm)
     ###PARABOLIC###
@@ -808,15 +768,11 @@ def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
     # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
     return length_fit
-
-
 def calc_avg_dist(chromo):
     distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[
         1]  # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
     return avg_dist
-
-
 def calc_distance_fittness(L_aim, chromo):
     # Berechnung durchschnittlicher Abstand
     avg_dist = calc_avg_dist(chromo)
@@ -830,8 +786,6 @@ def calc_distance_fittness(L_aim, chromo):
     # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
     # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
     return distance_fit, avg_dist
-
-
 def evalute_adaptiv_gamma_():
     if not 'p' in globals():
         pass
@@ -860,117 +814,130 @@ def evalute_adaptiv_gamma_():
 
 
 # Erstellung Chromosom der Startlösung
-startchromo = create_start_chromo()
+# Chromosom der Startlösung (Comment_DB: independent of chromominmaxvalue limitation from galileo)
+def create_start_chromo():
+    # Nimmt die Startparameter aus der Geometriedatenvorverarbeitung und wandelt diese in ein Chromosom mit der
+    # entsprechenden Auflösung um. Rückgabewert ist das Chromosom der Startlösung.
+    start_chromo = []
 
-"""
-#Ausgabe der Ergebnisse aus Vorverarbeitung der Geometriedaten
+    # Fill length1, alpha1, beta1, length2...
+    for i in range(len(start_lengths)):
+        start_chromo.append(int(start_lengths[i] / l_factor))
+        if i < len(start_betas):  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
+            start_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
+            beta_chromo = (start_betas[i] + 90) * chromo_resolution / 180
+            start_chromo.append(int(beta_chromo))
 
-print("Anzahl Biegestellen:", AnzahlKnicke)
-print("L_aim",L_aim)
-print("Start Chromo",startchromo)
-print("\tStart Length",patch_length_in_mm(startchromo,l_factor))
-print("\tStart Fitness", Fitness(startchromo)[0],l_factor)
-print("\t\tStart Distance Fit",Fitness(startchromo)[1])
-print("\t\tStart Length Fit",Fitness(startchromo)[2])
-print("\t\tStart Border Fit Start",Fitness(startchromo)[3])
-print("\t\tStart Border Fit End",Fitness(startchromo)[4])
-print("\t\tStart Average Distance", Fitness(startchromo)[5])
-"""
+    # Variable Startparameter werden standardmäßig auf chromo_resolution/2 gesetzt
+    for i in range(7):
+        start_chromo.append(int(chromo_resolution / 2))
+    return start_chromo
+def show_chromo(chromo):
+    points_all_filled_up = ListOfPoints(chromo)[0]
+    patch_visualisation_points = ListOfPoints(chromo)[3]
 
-# Ergebnisse aus Vorverarbeitung visualisieren:
-stlprep3_6.show_startstrip(input_file, ListOfPoints(startchromo)[0], poly_order, window_quotient, max_distance,
-                           ListOfPoints(startchromo)[3], patch_start, patch_end)
-
-####################Evolutionärer Algorithmus####################
-## Erzeuge ein Objekt der Klasse Population:
-p = Population(pop_size)  # Comment_DB: pop_size is user input in dialog box
-## Startwerte aus Preprocessing werden an die Population gegeben
-p.startchromo = startchromo
-# Soll die Initialisierung mit den Startwerten des Preprozesses erfolgen?
-p.preprocessedInit = init_preprocess  # Comment_DB: init_preprocess also user input, preprocessedInit is from chromosome class in Galileo module
-p.initrange = 10  # Comment_DB: in chromosome class in Galileo module. Interval for variation of preprocessed gene
-p.p_randInit = 8
-p.p_prepInit = 70
-
-# Festlegen der Fitnessfunktion
-p.evalFunc = Fitness  # Comment_DB: The FUNCTION Fitness is assigned, not the lowercase equation fitness! Stores the function. p.evalFunc = Fitness() stores the return value
-## Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
-p.chromoMinValues = [0] * (3 * AnzahlKnicke + 8)
-p.chromoMaxValues = [chromo_resolution] * (3 * AnzahlKnicke + 8)
-
-## Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
-p.useInteger = useInteger
-# p.useInteger = 0
-
-## Wahl der Selektionsmethode -> Rouletterad, Rankedselect, Eliteranked
-# p.selectFunc = p.select_Roulette
-# p.selectFunc = p.select_Ranked
-# p.selectFunc = p.select_EliteRanked #Comment_DB: function returns elites[k-1]
-p.selectFunc = p.select_Roulette  # MW: Convergenz problem mit Elite?
-
-## Wie viele Chromosome dürfen überleben? #Comment_DKu_Wenzel: Das ist die Anzahl an Kinder!!!
-# p.replacementSize = p.numChromosomes
-p.replacementSize = p.numChromosomes * 5
-## Crossover Wahrscheinlichkeit
-p.crossoverRate = p_crossover
-## Wahl der Crossoverfunktion -> Flat
-p.crossoverFunc = p.crossover_Flat
-# p.crossoverFunc = p.crossover_Uniform
-# p.crossoverFunc = p.crossover_Uniform
-## Mutations Wahrscheinlichkeit
-p.mutationRate = p_mutation
-
-## Wahl der Mutationsfunktion
-if init_preprocess == 0:
-    # p.mutateFunc = p.mutate_Default
-    p.mutateFunc = p.mutate_Uniform
-    p.mutationRange = p_mutate_range
-else:
-    p.mutateFunc = p.mutate_Uniform
-    # p.mutateFunc = p.mutate_Gauss
-    p.mutationRange = p_mutate_range
-
-## Replacementfunktion: SteadyState, SteadyState ohne doppelten Chromosome & Generationell(nur Kinder überleben)
-# p.replaceFunc = p.replace_SteadyState
-p.replaceFunc = p.replace_SteadyStateNoDuplicates
-# p.replaceFunc = p.replace_Generational
-p.maxGenerations = num_gen
-
-
-def show_current_solution(ListOfPoints):  # Comment_DB: PATCH OF STARTING CHROMOSOME DETERMINED FROM DATA FROM PREPROCESSOR. SHOWING THE "ListOfPoints"!
-    bestPatch = ListOfPoints[0]
-    bestPatch_patternpoints = ListOfPoints[3]
-    figure = pyplot.figure()
+    #############PLOTTING########### (#Comment_DB: Final patch)
+    figure = pyplot.figure()  # Comment_DB: create a new figure
     axes = mplot3d.Axes3D(figure)
-    your_mesh = mesh.Mesh.from_file(input_file)  # Comment_DB: This is the target shape!
-    patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=3, alpha=0.5)
-    axes.scatter(bestPatch[:, 0], bestPatch[:, 1], bestPatch[:, 2], c='y')
-
+    your_mesh = mesh.Mesh.from_file(input_file)
+    patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=1,
+                                                  alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
+    testpatch_vector = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
+    triangles = testpatch_vector.vectors
+    patch_pc = stlprep3_6.patch_pointcloud(triangles)
+    axes.scatter(points_all_filled_up[:, 0], points_all_filled_up[:, 1], points_all_filled_up[:, 2], c='y')
     # Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
     patch_meshpoints = []
-    verts = [list(zip(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2]))]
-    for i in range(len(bestPatch_patternpoints) - 2):
-        verts = [list(
-            zip([bestPatch_patternpoints[i][0], bestPatch_patternpoints[i + 1][0], bestPatch_patternpoints[i + 2][0]],
-                [bestPatch_patternpoints[i][1], bestPatch_patternpoints[i + 1][1], bestPatch_patternpoints[i + 2][1]],
-                [bestPatch_patternpoints[i][2], bestPatch_patternpoints[i + 1][2], bestPatch_patternpoints[i + 2][2]]))]
+    verts = [
+        list(zip(patch_visualisation_points[:, 0], patch_visualisation_points[:, 1], patch_visualisation_points[:, 2]))]
+    for i in range(len(patch_visualisation_points) - 2):
+        verts = [
+            list(zip(
+                [patch_visualisation_points[i][0], patch_visualisation_points[i + 1][0],
+                 patch_visualisation_points[i + 2][0]], \
+                [patch_visualisation_points[i][1], patch_visualisation_points[i + 1][1],
+                 patch_visualisation_points[i + 2][1]], \
+                [patch_visualisation_points[i][2], patch_visualisation_points[i + 1][2],
+                 patch_visualisation_points[i + 2][2]]))]
         axes.add_collection3d(Poly3DCollection(verts), zs='z')
         patch_meshpoints.append(verts)
     # Biegestellen rot färben:
-    axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
+    axes.scatter(patch_visualisation_points[:, 0], patch_visualisation_points[:, 1], patch_visualisation_points[:, 2],
+                 c='r')
+    patch_meshpoints = np.concatenate(np.asarray(patch_meshpoints), axis=0)
     axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
     axes.scatter(patch_end[0], patch_end[1], patch_end[2], c='black')
     face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
     patch_visual.set_facecolor(face_color)
     axes.add_collection3d(patch_visual)
+    # Show the plot to the screen
     axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
     axes.set_xbound(-100, 100)
     axes.set_ybound(-50, 150)
     axes.set_zbound(-100, 100)
     pyplot.axis('off')
     pyplot.show(figure)
-    return
+def initialize_Population_with_global_Settings():
+    # Erzeuge ein Objekt der Klasse Population:
+    p = Population(pop_size)  # Comment_DB: pop_size is user input in dialog box
+    # Startwerte aus Preprocessing werden an die Population gegeben
+    p.startchromo = startchromo
+    # Soll die Initialisierung mit den Startwerten des Preprozesses erfolgen?
+    p.preprocessedInit = init_preprocess  # Comment_DB: init_preprocess also user input, preprocessedInit is from chromosome class in Galileo module
+    p.initrange = 10  # Comment_DB: in chromosome class in Galileo module. Interval for variation of preprocessed gene
+    p.p_randInit = 8
+    p.p_prepInit = 70
+    # Festlegen der Fitnessfunktion
+    p.evalFunc = Fitness  # Comment_DB: The FUNCTION Fitness is assigned, not the lowercase equation fitness! Stores the function. p.evalFunc = Fitness() stores the return value
+    # Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
+    p.chromoMinValues = [0] * (3 * AnzahlKnicke + 8)
+    p.chromoMaxValues = [chromo_resolution] * (3 * AnzahlKnicke + 8)
+    # Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
+    p.useInteger = useInteger
+    # p.useInteger = 0
+    # Wahl der Selektionsmethode -> Rouletterad, Rankedselect, Eliteranked
+    # p.selectFunc = p.select_Roulette
+    # p.selectFunc = p.select_Ranked
+    # p.selectFunc = p.select_EliteRanked #Comment_DB: function returns elites[k-1]
+    p.selectFunc = p.select_Roulette  # MW: Convergenz problem mit Elite?
+    # Wie viele Chromosome dürfen überleben? #Comment_DKu_Wenzel: Das ist die Anzahl an Kinder!!!
+    # p.replacementSize = p.numChromosomes
+    p.replacementSize = p.numChromosomes * 5
+    # Crossover Wahrscheinlichkeit
+    p.crossoverRate = p_crossover
+    # Wahl der Crossoverfunktion -> Flat
+    p.crossoverFunc = p.crossover_Flat
+    # p.crossoverFunc = p.crossover_Uniform
+    # p.crossoverFunc = p.crossover_Uniform
+    # Mutations Wahrscheinlichkeit
+    p.mutationRate = p_mutation
+    # Wahl der Mutationsfunktion
+    if init_preprocess == 0:
+        # p.mutateFunc = p.mutate_Default
+        p.mutateFunc = p.mutate_Uniform
+        p.mutationRange = p_mutate_range
+    else:
+        p.mutateFunc = p.mutate_Uniform
+        # p.mutateFunc = p.mutate_Gauss
+        p.mutationRange = p_mutate_range
+    # Replacementfunktion: SteadyState, SteadyState ohne doppelten Chromosome & Generationell(nur Kinder überleben)
+    # p.replaceFunc = p.replace_SteadyState
+    p.replaceFunc = p.replace_SteadyStateNoDuplicates
+    # p.replaceFunc = p.replace_Generational
+    p.maxGenerations = num_gen
 
+    return p
+
+
+
+
+####################Evolutionärer Algorithmus####################
+startchromo = create_start_chromo()
+p = initialize_Population_with_global_Settings()
+
+# Ergebnisse aus Vorverarbeitung visualisieren:
+stlprep3_6.show_startstrip(input_file, ListOfPoints(startchromo)[0], poly_order, window_quotient, max_distance,
+                           ListOfPoints(startchromo)[3], patch_start, patch_end)
 
 ##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
 num_gen_list = np.array([])
@@ -980,6 +947,7 @@ length_fit_list = np.array([])
 border_fit_start_list = np.array([])
 border_fit_end_list = np.array([])
 mutation_rate_list = np.array([])
+
 ## Initialisierung
 time_start = timer()  # Comment_DB: start timer
 p.prepPopulation()
@@ -1070,10 +1038,10 @@ for i in range(num_gen):
     ###Comment_DB: Show iterations for Total Gen 100 or Total Gen 50###
     if num_gen == 100:
         if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 50 or p.generationNumber == 90:
-            show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
+            show_chromo(p.bestFitIndividual.genes)
     if num_gen == 50:
         if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 25 or p.generationNumber == 40:
-            show_current_solution(ListOfPoints(p.bestFitIndividual.genes))
+            show_chromo(p.bestFitIndividual.genes)
 
     # Comment_DB: append determined values into arrays after each iteration
     num_gen_list = np.append(num_gen_list, [i])
@@ -1090,131 +1058,74 @@ distance_fit_list_gen_index = np.stack((num_gen_list, distance_fit_list))
 length_fit_list_gen_index = np.stack((num_gen_list, length_fit_list))
 border_fit_start_list_gen_index = np.stack((num_gen_list, border_fit_start_list))
 border_fit_end_list_gen_index = np.stack((num_gen_list, border_fit_end_list))
+
 if adap_mutation == 1:
     mutation_rate_list_gen_index = np.stack((num_gen_list, mutation_rate_list))
 
-print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
-      "L_Aim (From Preprocessor):", L_aim)
-print("End Fitness: ", p.bestFitIndividual.getFitness(),
-      "\n\tEnd Distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
-      "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes)[2],
-      "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes)[3],
-      "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes)[4])
-
-if adap_mutation == 1:
-    print("\tEnd Mutation Rate: ", p.mutationRate)
-
-print("\nSettings Used: ")
-print("Set 1 gamma_d: ", gamma_d, "\tSet 2 gamma_d: ", gamma_d2, "\tSet 3 gamma_d: ", gamma_d3, "\tSet 4 gamma_d: ",
-      gamma_d4,
-      "\nSet 1 gamma_l: ", gamma_l, "\tSet 2 gamma_l: ", gamma_l2, "\tSet 3 gamma_l: ", gamma_l3, "\tSet 4 gamma_l: ",
-      gamma_l4,
-      "\nSet 1 gamma_ps: ", gamma_ps, "\tSet 2 gamma_ps: ", gamma_ps2, "\tSet 3 gamma_ps: ", gamma_ps3,
-      "\tSet 4 gamma_ps: ", gamma_ps4,
-      "\nSet 1 gamma_pe: ", gamma_pe, "\tSet 2 gamma_pe: ", gamma_pe2, "\tSet 3 gamma_pe: ", gamma_pe3,
-      "\tSet 4 gamma_pe: ", gamma_pe4,
-      "\n\nSet 2 Gen Start Point: ", num_gen_set2, "\tSet 3 Gen Start Point: ", num_gen_set3,
-      "\tSet 4 Gen Start Point: ", num_gen_set4)
-
-print("\nPop Size: ", pop_size,
-      "\n# of Gens: ", num_gen,
-      "\nMutation Rate: ", p_mutation, "\tMutation Rate (Final):", p.mutationRate if not adap_mutation == 0 else "N/A",
-      "\tMutation Range: ", p_mutate_range,
-      "\nCrossover Rate: ", p_crossover if not p.crossoverFunc == p.crossover_Flat else "N/A")
-
-print("\n\nElapsed Time [s]: ", time_end - time_start)
-
-##Comment_DB: Create plots for fitness and subfitnesses
-plt.figure(1)
-plt.plot(fitness_list_gen_index[0], fitness_list_gen_index[1], linewidth=2)
-plt.xlabel('Generation')
-plt.ylabel('Fitness')
-plt.title('Overall Fitness 1')
-
-plt.figure(2)
-plt.plot(distance_fit_list_gen_index[0], distance_fit_list_gen_index[1])
-plt.xlabel('Generation')
-plt.ylabel('Distance Fitness')
-plt.title('Distance Fitness 1')
-
-plt.figure(3)
-plt.plot(length_fit_list_gen_index[0], length_fit_list_gen_index[1])
-plt.xlabel('Generation')
-plt.ylabel('Length Fitness')
-plt.title('Length Fitness 1')
-
-plt.figure(4)
-plt.plot(border_fit_start_list_gen_index[0], border_fit_start_list_gen_index[1])
-plt.xlabel('Generation')
-plt.ylabel('Border Fitness at Start')
-plt.title('Border Fitness at Start 1')
-
-plt.figure(5)
-plt.plot(border_fit_end_list_gen_index[0], border_fit_end_list_gen_index[1])
-plt.xlabel('Generation')
-plt.ylabel('Border Fitness at End')
-plt.title('Border Fitness at End 1')
-
-if adap_mutation == 1:
-    plt.figure(6)
-    plt.stem(mutation_rate_list_gen_index[0], mutation_rate_list_gen_index[1])
+######## Abspeichern und Ausgeben der Parameter #########
+def print_consol_output_end():
+    print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
+          "L_Aim (From Preprocessor):", L_aim)
+    print("End Fitness: ", p.bestFitIndividual.getFitness(),
+          "\n\tEnd Distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
+          "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes)[2],
+          "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes)[3],
+          "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes)[4])
+    if adap_mutation == 1:
+        print("\tEnd Mutation Rate: ", p.mutationRate)
+    print("\nSettings Used: ")
+    print("Set 1 gamma_d: ", gamma_d, "\tSet 2 gamma_d: ", gamma_d2, "\tSet 3 gamma_d: ", gamma_d3, "\tSet 4 gamma_d: ",
+          gamma_d4,
+          "\nSet 1 gamma_l: ", gamma_l, "\tSet 2 gamma_l: ", gamma_l2, "\tSet 3 gamma_l: ", gamma_l3,
+          "\tSet 4 gamma_l: ",
+          gamma_l4,
+          "\nSet 1 gamma_ps: ", gamma_ps, "\tSet 2 gamma_ps: ", gamma_ps2, "\tSet 3 gamma_ps: ", gamma_ps3,
+          "\tSet 4 gamma_ps: ", gamma_ps4,
+          "\nSet 1 gamma_pe: ", gamma_pe, "\tSet 2 gamma_pe: ", gamma_pe2, "\tSet 3 gamma_pe: ", gamma_pe3,
+          "\tSet 4 gamma_pe: ", gamma_pe4,
+          "\n\nSet 2 Gen Start Point: ", num_gen_set2, "\tSet 3 Gen Start Point: ", num_gen_set3,
+          "\tSet 4 Gen Start Point: ", num_gen_set4)
+    print("\nPop Size: ", pop_size,
+          "\n# of Gens: ", num_gen,
+          "\nMutation Rate: ", p_mutation, "\tMutation Rate (Final):",
+          p.mutationRate if not adap_mutation == 0 else "N/A",
+          "\tMutation Range: ", p_mutate_range,
+          "\nCrossover Rate: ", p_crossover if not p.crossoverFunc == p.crossover_Flat else "N/A")
+    print("\n\nElapsed Time [s]: ", time_end - time_start)
+def show_fitness_and_subfitness():
+    ##Comment_DB: Create plots for fitness and subfitnesses
+    plt.figure(1)
+    plt.plot(fitness_list_gen_index[0], fitness_list_gen_index[1], linewidth=2)
     plt.xlabel('Generation')
-    plt.ylabel('Mutation Rate')
-    plt.title('Mutation Rate')
-
-plt.show()
-
-bestPatch = ListOfPoints(p.bestFitIndividual.genes)[0]
-bestPatch_patternpoints = ListOfPoints(p.bestFitIndividual.genes)[3]
-
-#############PLOTTING########### (#Comment_DB: Final patch)
-
-figure = pyplot.figure()  # Comment_DB: create a new figure
-axes = mplot3d.Axes3D(figure)
-your_mesh = mesh.Mesh.from_file(input_file)
-patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=1,
-                                              alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
-
-testpatch_vector = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
-triangles = testpatch_vector.vectors
-patch_pc = stlprep3_6.patch_pointcloud(triangles)
-axes.scatter(bestPatch[:, 0], bestPatch[:, 1], bestPatch[:, 2], c='y')
-
-# Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
-patch_meshpoints = []
-verts = [list(zip(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2]))]
-for i in range(len(bestPatch_patternpoints) - 2):
-    verts = [
-        list(zip([bestPatch_patternpoints[i][0], bestPatch_patternpoints[i + 1][0], bestPatch_patternpoints[i + 2][0]], \
-                 [bestPatch_patternpoints[i][1], bestPatch_patternpoints[i + 1][1], bestPatch_patternpoints[i + 2][1]], \
-                 [bestPatch_patternpoints[i][2], bestPatch_patternpoints[i + 1][2],
-                  bestPatch_patternpoints[i + 2][2]]))]
-    axes.add_collection3d(Poly3DCollection(verts), zs='z')
-    patch_meshpoints.append(verts)
-# Biegestellen rot färben:
-axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
-
-patch_meshpoints = np.concatenate(np.asarray(patch_meshpoints), axis=0)
-
-axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
-axes.scatter(patch_end[0], patch_end[1], patch_end[2], c='black')
-
-face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
-patch_visual.set_facecolor(face_color)
-axes.add_collection3d(patch_visual)
-
-# Show the plot to the screen
-
-axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
-axes.set_xbound(-100, 100)
-axes.set_ybound(-50, 150)
-axes.set_zbound(-100, 100)
-pyplot.axis('off')
-
-pyplot.show(figure)
-
-
-######## Abspeichern der Biegeparameter #########
+    plt.ylabel('Fitness')
+    plt.title('Overall Fitness 1')
+    plt.figure(2)
+    plt.plot(distance_fit_list_gen_index[0], distance_fit_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('Distance Fitness')
+    plt.title('Distance Fitness 1')
+    plt.figure(3)
+    plt.plot(length_fit_list_gen_index[0], length_fit_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('Length Fitness')
+    plt.title('Length Fitness 1')
+    plt.figure(4)
+    plt.plot(border_fit_start_list_gen_index[0], border_fit_start_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('Border Fitness at Start')
+    plt.title('Border Fitness at Start 1')
+    plt.figure(5)
+    plt.plot(border_fit_end_list_gen_index[0], border_fit_end_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('Border Fitness at End')
+    plt.title('Border Fitness at End 1')
+    if adap_mutation == 1:
+        plt.figure(6)
+        plt.stem(mutation_rate_list_gen_index[0], mutation_rate_list_gen_index[1])
+        plt.xlabel('Generation')
+        plt.ylabel('Mutation Rate')
+        plt.title('Mutation Rate')
+    plt.show()
 def save_patch_file():
     name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
     bestPatch_parameter_l = ListOfPoints(p.bestFitIndividual.genes)[4]
@@ -1236,14 +1147,18 @@ def save_patch_file():
     name.close
     end.destroy()
 
+print_consol_output_end()
+show_fitness_and_subfitness()
+show_chromo(p.bestFitIndividual.genes)
+
 
 # TODO ####Comment_DB: Save End Fitness Values#####
 
 end = Tk()
-
 Label(end, text="Sind Sie mit dem Patch zufrieden?").grid(row=10, column=1, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 Button(end, text="Abbrechen", command=sys.exit).grid(row=30, column=0, )
 Button(end, text="Patchparameter speichern", command=save_patch_file).grid(row=30, column=2, )
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
+
 mainloop()

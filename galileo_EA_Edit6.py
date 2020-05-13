@@ -32,7 +32,6 @@ from functools import total_ordering
 from random import Random
 from random import gauss
 
-
 @total_ordering
 class Chromosome:
     """The Chromosome class represents a single chromosome in a population.
@@ -125,14 +124,6 @@ class Chromosome:
 
 
         self.fitness = None
-
-
-
-
-
-
-
-
 
     def evaluate(self):
         """Calls evalFunc for this chromosome, and caches the fitness value
@@ -232,7 +223,6 @@ after all user defined variables have been set, to finish initialization.
 """
 
 class Population:
-
     def __init__(self, numChromosomes):
 
         self.numChromosomes = numChromosomes
@@ -280,7 +270,6 @@ class Population:
         self.avgFitnessNextGen = None
         self.sumFitnessNextGen = None
         self.bestFitIndividualNextGen = None
-
     def prepPopulation(self): #Comment_DB: For both random and preprocessed initialization
         """Radnomly initializes each chromosome according to the values in
         chromosMinValues and chromosMaxValues.
@@ -359,7 +348,6 @@ class Population:
         #print("self.currentGeneration[0] after for loop",self.currentGeneration[0])
         #print("self.bestFitIndividual", self.bestFitIndividual)
         self.avgFitness = self.sumFitness / len(self.currentGeneration) #Comment_DB: can be used if needed
-
     def mutate(self):
         """At probability mutationRate, mutates each gene of each chromosome. That
         is, each gene has a mutationRate chance of being randomly re-initialized.
@@ -369,51 +357,6 @@ class Population:
         self.mutationCount = 0
         for i in range(self.replacementSize):
             self.nextGeneration[i] = self.mutateFunc(self.nextGeneration[i])
-
-    '''
-    def adaptive_mutate(self):
-
-        """Comment_DB: Adaptive mutation changes the mutation rate w.r.t. nextGeneration fitness.
-        Determines fitness in nextGeneration, the max/min/avg fitness, then with that information determines mutation
-        rate for each chromosome. Mutation rate based on (Gao, Liang, Shi, Cao 2019)."""
-
-        self.mutationCount = 0
-        self.sumFitnessNextGen = 0.0
-        self.avgFitnessNextGen = 0.0
-
-        #self.nextGeneration[0].fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
-
-        self.maxFitnessNextGen = self.nextGeneration[0].getFitness()
-        self.minFitnessNextGen = self.nextGeneration[0].getFitness()
-        self.bestFitIndividualNextGen = self.nextGeneration[0]
-
-
-        for chromo in self.nextGeneration: #Comment_DB: only works if replacementsize is identical to initial population size
-            #chromo.fitness = None
-            f_next = chromo.getFitness()
-            self.sumFitnessNextGen = self.sumFitnessNextGen + f_next
-
-            if f_next > self.maxFitnessNextGen:
-                self.maxFitnessNextGen = f_next
-                self.bestFitIndividualNextGen = chromo
-                #print("after if statem", self.bestFitIndividual)
-            elif f_next < self.minFitnessNextGen:
-                self.minFitnessNextGen = f_next
-        self.avgFitnessNextGen = self.sumFitnessNextGen / len(self.nextGeneration)
-
-        #Comment_DB: max fitness, avg fitness have been calculated for this population
-
-        #Comment_DB: Not sorted because crossover happened
-
-        for i in range(self.replacementSize):
-            if self.nextGeneration[i].getFitness() >= self.avgFitnessNextGen:
-                self.mutationRate = ((self.mutationRate*(self.maxFitnessNextGen - self.nextGeneration[i].getFitness()))/(self.maxFitnessNextGen-self.avgFitnessNextGen)) + 0.01
-            else:
-                pass
-            #print("mutation rate in adaptive mutation:", self.mutationRate)
-            self.nextGeneration[i] = self.mutateFunc(self.nextGeneration[i])
-
-    '''
     def select(self):
         """Selects chromosomes from currentGeneration for placement into
         nextGeneration based on selectFunc.
@@ -472,7 +415,6 @@ class Population:
             k = k + 1
             pos = pos + k
         return sortedGeneration[k - 1]
-
     def select_EliteRanked(self):
         """Ranked selection only from the top n individuals - the genes of
         the rest will die out. selectionSize is half of the populationSize
@@ -491,12 +433,6 @@ class Population:
             k = k + 1
             pos = pos + k
         return elites[k - 1] #Comment_DB: Return the (k-1)th chromosome in the elites list!
-
-
-
-
-
-
     def crossover_Flat(self, chromo1, chromo2):
         """A crossover function that can be assigned to crossoverFunc.
         This takes two chromosomes and produces an offspring through linear
@@ -521,7 +457,6 @@ class Population:
         newchromo1.fitness = None
         newchromo2.fitness = None
         return (newchromo1,newchromo2)
-
     def crossover_OnePoint(self, chromo1, chromo2):
         """A crossover function that can be assigned to crossoverFunc. This one
         takes two chromosomes, cuts them at some random point, and swaps the parts
@@ -563,7 +498,6 @@ class Population:
             return (newchromo1, newchromo2)
         else:
             return (chromo1, chromo2)
-
     def crossover_Uniform(self, chromo1, chromo2):
         """A crossover function that can be assigned to crossoverFunc. Creates
         two new chromosomes by flippinng a coin for each gene. If the coin is heads,
@@ -589,7 +523,6 @@ class Population:
             return (newchromo1, newchromo2)
         else:
             return (chromo1, chromo2)
-
     def mutate_Default(self, chromo):
         """Mutation function that can be assigned to mutateFunc. For each gene
         on each chromosome, there is a mutationRate chance that it will be
@@ -607,7 +540,6 @@ class Population:
                     f = self.generator.uniform(self.chromoMinValues[i], self.chromoMaxValues[i])
                 chromo.genes[i] = f
         return chromo
-
     def mutate_Uniform(self, chromo):
         """Mutation function that can be assigned to mutateFunc.
         Uniform mutation within the mutation radius.
@@ -631,7 +563,6 @@ class Population:
                         self.chromoMinValues[i], self.chromoMaxValues[i])
                 chromo.genes[i] = f
         return chromo
-
     def mutate_Gauss(self, chromo):
         """Mutation function that can be assigned to mutateFunc.
         Uniform mutation within the mutation radius.
@@ -651,7 +582,6 @@ class Population:
                     f = self.chromoMaxValues[i]
                 chromo.genes[i] = f
         return chromo
-
     def replace(self):
 
         """Replaces currentGeneration with nextGeneration according to the rules
@@ -661,7 +591,6 @@ class Population:
         """
 
         return self.replaceFunc()
-
     def replace_SteadyState(self):
         """Replacement function that can be assigned to replaceFunc.
         Takes the values in nextGeneration, sticks them into currentGeneration, sorts
@@ -676,7 +605,6 @@ class Population:
         self.currentGeneration.reverse()
         self.currentGeneration = self.currentGeneration[:self.numChromosomes]
         self.nextGeneration = []
-
     def replace_SteadyStateNoDuplicates(self):
         """Replacement function that can be assigned to replaceFunc. Same as
         replace_SteadyState, exccept that duplicate chromosomes are not inserted
@@ -694,8 +622,6 @@ class Population:
         self.currentGeneration.reverse()
         self.currentGeneration = self.currentGeneration[:self.numChromosomes]
         self.nextGeneration = []
-
-
     def replace_Generational(self):
         """Replacement function that can be assigned to replaceFunc. Wholesale
         replacement of currentGeneration with nextGeneration. assumes that
