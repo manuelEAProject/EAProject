@@ -49,8 +49,7 @@ def tri_normals(ID_list,triangles,stl_normals):
     avg_stl_normal = sum(stl_normals) / len(stl_normals)
     # average of the created normals:
     avg_sorted_normal=sum(normals) / len(normals)
-    #print("stl:",avg_stl_normal)
-    #print("own",avg_sorted_normal)
+
     #Normalenvektoren werden immer in positive z-Richtung ausgerichtet
     if avg_sorted_normal[0]*avg_stl_normal[0]<0 or avg_sorted_normal[2]<0:
         normals=np.negative(normals)
@@ -306,10 +305,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     triangles = testpatch_vector.vectors #Comment_DB: triangle edges (wireframe)
     stl_normals = testpatch_vector.normals
 
-
-    triangles_newshape = np.reshape(triangles, (-1, 3))
-
-
     #Creating pointcloud:
     patch_pc = patch_pointcloud(triangles) #!!!!!Comment_DB: The blue points!
 
@@ -454,8 +449,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     bend_pts_xy.append([xy_patch_curve[-1][0], y_smooth[-1]]) #Comment_DB: end point 2D (x coord, y coord)
     bend_pts_xy = np.asarray(bend_pts_xy)
     bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()] #Comment_DB: sorted start and endpoints of 2D line that shows bends
-    #print("bend_pts_xy arg sorted", bend_pts_xy) #Comment_DB: only contains start and end points
-    #print(bend_pts_xy) #Comment_DB: TEST (START- AND ENDPOINTS!)
+
     # Einfügen von weiteren Knickpunkten durch Finden von großen Abweichungen zur Kurve:
     set_max_divergence = max_distance #Comment_DB: User input
     insert_pts = True
@@ -498,6 +492,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
         bend_pts_xy = np.insert(bend_pts_xy, -1,
                                 np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]), axis=0) #Comment_DB: insert a corner at x coord (counter i) and y coord (counter i) of max divergence
         bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()] #Comment_DB: Bend points sorted in an array
+
         # no further points, if the chosen maximum distance is not surpassed
         if max_divergence[0] < set_max_divergence: #Comment_DB: This implies that there will be one extra bend, as the above code will have executed already
             insert_pts = False
@@ -528,9 +523,9 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
     # find the next bending point from Start_p_mid in trendline direction
     next_bend_pts_from_center = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center)] #Comment_DB: x coord of next bending point
-    #print("next_bend_pts_from_center", next_bend_pts_from_center)
+
     Start_p_ID = find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center) #Comment_DB: find the INDEX of the next bending point in the array. Bending points are in x coordinates. Note: find_nearest(array, value) - find the index of the closest value in an array to a given value
-    #print(find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center))
+
     if next_bend_pts_from_center[0] - x_pos_trendline_center < 0:
         next_bend_pts_from_center = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center) + 1]
         Start_p_ID = Start_p_ID+1 #Comment_DB: Start_p_id is the # of tape sections before Start_p (which is in the middle)!!
@@ -543,47 +538,33 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
 
     Start_p_ID_fromstart = find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start)
-    # print(find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start))
+
     if next_bend_pts_from_start[0] - x_pos_trendline_start < 0: #Comment_DB: x_coord distance is negative
         next_bend_pts_from_start = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start) + 1]
         Start_p_ID_fromstart = Start_p_ID_fromstart + 1
 
-    y_pos_trendline_start = bend_pts_xy_curve[find_nearest(bend_pts_xy_curve[:, 0], x_pos_trendline_start)][1]
-
     # Start_p in 2D und 3D
-    Start_p_2d = np.array([x_pos_trendline_center, y_pos_trendline_center])
     Start_p_3d = sorted_projection_points[
                       0] + trendline_x_axis * x_pos_trendline_center + trendline_y_axis * y_pos_trendline_center
 
     ###Start_r in 2D & 3D###
-    Start_r_2d = next_bend_pts_from_center - Start_p_2d #Comment_DB: direction vector coincidental with tape
+
 
 
     pos_or_neg_adjust_xy = 1
-    #if Start_r_2d[1] < 0:
-        #pos_or_neg_adjust_xy = -1
+
     Start_r_3d = np.linalg.norm(next_bend_pts_from_center[0] - x_pos_trendline_center) * trendline_x_axis + \
                  pos_or_neg_adjust_xy * np.linalg.norm(
         next_bend_pts_from_center[1] - y_pos_trendline_center) * trendline_y_axis
     Start_r_3d = 1 / np.linalg.norm(Start_r_3d) * Start_r_3d        #normieren
-    #print("Start_r_2d (center)", Start_r_2d)
-    #print("Start_r_3d (center)", Start_r_3d)
+
     ###Start_r_atstart in 2D & 3D### COMMENT_DB: NEW DEFINITION
     Start_r_2d_atstart = bend_pts_xy[1] - bend_pts_xy[0]
-    #print("next bend pts from start",next_bend_pts_from_start)
-    #print("startvert_proj", startvert_proj)
-    #print("Start_r_2d_atstart", Start_r_2d_atstart)
-    #print("startvert_trendline", startvert_trendline)
-    #print("sorted_projection_points[0]", sorted_projection_points[0])
-    #if Start_r_2d_atstart[1] < 0:
-        #pos_or_neg_adjust_xy = -1
+
     Start_r_3d_atstart = Start_r_2d_atstart[0] * trendline_x_axis + \
                  pos_or_neg_adjust_xy * Start_r_2d_atstart[1] * trendline_y_axis
     Start_r_3d_atstart = 1 / np.linalg.norm(Start_r_3d_atstart) * Start_r_3d_atstart
 
-    #print("start_r_3d_atstart", Start_r_3d_atstart)
-    #print("trendline_x_axis", trendline_x_axis)
-    ##Start_n 3d
     Start_n_3d = np.cross(trendline_z_axis, Start_r_3d)
     Start_n_3d = 1 / np.linalg.norm(Start_n_3d) * Start_n_3d        #normieren
 
@@ -591,23 +572,13 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     Start_n_3d_atstart = np.cross(trendline_z_axis, Start_r_3d_atstart)
     Start_n_3d_atstart = 1 / np.linalg.norm(Start_n_3d_atstart) * Start_n_3d_atstart
 
-
-
-
-    # Biegepunkt an Start_p einfügen
-    #bend_pts_xy = np.insert(bend_pts_xy, -1, np.array([Start_p_2d[0], Start_p_2d[1]]), axis=0)
-    #bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]
-    #print(bend_pts_xy) #Comment_DB: TEST (E.G. 5 BENDS PLUS START AND END EDGE)
-
-
     # l-list for Chromo
     l_list = []
     for i in range(1, len(bend_pts_xy)):
         l = np.linalg.norm(bend_pts_xy[i] - bend_pts_xy[i - 1])
         l_list.append(l)
     l_list = np.asarray(l_list)
-    #print("bend_pts_xy[0]",bend_pts_xy[0])
-    #print("bend_pts_xy[1]", bend_pts_xy[1])
+
     # beta-list for Chromo
     beta_list = []
     for i in range(1, len(bend_pts_xy) - 1):
@@ -625,7 +596,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     #print("beta_list", beta_list) #Comment_DB: THIS IS THE SAME AS BETA_LIST FOR PREPROCESSED CHROMO IN LoP, EXCEPT HERE IT IS IN DEGREES
 
     # L_aim of savgol curve:
-    savgol = [xy_patch_curve[:,0], y_smooth]
     L_aim = 0
     for i in range(1,len(xy_patch_curve)):
         p0=np.array([xy_patch_curve[i-1][0], y_smooth[i - 1]])
@@ -635,13 +605,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     start_parameter = [Start_p_3d, Start_r_3d, Start_n_3d, l_list, L_aim, beta_list, Start_p_ID, startvert_proj,
                        endvert_proj, Start_p_ID_fromstart, Start_r_3d_atstart, Start_n_3d_atstart, len(bend_pts_xy)]
     return start_parameter
-"""
-a = startparam(input_file)
 
-print("Startparameter", '\n',"Start_p_mid:", startparam(input_file)[0],'\n',"Start_r_mid:", startparam(input_file)[1], \
-      '\n',"Start_n_mid:",startparam(input_file)[2],'\n',"l_list:",startparam(input_file)[3],'\n',"totallength:", \
-      startparam(input_file)[4],'\n',"beta_list:",startparam(input_file)[5])
-"""
 def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_distance,bestPatch_patternpoints,patch_start,patch_end):
     #Calculation:
     # Read in the file:
@@ -650,17 +614,12 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     triangles = testpatch_vector.vectors
     stl_normals = testpatch_vector.normals
 
-    triangles_newshape = np.reshape(triangles, (-1, 3))
-    # print(triangles_newshape)
-
-
-    # Creating pointcloud:
+    #Creating pointcloud:
     patch_pc = patch_pointcloud(triangles)
-
 
     # Creating trendline:
     trendline = pc_trendline_projection(patch_pc, tri_centerpoints(triangles))
-    #trendline2 = pc_trendline_projection(patch_pc, pointsfortrendline)
+
     # Sorted list of triangle points projected on trendline:
     sorted_projection_points = sorted_trendline_projection(trendline, sort_tri_id_by_trendline(trendline))
 
@@ -668,8 +627,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     Normlist = tri_normals(sort_tri_id_by_trendline(trendline), triangles, stl_normals)
 
     # Average normal to determine the plane which we will use to create the 2D stripe:
-    avg_tri_norm = sum(Normlist) / (len(Normlist))
-    #"""
     tri_surfaces = tri_surface(triangles)
     sorted_tri_surfaces = []
     for i in range(len(tri_surfaces)):
@@ -680,8 +637,7 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
         weighted_norms.append(sorted_tri_surfaces[i] * Normlist[i] / total_surface)
 
     avg_tri_norm = sum(weighted_norms)
-    #"""
-    #print(avg_tri_norm)
+
     # Singular value decomposition of the pointcloud to determine the main axis / directions of the patch
     datamean = patch_pc.mean(axis=0)
     uu, dd, vv = np.linalg.svd(patch_pc - datamean)
@@ -698,14 +654,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     trendline_y_axis = (datamean + avg_tri_norm) - trendline_avg_norm_point
     trendline_y_axis = (1 / np.linalg.norm(trendline_y_axis)) * trendline_y_axis
     trendline_z_axis = np.cross(trendline_x_axis, trendline_y_axis)
-
-    # Winkel der Normalenvektoren in der x-y-Ebene der Trendline (entspricht nur dem Beta-Winkel)
-    Normlist_gamma = []
-    for i in range(len(Normlist)):
-        Normlist_gamma.append(np.cross(trendline_z_axis, np.cross(Normlist[i], trendline_z_axis)))
-    Normlist_gamma = np.asarray(Normlist_gamma)
-
-
 
     # Dreiecksmittelpunkte im Sinne der Trendlinie entlang sortieren
     sorted_centerpoints = []
@@ -727,12 +675,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
     endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
 
-    triangle_verts_pc = []
-    for i in range(len(triangles_newshape)):
-        triangle_verts_pc.append(project_pointtoplane(triangles_newshape[i], trendline_z_axis, datamean))
-    triangle_verts_pc = np.asarray(triangle_verts_pc)
-
-
     # In Hauptebene projiziert:
     startvert_proj = project_pointtoplane(startvert_3d, trendline_z_axis, datamean)
     endvert_proj = project_pointtoplane(endvert_3d, trendline_z_axis, datamean)
@@ -749,7 +691,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     sorted_projection_points = np.insert(sorted_projection_points, 0, startvert_trendline, axis=0)
     sorted_projection_points = np.concatenate((sorted_projection_points, [endvert_trendline]))
 
-
     # x-Werte: Abstand zwischen den sorted_projection_points
     x_list = []
     for i in range(len(sorted_projection_points)):
@@ -757,17 +698,14 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
         x_list.append(x)
     x_list = np.asarray(x_list)
 
-
-
     #Die Dreiecksmittelpunkte werden in x-y-Ebene der Trendline projiziert, um ein 2D Abstandsprofil zu erhalten
     tri_distance_xy_point = [startvert_proj]
-    #tri_distance_xy_point = []
+
     for i in range(len(sorted_centerpoints)):
         tri_distance_xy_point.append(project_pointtoplane(sorted_centerpoints[i], trendline_z_axis,
                                                           datamean))
     tri_distance_xy_point.append(endvert_proj)
     tri_distance_xy_point = np.asarray(tri_distance_xy_point)
-
 
     # xy-Distanzplot
     # berechnet den Abstand der auf xy-Ebene projizierten Dreiecksmittelpunkte zur Trendline
@@ -775,8 +713,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     for i in range(len(tri_distance_xy_point)):
         dist = np.linalg.norm(sorted_projection_points[i] - tri_distance_xy_point[i])
 
-        #if i == len(tri_distance_xy_point)-1:
-            #print()
         # Vorzeichen ermitteln:
         if ((sorted_projection_points[i] + dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2 < \
                 ((sorted_projection_points[i] - dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2:
@@ -785,11 +721,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
             tri_distance_xy.append(-dist)
     tri_distance_xy = np.asarray(tri_distance_xy)
 
-    xy_singlepoints =[]
-    for i in range(len(tri_distance_xy_point)):
-        xy_singlepoints.append([x_list[i], tri_distance_xy[i]])
-    xy_singlepoints=np.asarray(xy_singlepoints)
-    xy_singlepoints = xy_singlepoints[xy_singlepoints[:, 0].argsort()]
     # Funktion des xy-Abstands über die Länge der Trendline. Außerdem werden linear Punkte aufgefüllt, um eine
     # äquidistante Schrittgröße zu erreichen
     xy_patch_curve_step_size = equidistant_step_size
@@ -806,24 +737,21 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
         xy_patch_curve_raw_list.append([xy_patch_curve[i][0],xy_patch_curve[i][1]])
 
 
-
-
     for i in range(1, len(tri_distance_xy)):
 
         x_dist = xy_patch_curve_raw_list[i][0] - xy_patch_curve_raw_list[i - 1][0]
         if x_dist > xy_patch_curve_step_size:
             additional_steps = math.floor(x_dist / xy_patch_curve_step_size)
-            # print(additional_steps)
+
 
             for j in range(1, additional_steps + 1):
-                # print((xy_patch_curve[i-1][0]+additional_steps*j))
+
 
                 xy_patch_curve_raw_list.append([xy_patch_curve_raw_list[i - 1][0] + j * xy_patch_curve_step_size, \
                                        (xy_patch_curve_raw_list[i - 1][1] + (xy_patch_curve_raw_list[i][1] - xy_patch_curve_raw_list[i - 1][1]) \
                                         / (x_dist) * j * xy_patch_curve_step_size)])
 
     xy_patch_curve = np.asarray(xy_patch_curve_raw_list)
-    #print(xy_patch_curve)
 
     xy_patch_curve = xy_patch_curve[xy_patch_curve[:, 0].argsort()]
 
@@ -840,10 +768,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     set_max_divergence = max_distance
     insert_pts = True
 
-    #bend_pts_xy_curve = []
-    #bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
-    #bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)
-
     while insert_pts:
         bend_pts_xy_curve = []
         bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
@@ -857,26 +781,16 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
 
         bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)
 
-
         # Größte Abweichung von geglätteter Kurve:
         curve_divergence = []
         for i in range(len(bend_pts_xy_curve)):
             curve_divergence.append([bend_pts_xy_curve[i][0], abs(bend_pts_xy_curve[i][1] - y_smooth[i])])
         curve_divergence = np.asarray(curve_divergence)
         max_divergence = (max([(v, i) for i, v in enumerate(curve_divergence[:, 1])]))
-        # print(max_divergence[0])
 
         #Comment_DB: x,y coordinates of sav-gol curve in an array
-        xy_savgol_curve = np.column_stack((xy_patch_curve[:, 0], y_smooth))
-        #local_maxima_y_smooth = argrelextrema(y_smooth, np.greater)
-        #local_minima_y_smooth = argrelextrema(y_smooth, np.less)
 
-
-
-
-
-        bend_pts_xy = np.insert(bend_pts_xy, -1,
-                                np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]), axis=0)
+        bend_pts_xy = np.insert(bend_pts_xy, -1,np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]), axis=0)
         bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]
         # no further points, if the chosen maximum distance is not surpassed
         if max_divergence[0] < set_max_divergence:
@@ -887,7 +801,6 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
         bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
 
         j = 1
-
         for i in range(1, len(bend_pts_xy)):
             while bend_pts_xy_curve[-1][0] < bend_pts_xy[i][0]:
                 y_add = bend_pts_xy_curve[-1][1] + (bend_pts_xy[i - 1][1] - bend_pts_xy[i][1]) / \
@@ -895,143 +808,19 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
                 bend_pts_xy_curve.append([xy_patch_curve[j][0], y_add])
                 j = j + 1
 
-        bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)
-
-    """
-    # ÜBERSETZUNG IN LÄNGEN UND WINKEL BEZOGEN AUF STARTPUNKT ( MITTELPUNKT DER TRENDLINE)
-    # Mittelpunkt auf Trendlinie setzen, -> Mitte zwischen den Randpunkten
-    trendline_center = (sorted_projection_points[0] + sorted_projection_points[-1]) / 2
-    x_pos_trendline_center = np.linalg.norm(trendline_center - sorted_projection_points[0])
-
-    # find the next bending point from Start_p_mid in trendline direction
-    next_bend_pts_from_center = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center)]
-
-    if next_bend_pts_from_center[0] - x_pos_trendline_center < 0:
-        next_bend_pts_from_center = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center) + 1]
-
-    y_pos_trendline_center = bend_pts_xy_curve[find_nearest(bend_pts_xy_curve[:, 0], x_pos_trendline_center)][1]
-
-    # Start_p in 2D und 3D
-    Start_p_2d = np.array([x_pos_trendline_center, y_pos_trendline_center])
-    Start_p_mid = sorted_projection_points[
-                      0] + trendline_x_axis * x_pos_trendline_center + trendline_y_axis * y_pos_trendline_center
-
-    ###Start_r in 2D & 3D###
-    Start_r_2d = next_bend_pts_from_center - Start_p_2d
-
-    pos_or_neg_adjust_xy = 1
-    if Start_r_2d[1] < 0:
-        pos_or_neg_adjust_xy = -1
-    Start_r_3d = np.linalg.norm(next_bend_pts_from_center[0] - x_pos_trendline_center) * trendline_x_axis + \
-                 pos_or_neg_adjust_xy * np.linalg.norm(
-        next_bend_pts_from_center[1] - y_pos_trendline_center) * trendline_y_axis
-    Start_r_3d = 1 / np.linalg.norm(Start_r_3d) * Start_r_3d
-
-    ##Start_n 3d
-    Start_n_3d = np.cross(trendline_z_axis, Start_r_3d)
-    Start_n_3d = 1 / np.linalg.norm(Start_n_3d) * Start_n_3d
-
-    # Knickpunkt an Start_p einfügen, damit Längen abgegrenzt werden
-    bend_pts_xy = np.insert(bend_pts_xy, -1, np.array([Start_p_2d[0], Start_p_2d[1]]), axis=0)
-    bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]
-    """
-    #######################################################################################################
-    #Mittelpunkt auf Trendlinie setzen, -> Mitte zwischen den Randpunkten
-    trendline_center = (sorted_projection_points[0] + sorted_projection_points[-1]) / 2
-    x_pos_trendline_center = np.linalg.norm(
-        trendline_center - sorted_projection_points[0])  # Comment_DB: x coordinate of trendline midpoint
-
-    trendline_start = sorted_projection_points[0]  # Comment_DB: NEW
-    x_pos_trendline_start = startvert_trendline[0]
-
-    # find the next bending point from Start_p_mid in trendline direction
-    next_bend_pts_from_center = bend_pts_xy[
-        find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center)]  # Comment_DB: x coord of next bending point
-    Start_p_ID = find_nearest(bend_pts_xy[:, 0],
-                              x_pos_trendline_center)  # Comment_DB: find the INDEX of the next bending point in the array. Bending points are in x coordinates. Note: find_nearest(array, value) - find the index of the closest value in an array to a given value
-    # print(find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center))
-    if next_bend_pts_from_center[0] - x_pos_trendline_center < 0:
-        next_bend_pts_from_center = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center) + 1]
-        Start_p_ID = Start_p_ID + 1  # Comment_DB: Start_p_id is the # of tape sections before Start_p (which is in the middle)!!
-
-    y_pos_trendline_center = bend_pts_xy_curve[find_nearest(bend_pts_xy_curve[:, 0], x_pos_trendline_center)][1]
-
-    # find the next bending point from start of tape (startvert_proj) in trendline direction
-    next_bend_pts_from_start = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start)]
-    Start_p_ID_fromstart = find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start)
-    # print(find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start))
-    if next_bend_pts_from_start[0] - x_pos_trendline_start < 0:  # Comment_DB: x_coord distance is negative
-        next_bend_pts_from_start = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start) + 1]
-        Start_p_ID_fromstart = Start_p_ID_fromstart + 1
-
-    y_pos_trendline_start = bend_pts_xy_curve[find_nearest(bend_pts_xy_curve[:, 0], x_pos_trendline_start)][1]
-
-    # Start_p in 2D und 3D
-    Start_p_2d = np.array([x_pos_trendline_center, y_pos_trendline_center])
-    Start_p_mid = sorted_projection_points[
-                     0] + trendline_x_axis * x_pos_trendline_center + trendline_y_axis * y_pos_trendline_center
-
-    ###Start_r in 2D & 3D###
-    Start_r_2d = next_bend_pts_from_center - Start_p_2d  # Comment_DB: direction vector coincidental with tape
-
-    pos_or_neg_adjust_xy = 1
-    #if Start_r_2d[1] < 0:
-        #pos_or_neg_adjust_xy = -1
-    Start_r_3d = np.linalg.norm(next_bend_pts_from_center[0] - x_pos_trendline_center) * trendline_x_axis + \
-                 pos_or_neg_adjust_xy * np.linalg.norm(
-        next_bend_pts_from_center[1] - y_pos_trendline_center) * trendline_y_axis
-    Start_r_3d = 1 / np.linalg.norm(Start_r_3d) * Start_r_3d  # normieren
-
-    ###Start_r_atstart in 2D & 3D### COMMENT_DB: NEW DEFINITION
-    Start_r_2d_atstart = bend_pts_xy[1]-bend_pts_xy[0]
-
-    #if Start_r_2d_atstart[1] < 0:
-        #pos_or_neg_adjust_xy = -1
-    Start_r_3d_atstart = Start_r_2d_atstart[0] * trendline_x_axis + \
-                         pos_or_neg_adjust_xy * Start_r_2d_atstart[1] * trendline_y_axis
-    Start_r_3d_atstart = 1 / np.linalg.norm(Start_r_3d_atstart) * Start_r_3d_atstart
-
-    ##Start_n 3d
-    Start_n_3d = np.cross(trendline_z_axis, Start_r_3d)
-    Start_n_3d = 1 / np.linalg.norm(Start_n_3d) * Start_n_3d  # normieren
-
-    ## Start_n_3d_atstart
-    Start_n_3d_atstart = np.cross(trendline_z_axis, Start_r_3d_atstart)
-    Start_n_3d_atstart = 1 / np.linalg.norm(Start_n_3d_atstart) * Start_n_3d_atstart
-
-    # Biegepunkt an Start_p einfügen
-    # bend_pts_xy = np.insert(bend_pts_xy, -1, np.array([Start_p_2d[0], Start_p_2d[1]]), axis=0)
-    # bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]
-    # print(bend_pts_xy) #Comment_DB: TEST (E.G. 5 BENDS PLUS START AND END EDGE)
-
-    ##############################################################################################################
-
-
-
-
-
-
-
     ###2D-xy-PLOT
-    #plt.plot(x_list, tri_distance_xy, 'ro', linewidth=2.0)  # Abstand zur Trendline
     plt.plot(xy_patch_curve[:, 0], xy_patch_curve[:, 1], 'bo', linewidth=2.0,label='ohne Glättung')  # äquidistante Punkte
-    #plt.plot(xy_singlepoints[:,0],xy_singlepoints[:,1],'bo')
-    #plt.plot(xy_patch_curve_raw[:,0],xy_patch_curve_raw[:,1],'ro')
+
     plt.plot(xy_patch_curve[:, 0], y_smooth, color='r', linewidth = 3, label ='Savitzky-Golay')  # SavGol-Glättung
 
     plt.plot(bend_pts_xy[:, 0], bend_pts_xy[:, 1], color='green', linewidth=3.0, label='lineare Angleichung')  # Streckenweise linear (nur Eckpunkte)
-    #plt.plot(bend_pts_xy_curve[:,0],bend_pts_xy_curve[:,1],c='r',linewidth=3.0)    #alle Punkte auf linearer Strecke
-
-    #plt.plot(x_pos_trendline_center, y_pos_trendline_center, marker='o', color='black')  # Startpunkt 2D
-    # plt.plot(next_bend_pts_from_center[0],next_bend_pts_from_center[1],marker='o',color='y')   #Nächster Punkt in Trendline
     plt.axis([x_list[0] - 50, x_list[-1] + 50, -1 * max(tri_distance_xy)-50, max(tri_distance_xy)+50])
-    # plt.show()
+
     plt.xlabel('[ mm ]')
     plt.ylabel('[ mm ]')
     plt.legend()
-    #######################################################################################################################
-    ###############3D-PLOTTING################################################################################################
-    #######################################################################################################################
+
+    ###############3D-PLOTTING################
 
     figure = pyplot.figure() #Comment_DB: 3D plot of objective shape
     axes = mplot3d.Axes3D(figure)
@@ -1040,106 +829,12 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
 
     axes.scatter([999999990],[9999999900],[9999999900],linewidths=0.0001, alpha = 0.5, label = "Geometriebereich") #Comment_DB: label in legend
 
-
-    ###TODO
-
-    #if startpatch is not None:
-        #axes.scatter(startpatch[:,0],startpatch[:,1],startpatch[:,2],c='y')
-
-
-
-
-    # POINTCLOUD & POINTCLOUDCENTER
-    #axes.scatter(patch_pc[:,0],patch_pc[:,1],patch_pc[:,2],c='b')
-    #axes.scatter(triangle_verts_pc[:,0],triangle_verts_pc[:,1],triangle_verts_pc[:,2], c = 'g')
     axes.scatter(datamean[0],datamean[1],datamean[2],c='g')
-    # print("pcc",pcc)
 
     # TRENDLINE
-    #axes.scatter(cuboid[:,0],cuboid[:,1],cuboid[:,2],c='y')
     axes.plot(*pc_axes(patch_pc)[0].T,label='Trendlinie', c='red') #Comment_DB: *pc_axes is *args, and .T is np.transpose
-
-    #axes.plot3D(*pc_axes(patch_pc)[1].T,c='r')
-    #axes.plot3D(*pc_axes(patch_pc)[2].T,c='r')
-    #axes.scatter(sorted_projection_points[:,0],sorted_projection_points[:,1],sorted_projection_points[:,2],c='black')
-    # axes.scatter(sorted_projection_points[c][0],sorted_projection_points[c][1],sorted_projection_points[c][2],c='g')
-    #axes.scatter(trendline_center[0], trendline_center[1], trendline_center[2], c='r')
-    #axes.scatter(startverts[:,0],startverts[:,1],startverts[:,2],c="red")
-    #axes.scatter(endverts[:,0],endverts[:,1],endverts[:,2],c='red')
-    #axes.scatter(endvert_proj[0], endvert_proj[1], endvert_proj[2], c="black")
-    #axes.scatter(startvert_proj[0],startvert_proj[1],startvert_proj[2],c="black")
-    #axes.scatter(endvert_proj[0], endvert_proj[1], endvert_proj[2], c="black")
-    #axes.scatter((sorted_projection_points[-1]+154.96*trendline_y_axis)[0],(sorted_projection_points[-1]+154.96*trendline_y_axis)[1],(sorted_projection_points[-1]+154.96*trendline_y_axis)[2],c='black')
-    #k=0
-    #axes.scatter(sorted_projection_points[k][0],sorted_projection_points[k][1],sorted_projection_points[k][2],c='g')
     axes.scatter(patch_start[0], patch_start[1], patch_start[2], c="black")
-    #axes.scatter(startvert_3d[0], startvert_3d[1], startvert_3d[2], c="black")
-    #axes.scatter(endvert_3d[0], endvert_3d[1], endvert_3d[2], c='black')
     axes.scatter(patch_end[0],patch_end[1],patch_end[2],c='black')
-    #axes.scatter(trendline[0][0],trendline[0][1],trendline[0][2],c='r')
-    # tx2,ty2,tz2=[datamean[0],datamean[0]+20*trendline_y_axis[0]],[datamean[1],datamean[1]+20*trendline_y_axis[1]],[datamean[2],datamean[2]+20*trendline_y_axis[2]]
-    # plt.plot(tx2, ty2, tz2, marker='o', c='b')
-
-    #axes.scatter(Start_p_mid[0], Start_p_mid[1], Start_p_mid[2], c='r')
-    #axes.scatter(trendline_center[0], trendline_center[1], trendline_center[2], c='g')
-
-    # DREIECKS-ID PLOT
-    #axes.scatter(triangles[tri_id][:, 0], triangles[tri_id][:, 1], triangles[tri_id][:, 2],c='r')
-    #axes.scatter(triangles[12][:, 0], triangles[12][:, 1], triangles[12][:, 2],c='r')
-
-    #axes.scatter(sorted_centerpoints[:,0],sorted_centerpoints[:,1],sorted_centerpoints[:,2],c='b')
-
-    # Normalenvektoren in xy-Ebene projiziert
-    Normpoints_gamma = []
-    for i in range(len(Normlist_gamma)):
-        n = sorted_projection_points[i] + 30 * Normlist_gamma[i]
-        Normpoints_gamma.append(n)
-    Normpoints_gamma = np.asarray(Normpoints_gamma)
-
-    for i in range(len(Normpoints_gamma)):
-        xx1, yy1, zz1 = [sorted_projection_points[i][0], Normpoints_gamma[i][0]], [sorted_projection_points[i][1],
-                                                                                   Normpoints_gamma[i][1]], [
-                            sorted_projection_points[i][2], Normpoints_gamma[i][2]]
-        #plt.plot(xx1, yy1, zz1, marker='o', c='g')
-
-    # Auf Trendline projizierte Normalenvektoren
-    Normpoints = []
-    for i in range(len(Normlist)):
-        n = sorted_projection_points[i] + 40 * Normlist[i]
-        Normpoints.append(n)
-    Normpoints = np.asarray(Normpoints)
-    for i in range(len(Normpoints)):
-        x1, y1, z1 = [sorted_projection_points[i][0], Normpoints[i][0]], [sorted_projection_points[i][1],
-                                                                          Normpoints[i][1]], [
-                         sorted_projection_points[i][2], Normpoints[i][2]]
-        # plt.plot(x1, y1, z1, marker='o', c='y')
-
-
-    # Auf Dreiecksmittelpunkte projizierte Normalenvektoren
-    Normpoints_orig = []
-    for i in range(len(Normlist)):
-        n = sorted_centerpoints[i] + 40 * Normlist[i]
-        Normpoints_orig.append(n)
-    Normpoints_orig = np.asarray(Normpoints_orig)
-    for i in range(len(tri_centerpoints(triangles))):
-        x2, y2, z2 = [sorted_centerpoints[i][0], Normpoints_orig[i][0]], [sorted_centerpoints[i][1],
-                                                                          Normpoints_orig[i][1]], [
-                         sorted_centerpoints[i][2], Normpoints_orig[i][2]]
-        #plt.plot(x2, y2, z2, marker='o', c='r')
-
-    # xy_Distance_Points, 2D Projektion auf Ebene:
-    #axes.scatter(tri_distance_xy_point[:, 0], tri_distance_xy_point[:, 1], tri_distance_xy_point[:, 2],c='blue',label='projizierte Dreiecksmittelpunkte')
-
-    # Start_r_mid COMMENT_DB: NOT USED
-    x4, y4, z4 = [Start_p_mid[0], Start_p_mid[0] + 20 * Start_r_3d[0]], [Start_p_mid[1],
-                                                                         Start_p_mid[1] + 20 * Start_r_3d[1]], [
-                     Start_p_mid[2], Start_p_mid[2] + 20 * Start_r_3d[2]]
-    #plt.plot(x4, y4, z4, marker='o', c='r')
-
-    # Start_n_3d COMMENT_DB: NOT USED
-    x5, y5, z5 = [Start_p_mid[0],Start_p_mid[0]+20*Start_n_3d[0]],[Start_p_mid[1],Start_p_mid[1]+20*Start_n_3d[1]],\
-                 [Start_p_mid[2],Start_p_mid[2]+20*Start_n_3d[2]]
-    #plt.plot(x5, y5, z5, marker='o',c='r')
 
     # von PCC gemittelter Normalenvektor
     x3, y3, z3 = [datamean[0], datamean[0] + 500 * avg_tri_norm[0]], [datamean[1],
@@ -1148,7 +843,7 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
     plt.plot(x3,y3,z3,marker='o',c='green')
 
     patch_meshpoints = [] #Comment_DB: is not used
-    verts = [list(zip(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2]))] #Comment_DB: not used
+
     for i in range(len(bestPatch_patternpoints) - 2):
         verts = [list(
             zip([bestPatch_patternpoints[i][0], bestPatch_patternpoints[i + 1][0], bestPatch_patternpoints[i + 2][0]], \
@@ -1158,116 +853,15 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
         patch_meshpoints.append(verts) #Comment_DB: is not used
     axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
-
-
     face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
-    face_color2 = [1, 1, 1]
-    face_color3 = [0.5, 0.5, 0.5]
     patch_visual.set_facecolor(face_color)
-    #patch_visual.set_edgecolor([1, 1, 1]) #Comment_DB: already in above Poly3Dcollection line
     axes.legend()
     axes.add_collection3d(patch_visual) #Comment_DB: stl mesh file
-
-    #axes.scatter(1.0709,141.2,2.00,c='green')
-    # scale = your_mesh.points.flatten()
-    # axes.auto_scale_xyz(scale, scale, scale)
-    # plt.autoscale(enable=True)
-    # Show the plot to the screen
 
     axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
     axes.set_xbound(-150, 150)
     axes.set_ybound(-50, 250)
     axes.set_zbound(-150, 150)
-
-    """ #Comment_DB: plotly code
-    def stl2mesh3d(stl_mesh):
-        # stl_mesh is read by nympy-stl from a stl file; it is  an array of faces/triangles (i.e. three 3d points)
-        # this function extracts the unique vertices and the lists I, J, K to define a Plotly mesh3d
-        p, q, r = stl_mesh.vectors.shape  # (p, 3, 3)
-        # the array stl_mesh.vectors.reshape(p*q, r) can contain multiple copies of the same vertex;
-        # extract unique vertices from all mesh triangles
-        vertices, ixr = np.unique(stl_mesh.vectors.reshape(p * q, r), return_inverse=True, axis=0)
-        I = np.take(ixr, [3 * k for k in range(p)])
-        J = np.take(ixr, [3 * k + 1 for k in range(p)])
-        K = np.take(ixr, [3 * k + 2 for k in range(p)])
-        return vertices, I, J, K
-
-    vertices, I, J, K = stl2mesh3d(your_mesh)
-    x, y, z = vertices.T
-
-    colorscale = [[0, '#e5dee5'], [1, '#e5dee5']]
-
-    mesh3D = go.Mesh3d(
-        x=x,
-        y=y,
-        z=z,
-        i=I,
-        j=J,
-        k=K,
-        flatshading=True,
-        colorscale=colorscale,
-        intensity=z,
-        name='AT&T',
-        showscale=False)
-
-    title = "Mesh3d from a STL file<br>AT&T building"
-    layout = go.Layout(paper_bgcolor='rgb(1,1,1)',
-                       title_text=title, title_x=0.5,
-                       font_color='white',
-                       width=1280,
-                       height=800,
-                       scene_camera=dict(eye=dict(x=1.25, y=-1.25, z=1)),
-                       scene_xaxis_visible=False,
-                       scene_yaxis_visible=False,
-                       scene_zaxis_visible=False)  # Comment_DB: adding autosize=True uses too much memory
-
-
-
-
-
-
-
-    fig = go.Figure(data=[mesh3D], layout=layout)
-
-
-
-    fig.data[0].update(lighting=dict(ambient=0.18,
-                                     diffuse=1,
-                                     fresnel=.1,
-                                     specular=1,
-                                     roughness=.1,
-                                     facenormalsepsilon=0))
-    fig.data[0].update(lightposition=dict(x=3000,
-                                          y=3000,
-                                          z=10000));
-
-    # fig.add_trace(go.Scatter3d(*pc_axes(patch_pc)[0].T], mode='lines')) #mode='lines'
-    fig.add_trace(go.Scatter3d(x=[patch_start[0], patch_end[0]], y=[patch_start[1], patch_end[1]], z=[patch_start[2], patch_end[2]], mode='markers'))
-    # fig.add_trace(go.Scatter3d(x=[patch_end[0]], y=[patch_end[1]], z=[patch_end[2]]), mode='markers')
-    fig.add_trace(go.Scatter3d(x=[x3], y=[y3], z=[z3], mode='markers'))
-    fig.add_trace(go.Scatter3d(x=[bestPatch_patternpoints[:, 0]], y=[bestPatch_patternpoints[:, 1]],
-                               z=[bestPatch_patternpoints[:, 2]], mode='markers'))
-
-    def show_in_window(fig):
-
-
-        plotly.offline.plot(fig, filename='name.html', auto_open=False)
-
-        app = QApplication(sys.argv)
-        web = QWebEngineView()
-        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "name.html"))
-        web.load(QUrl.fromLocalFile(file_path))
-        # web.setZoomFactor(50) #Comment_DB: Ineffective
-        web.setZoomFactor(1.7)
-        # web.set
-
-        web.show()
-
-        sys.exit(app.exec_())
-
-    show_in_window(fig)
-    """
-
 
     pyplot.axis('off')
     pyplot.show(figure)
