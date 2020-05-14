@@ -292,7 +292,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589386069339</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="stl_preprocessing wird gekürzt weiterhin&#10;Nicht gebrauchte Variablen rausgeschmissen">
+      <created>1589443019213</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1589443019213</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -336,7 +343,8 @@
     <MESSAGE value="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end" />
     <MESSAGE value="stl_preprocessing wird gekürzt" />
     <MESSAGE value="stl_preprocessing wird gekürzt weiterhin" />
-    <option name="LAST_COMMIT_MESSAGE" value="stl_preprocessing wird gekürzt weiterhin" />
+    <MESSAGE value="stl_preprocessing wird gekürzt weiterhin&#10;Nicht gebrauchte Variablen rausgeschmissen" />
+    <option name="LAST_COMMIT_MESSAGE" value="stl_preprocessing wird gekürzt weiterhin&#10;Nicht gebrauchte Variablen rausgeschmissen" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

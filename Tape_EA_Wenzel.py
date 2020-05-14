@@ -838,7 +838,7 @@ def show_chromo(chromo):
                                                   alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
     testpatch_vector = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
     triangles = testpatch_vector.vectors
-    patch_pc = stlprep3_6.patch_pointcloud(triangles)
+    patch_pc = stlprep3_6.patch_pointcloud_weighted_by_area(triangles)
     axes.scatter(points_all_filled_up[:, 0], points_all_filled_up[:, 1], points_all_filled_up[:, 2], c='y')
     # Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
     patch_meshpoints = []
