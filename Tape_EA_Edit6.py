@@ -1433,8 +1433,8 @@ patch_visual = mplot3d.art3d.Poly3DCollection(your_mesh.vectors, linewidths=1,
                                               alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
 # patch_visual.set_facecolor([0.5, 0.5, 1])
 # axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors,linewidths=1, alpha=0.01))
-testpatch_vector = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
-triangles = testpatch_vector.vectors
+patch_vectors_of_stl_input = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh. Added to show point cloud
+triangles = patch_vectors_of_stl_input.vectors
 patch_pc = stlprep3_6.patch_pointcloud(triangles)
 # axes.scatter(patch_pc[:,0],patch_pc[:,1],patch_pc[:,2],c='b') #Comment_DB: added to show point cloud
 axes.scatter(bestPatch[:, 0], bestPatch[:, 1], bestPatch[:, 2], c='y')
