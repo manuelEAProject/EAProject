@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -285,7 +285,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589383464625</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="stl_preprocessing wird gekürzt weiterhin">
+      <created>1589386069339</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1589386069339</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -328,7 +335,8 @@
     <MESSAGE value="List of Points done" />
     <MESSAGE value="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end" />
     <MESSAGE value="stl_preprocessing wird gekürzt" />
-    <option name="LAST_COMMIT_MESSAGE" value="stl_preprocessing wird gekürzt" />
+    <MESSAGE value="stl_preprocessing wird gekürzt weiterhin" />
+    <option name="LAST_COMMIT_MESSAGE" value="stl_preprocessing wird gekürzt weiterhin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

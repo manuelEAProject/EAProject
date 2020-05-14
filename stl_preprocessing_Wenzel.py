@@ -477,14 +477,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
             curve_divergence_y.append([bend_pts_xy_curve[i][0], ((bend_pts_xy_curve[i][0]-xy_patch_curve[i][0])**2+(bend_pts_xy_curve[i][1]-y_smooth[i])**2)**0.5]) #Comment_DB: (x-coord vs. change in y-coord) take the x coord and y-distance between linear curve and sav-gol curve and append
         curve_divergence_y = np.asarray(curve_divergence_y)
 
-        #Comment_DB: curve_divergence in terms of euclidean distance
-        curve_divergence_list = distancelist.cdist(bend_pts_xy_curve, xy_savgol_curve).min(axis=1) #Comment_DB: min dist of each point in bend_pts_xy_curve to any point in xy_savgol_curvehttps://stackoverflow.com/questions/48887912/find-minimum-distance-between-points-of-two-lists-in-python
-        curve_divergence = []
-        for i in range(len(bend_pts_xy_curve)):
-            curve_divergence.append([bend_pts_xy_curve[i][0], curve_divergence_list[i]])
-        curve_divergence = np.asarray(curve_divergence)
-
-
         max_divergence = max([(v, i) for i, v in enumerate(curve_divergence_y[:, 1])]) #Comment_DB: returns distance, counter (Uses new curve_divergence)
 
         #Comment_DB: We know at which x-coord of bend_pts_xy_curve the max_divergence happens --> counter i
@@ -503,60 +495,11 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
         j = 1
 
-        for i in range(1, len(bend_pts_xy)):
-            while bend_pts_xy_curve[-1][0] < bend_pts_xy[i][0]:
-                y_add = bend_pts_xy_curve[-1][1] + (bend_pts_xy[i - 1][1] - bend_pts_xy[i][1]) / \
-                        (bend_pts_xy[i - 1][0] - bend_pts_xy[i][0]) * (xy_patch_curve[j][0] - xy_patch_curve[j - 1][0])
-                bend_pts_xy_curve.append([xy_patch_curve[j][0], y_add])
-                j = j + 1
-
-        bend_pts_xy_curve = np.asarray(bend_pts_xy_curve) #Comment_DB: the bending line. While loop, therefore repeat until insert_pts = False
-
     ###### Startparameter extrahieren #####
 
-    # Mittelpunkt auf Trendlinie setzen, -> Mitte zwischen den Randpunkten
-    trendline_center = (sorted_projection_points[0] + sorted_projection_points[-1]) / 2
-    x_pos_trendline_center = np.linalg.norm(trendline_center - sorted_projection_points[0]) #Comment_DB: x coordinate of trendline midpoint
-
-    trendline_start = sorted_projection_points[0] #Comment_DB: NEW
-    x_pos_trendline_start = startvert_trendline[0]
-
-    # find the next bending point from Start_p_mid in trendline direction
-    next_bend_pts_from_center = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center)] #Comment_DB: x coord of next bending point
-
-    Start_p_ID = find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center) #Comment_DB: find the INDEX of the next bending point in the array. Bending points are in x coordinates. Note: find_nearest(array, value) - find the index of the closest value in an array to a given value
-
-    if next_bend_pts_from_center[0] - x_pos_trendline_center < 0:
-        next_bend_pts_from_center = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_center) + 1]
-        Start_p_ID = Start_p_ID+1 #Comment_DB: Start_p_id is the # of tape sections before Start_p (which is in the middle)!!
-
-    y_pos_trendline_center = bend_pts_xy_curve[find_nearest(bend_pts_xy_curve[:, 0], x_pos_trendline_center)][1]
-
-
-    # find the next bending point from start of tape (startvert_proj) in trendline direction
-    next_bend_pts_from_start = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start)]
-
-
-    Start_p_ID_fromstart = find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start)
-
-    if next_bend_pts_from_start[0] - x_pos_trendline_start < 0: #Comment_DB: x_coord distance is negative
-        next_bend_pts_from_start = bend_pts_xy[find_nearest(bend_pts_xy[:, 0], x_pos_trendline_start) + 1]
-        Start_p_ID_fromstart = Start_p_ID_fromstart + 1
-
-    # Start_p in 2D und 3D
-    Start_p_3d = sorted_projection_points[
-                      0] + trendline_x_axis * x_pos_trendline_center + trendline_y_axis * y_pos_trendline_center
 
     ###Start_r in 2D & 3D###
-
-
-
     pos_or_neg_adjust_xy = 1
-
-    Start_r_3d = np.linalg.norm(next_bend_pts_from_center[0] - x_pos_trendline_center) * trendline_x_axis + \
-                 pos_or_neg_adjust_xy * np.linalg.norm(
-        next_bend_pts_from_center[1] - y_pos_trendline_center) * trendline_y_axis
-    Start_r_3d = 1 / np.linalg.norm(Start_r_3d) * Start_r_3d        #normieren
 
     ###Start_r_atstart in 2D & 3D### COMMENT_DB: NEW DEFINITION
     Start_r_2d_atstart = bend_pts_xy[1] - bend_pts_xy[0]
@@ -564,9 +507,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     Start_r_3d_atstart = Start_r_2d_atstart[0] * trendline_x_axis + \
                  pos_or_neg_adjust_xy * Start_r_2d_atstart[1] * trendline_y_axis
     Start_r_3d_atstart = 1 / np.linalg.norm(Start_r_3d_atstart) * Start_r_3d_atstart
-
-    Start_n_3d = np.cross(trendline_z_axis, Start_r_3d)
-    Start_n_3d = 1 / np.linalg.norm(Start_n_3d) * Start_n_3d        #normieren
 
     ## Start_n_3d_atstart
     Start_n_3d_atstart = np.cross(trendline_z_axis, Start_r_3d_atstart)
@@ -602,11 +542,11 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
         p1=np.array([xy_patch_curve[i][0], y_smooth[i]])
         L_aim =L_aim + np.linalg.norm(p1-p0)
 
-    start_parameter = [Start_p_3d, Start_r_3d, Start_n_3d, l_list, L_aim, beta_list, Start_p_ID, startvert_proj,
-                       endvert_proj, Start_p_ID_fromstart, Start_r_3d_atstart, Start_n_3d_atstart, len(bend_pts_xy)]
+    start_parameter = [l_list, L_aim, beta_list, startvert_proj,
+                       endvert_proj, Start_r_3d_atstart, Start_n_3d_atstart]
     return start_parameter
 
-def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_distance,bestPatch_patternpoints,patch_start,patch_end):
+def show_startstrip(input_file,poly_order,savgol_window_quotient,max_distance,bestPatch_patternpoints,patch_start,patch_end):
     #Calculation:
     # Read in the file:
     testpatch_vector = mesh.Mesh.from_file(input_file)

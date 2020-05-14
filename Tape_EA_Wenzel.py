@@ -477,21 +477,15 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
 # Ruft das stl_preprocessing modul auf und übergibt die stl-Datei an die Funktion startparam
 # Startparam gibt eine Liste mit den berechneten Startparametern zurück:
 
-[Start_p_prep,  # Comment_DKu_Wenzel: No usage anymore!!
- Start_r_prep,  # Comment_DKu_Wenzel: No usage anymore!!
- Start_n,  # Comment_DKu_Wenzel: No usage anymore!!
- start_lengths,
+[start_lengths,
  L_aim,  # Comment_DB: already in [mm]
  start_betas,
- Start_p_id,# Comment_DKu_Wenzel: No usage anymore!! # Comment_DB: The I.D. of the next bending point from start p mid in trendline direction
+
  patch_start,
  patch_end,
 
- Start_p_id_fromstart,  # Comment_DKu_Wenzel: No usage anymore!!
  Start_direction_prep_fromstart,
- Start_normal_atstart,
- AnzahlKnicke_too  # Comment_DKu_Wenzel: Verschieden von AnzahlKnicke(+2) und keine Benutzung
- ] = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
+ Start_normal_atstart ] = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
 
 AnzahlKnicke = len(start_lengths) - 1
 
@@ -936,7 +930,7 @@ startchromo = create_start_chromo()
 p = initialize_Population_with_global_Settings()
 
 # Ergebnisse aus Vorverarbeitung visualisieren:
-stlprep3_6.show_startstrip(input_file, ListOfPoints(startchromo)[0], poly_order, window_quotient, max_distance,
+stlprep3_6.show_startstrip(input_file, poly_order, window_quotient, max_distance,
                            ListOfPoints(startchromo)[3], patch_start, patch_end)
 
 ##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
