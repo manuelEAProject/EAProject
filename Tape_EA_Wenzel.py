@@ -830,20 +830,15 @@ def show_chromo(chromo):
     points_all_filled_up = ListOfPoints(chromo)[0]
     patch_visualisation_points = ListOfPoints(chromo)[3]
 
-    #############PLOTTING########### (#Comment_DB: Final patch)
+    #############PLOTTING###########
     figure = pyplot.figure()  # Comment_DB: create a new figure
     axes = mplot3d.Axes3D(figure)
-    patch_vectors_of_stl_input = mesh.Mesh.from_file(input_file)
-    patch_visual = mplot3d.art3d.Poly3DCollection(patch_vectors_of_stl_input.vectors, linewidths=1,
-                                                  alpha=0.5)  # edgecolor = [1, 1, 1] #Comment_DB: added edgecolor to make the edges visible
+    patch_visual = mplot3d.art3d.Poly3DCollection(stlprep3_6.triangle_vectors_of_stl, linewidths=1,alpha=0.5)
+
     # Comment_DB: stl mesh. Added to show point cloud
-    triangles = patch_vectors_of_stl_input.vectors
-    patch_pc = stlprep3_6.patch_pointcloud_weighted_by_area(triangles)
     axes.scatter(points_all_filled_up[:, 0], points_all_filled_up[:, 1], points_all_filled_up[:, 2], c='y')
     # Plotten des Patches. Die Knickkantenpunkte werden mit Dreiecken geplottet.
-    patch_meshpoints = []
-    verts = [
-        list(zip(patch_visualisation_points[:, 0], patch_visualisation_points[:, 1], patch_visualisation_points[:, 2]))]
+
     for i in range(len(patch_visualisation_points) - 2):
         verts = [
             list(zip(
@@ -854,16 +849,17 @@ def show_chromo(chromo):
                 [patch_visualisation_points[i][2], patch_visualisation_points[i + 1][2],
                  patch_visualisation_points[i + 2][2]]))]
         axes.add_collection3d(Poly3DCollection(verts), zs='z')
-        patch_meshpoints.append(verts)
+
     # Biegestellen rot färben:
     axes.scatter(patch_visualisation_points[:, 0], patch_visualisation_points[:, 1], patch_visualisation_points[:, 2],
                  c='r')
-    patch_meshpoints = np.concatenate(np.asarray(patch_meshpoints), axis=0)
+
     axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
     axes.scatter(patch_end[0], patch_end[1], patch_end[2], c='black')
     face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
     patch_visual.set_facecolor(face_color)
     axes.add_collection3d(patch_visual)
+
     # Show the plot to the screen
     axes.autoscale(enable=False, axis='both')  # you will need this line to change the Z-axis
     axes.set_xbound(-100, 100)
