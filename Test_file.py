@@ -5,7 +5,8 @@ var_range = 1
 
 chromo_resolution=100
 
-chromo=[51,53,52,54]
+
+"""
 var_range = 0.8
 variation_start = [(1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value) for gen_value in chromo[-3:-1:1]]
 
@@ -15,6 +16,7 @@ print (list(enumerate(chromo)))
 
 variation_start.append(55)
 print (variation_start)
+"""
 """
 variation_start = 1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value
 

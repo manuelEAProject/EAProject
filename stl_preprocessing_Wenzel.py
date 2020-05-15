@@ -27,13 +27,13 @@ def distance(p1,p2):
     return distance
 
 #Dreiecksnormalen(sortiert)
-def tri_normals():
+def tri_normals(stl_normals):
     normals=[]
     #We generate our own normals with the id_list. Notice that the triangle order of stl_normals and the vertices
     #(triangles) is not the same
 
     #Comment_DKu_Wenzel: We are just taking the length of tri_id_sorted. So we iterate normal and not the different id
-    for i in range(len(triangle_vectors_of_stl)):
+    for i in range(num_of_triangles):
 
         v1= triangle_vectors_of_stl[i][0] - triangle_vectors_of_stl[i][1]
         v2= triangle_vectors_of_stl[i][0] - triangle_vectors_of_stl[i][2]
@@ -47,43 +47,24 @@ def tri_normals():
     # Normalenvektoren werden immer in positive z-Richtung ausgerichtet
 
     # the following average stl_normal always point at the outside of the object:
-    avg_stl_normal = sum(stl_normals) / len(stl_normals)
+    avg_stl_normal = sum(stl_normals) / num_of_triangles
     # average of the created normals:
-    avg_sorted_normal = sum(normals) / len(normals)
+    avg_sorted_normal = sum(normals) / num_of_triangles
 
 
     true_when_stl_and_tri_normal_not_same_direction = avg_sorted_normal[0] * avg_stl_normal[0] < 0
     true_when_z_from_tri_normal_neg = avg_sorted_normal[2] < 0
 
+    # Comment_DKu_Wenzel: Die if Bedingung ist seltsam
     if true_when_stl_and_tri_normal_not_same_direction or true_when_z_from_tri_normal_neg:
         normals=np.negative(normals)
 
     return normals
 
-#Winkel zwischen den Dreiecksflächen
-"""
-
-def normal_angles(tri_normals):
-    normal_angles=[]
-    for i in range(len(tri_normals)-1):
-        n1=tri_normals[i]
-
-        n2=tri_normals[i+1]
-
-        dot=np.dot(n1,n2)
-
-        if (1-dot)<0.0002:
-            dot=1
-        angle = np.arccos(dot)*180/math.pi
-        normal_angles.append(angle)
-    normal_angles=np.asarray(normal_angles)
-    return normal_angles
-"""
-
 #Dreiecksmittelpunkt
 def tri_centerpoints():
     tri_centerpoints=[]
-    for i in range(len(triangle_vectors_of_stl)):
+    for i in range(num_of_triangles):
         center=np.array([(triangle_vectors_of_stl[i][0][0] + triangle_vectors_of_stl[i][1][0] + triangle_vectors_of_stl[i][2][0]) / 3, (triangle_vectors_of_stl[i][0][1] + triangle_vectors_of_stl[i][1][1] + triangle_vectors_of_stl[i][2][1]) / 3, (triangle_vectors_of_stl[i][0][2] + triangle_vectors_of_stl[i][1][2] + triangle_vectors_of_stl[i][2][2]) / 3])
         tri_centerpoints.append(center)
 
@@ -93,19 +74,19 @@ def tri_centerpoints():
 def tri_areas():
     #Berechnung der Dreiecksflächen und Speichern in einer Liste
     tri_surface = []
-    for i in range(len(tri_centerpoints)):
+    for i in range(num_of_triangles):
         tri_surface.append(0.5 * (
             np.linalg.norm((triangle_vectors_of_stl[i][0] - triangle_vectors_of_stl[i][1]) - (triangle_vectors_of_stl[i][0] - triangle_vectors_of_stl[i][2]))))
     tri_surface = np.asarray(tri_surface)
     return tri_surface
 
-def calc_avg_tri_norm_weighted_by_area():
+def calc_avg_tri_norm_weighted_by_area(tri_areas,triangle_normals):
     weighted_norms = []
-    for i in range(len(tri_areas)):
+    for i in range(num_of_triangles):
         weighted_norms.append((tri_areas[i] / sum(tri_areas)) * triangle_normals[i])
-    avg_tri_norm_weighted = sum(weighted_norms)
+    avg_tri_normal_weighted = sum(weighted_norms)
 
-    return avg_tri_norm_weighted
+    return avg_tri_normal_weighted
 
 #Punktwolke aus den Dreieckspunkten und Dreiecksmittelpunkten
 def patch_pointcloud_weighted_by_area():
@@ -113,7 +94,6 @@ def patch_pointcloud_weighted_by_area():
     centerpoints_weights_area_tri = weights_center_points_by_percentil_area()
 
     # für jedes Dreieck werden die Mittelpunkte so oft gewertet (in die Punktwolke getan) wie es in centerpoints_weights_area_tri steht
-    num_of_triangles = len(triangle_vectors_of_stl)
     pointcloud_weighted=[]
 
     for i in range(num_of_triangles):
@@ -148,7 +128,7 @@ def weights_center_points_by_percentil_area():
     # Abbruchbedingung: in der Pointcloud sollen maximal "max_points_in_pc" berechnet werden.
     if max_points_in_pc < estimated_number_points_in_pc:
         print("ERROR: Please use a .stl-object with reduced resolution ")
-        print("Number of triangles: ", len(triangle_vectors_of_stl))
+        print("Number of triangles: ", num_of_triangles)
         print("Estimated number of points in pointcloud:", estimated_number_points_in_pc)
         print("Allowed number of points in pointcloud:", max_points_in_pc)
         exit(1)
@@ -156,7 +136,7 @@ def weights_center_points_by_percentil_area():
     # Im Folgenden wird jedes Dreieck mit dem kleinsten Dreieck verglichen und in centerpoints_weights_area_tri festgehalten, wie
     # oft das kleinste Dreieck in das jeweilige Dreieck hineinpasst.
     centerpoints_weights_area_tri = []
-    for i in range(len(tri_areas)):
+    for i in range(num_of_triangles):
         centerpoints_weights_area_tri.append(math.ceil(tri_areas[i] / lower_percentil_area))
 
     return centerpoints_weights_area_tri
@@ -171,34 +151,23 @@ def pc_trendline():
     maxvals = np.amax(patch_pc_weighted, axis=0)
 
     # It's a straight line, so we only need 2 points.
-    linepts = first_principal_components_pc_weighted[2][0]* np.mgrid[-2*max(maxvals):2*max(maxvals):2j][:, np.newaxis]
+    linepts = trendline_x_axis* np.mgrid[-2*max(maxvals):2*max(maxvals):2j][:, np.newaxis]
 
     # shift by the mean to get the line in the right place
     linepts += center_point_of_cloud_weighted #COMMENT_DB: linepts = linepts + center_point_of_cloud_weighted (shifting it in the same direction as the vv[0] direction vector)
 
     return linepts
 
-def pc_trendline_projection():
+def pc_trendline_projection(tri_centerpoints):
     #SOURCE: https://gamedev.stackexchange.com/questions/72528/how-can-i-project-a-3d-point-onto-a-3d-line
-    trendline_projection = [trendline[0]] #Comment_DKu_Wenzel: Warum linepts0 in der Liste?
+    trendline_projection = [] #Comment_DKu_Wenzel: Warum linepts0 in der Liste?
 
-    for i in range(len(tri_centerpoints)):
+    for i in range(num_of_triangles):
         trendline_projection.append(project_pointtoline(tri_centerpoints[i], trendline[0], trendline[1]))
 
     trendline_projection=np.asarray(trendline_projection)
 
     return trendline_projection
-
-def first_principal_components_pc_weighted():
-    # ->Hauptkomponentenanalyse: https://de.wikipedia.org/wiki/Hauptkomponentenanalyse/Principal Component Analysis(PCA)
-    # aka Singulärwertzerlegung / SVD
-    # SOURCE: https://stackoverflow.com/questions/2298390/fitting-a-line-in-3d
-    # Explanation: https://www.tutorialspoint.com/scipy/scipy_linalg.htm
-
-    # Do an SVD on the mean-centered data.
-    first_principal_components_pc_weighted = np.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
-    # Now the first principal component contains [uu, dd, vv] , where vv[0] is the direction
-    return first_principal_components_pc_weighted
 
 def trendline_axis():
     # Definition der Hauptachsen
@@ -221,8 +190,8 @@ def sort_tri_id_by_trendline():
     # Dreiecke entlang der Trendlinienrichtung an. Es wird eine geordnete Liste der
     # Dreiecks-IDs zurückgegeben
     distance_startpoint_trendline_to_projectionpoint = []
-    for i in range(1, len(trendline_projection_points)):
-        distance = np.array([np.linalg.norm((trendline_projection_points[i] - trendline_projection_points[0])), i - 1])
+    for i in range(num_of_triangles):
+        distance = np.array([np.linalg.norm((trendline_projection_points_tri_centerpoints[i] - trendline[0])), i])
         distance_startpoint_trendline_to_projectionpoint.append(distance)
 
     # Put distances in a array for sorting triangles by size and keeping the global id of triangles
@@ -235,11 +204,11 @@ def sort_tri_id_by_trendline():
     return id_list
 
 #Liste mit den sortierten auf die Trendline projizierten Punkte
-def sort_trendline_projection(trendline_projection_points, sorted_tri_ids):
+def sort_list_by_tri_id(list_to_sort):
     #Die auf die Trendline projizierten Mittelpunkte der Dreiecke werden entlang der Trendline sortiert
     sorted_trendline = []
-    for i in range(len(sorted_tri_ids)):
-        sorted_trendline.append(trendline_projection_points[sorted_tri_ids[i] + 1])
+    for i in range(num_of_triangles):
+        sorted_trendline.append(list_to_sort[triangle_ID_sorted_on_trendline[i]])
     sorted_trendline=np.asarray(sorted_trendline)
     return sorted_trendline
 
@@ -285,13 +254,16 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
     #Read in the file:
     patch_vectors_of_stl_input = mesh.Mesh.from_file(input_file) #Comment_DB: stl mesh
+    stl_normals = patch_vectors_of_stl_input.normals
+
     global triangle_vectors_of_stl
     triangle_vectors_of_stl = patch_vectors_of_stl_input.vectors #Comment_DB: triangle edges (wireframe)
+    # Number of triangles, better then using always different len(list)
+    global num_of_triangles
+    num_of_triangles = len(triangle_vectors_of_stl)
 
-    global stl_normals
     global triangle_normals
-    stl_normals = patch_vectors_of_stl_input.normals
-    triangle_normals = tri_normals()
+    triangle_normals = tri_normals(stl_normals)
 
     global tri_centerpoints # Comment_DKu_Wenzel: basically the unweighted point cloud
     tri_centerpoints= tri_centerpoints()
@@ -300,9 +272,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     tri_areas = tri_areas()
 
     global avg_tri_norm_weighted
-    avg_tri_norm_weighted = calc_avg_tri_norm_weighted_by_area()
-
-
+    avg_tri_norm_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, triangle_normals)
     #Creating pointcloud:
     global patch_pc_weighted
     patch_pc_weighted = patch_pointcloud_weighted_by_area() #!!!!!Comment_DB: The blue points!
@@ -313,48 +283,27 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     # The first principal component contains [uu, dd, vv] , where vv[0] is the direction
     global first_principal_components_pc_weighted
     first_principal_components_pc_weighted = np.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
-
     global trendline_x_axis, trendline_y_axis, trendline_z_axis
     trendline_x_axis, trendline_y_axis, trendline_z_axis = trendline_axis()
-
     # Creating trendline
     global trendline
     trendline = pc_trendline()
 
     # Creating trendline_projection_points:
-    global trendline_projection_points
-    trendline_projection_points = pc_trendline_projection()
+    global trendline_projection_points_tri_centerpoints
+    trendline_projection_points_tri_centerpoints = pc_trendline_projection(tri_centerpoints)
 
-    global tri_id_sorted
-    tri_id_sorted = sort_tri_id_by_trendline()
+    global triangle_ID_sorted_on_trendline
+    triangle_ID_sorted_on_trendline = sort_tri_id_by_trendline()
 
     #Sorted list of triangle points with trendline_projection_points:
-    global sorted_projection_points
-    sorted_projection_points = sort_trendline_projection(trendline_projection_points, tri_id_sorted)
-
-
-
-    # Dreiecksmittelpunkte im Sinne der Trendlinie entlang sortieren
-    sorted_centerpoints = []
-
-    for i in range(len(triangle_vectors_of_stl)):
-        sorted_centerpoints.append(tri_centerpoints[tri_id_sorted[i]])
-    sorted_centerpoints = np.asarray(sorted_centerpoints)
+    global sorted_projection_points_tri_centerpoints, sorted_centerpoints
+    sorted_projection_points_tri_centerpoints = sort_list_by_tri_id(trendline_projection_points_tri_centerpoints)
+    sorted_centerpoints = sort_list_by_tri_id(tri_centerpoints)
 
     # Start- und Endkante des Patches finden:
-    # -> wenn bei großen Randdreiecken nur der Mittelpunkt benutzt wird, wird das Tape zu kurz. Daher werden
-    # bei den Randdreiecken noch die Eckpunkte miteinbezogen
-    startverts = triangle_vectors_of_stl[tri_id_sorted[0]] #Comment_DB: startverts is start vertices
-    endverts = triangle_vectors_of_stl[tri_id_sorted[-1]]
-
-    dist_startverts = []
-    dist_endverts = []
-    for i in range(3):
-        dist_startverts.append(distance(startverts[i], center_point_of_cloud_weighted))
-        dist_endverts.append(distance(endverts[i], center_point_of_cloud_weighted))
-    startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
-    endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
-
+    endvert_3d, startvert_3d = calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weighted, triangle_ID_sorted_on_trendline,
+                                                                               triangle_vectors_of_stl)
     # In Ebene projiziert:
     startvert_proj = project_pointtoplane(startvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
     endvert_proj = project_pointtoplane(endvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
@@ -368,20 +317,22 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     # Für Start und Endpunkte müssen auch die jeweiligen Projektionen auf die Trendline berechnet werden, um den Abstand
     # zu berechnen (COMMENT_DB: insertion of points into sorted_projection_points list)
 
-    sorted_projection_points = np.insert(sorted_projection_points, 0, startvert_trendline, axis=0)
-    sorted_projection_points = np.concatenate((sorted_projection_points, [endvert_trendline]))
+    sorted_projection_points_tri_centerpoints = np.insert(sorted_projection_points_tri_centerpoints, 0, startvert_trendline, axis=0)
+    sorted_projection_points_tri_centerpoints = np.concatenate((sorted_projection_points_tri_centerpoints, [endvert_trendline]))
 
     # x-Werte: Abstand zwischen den sorted_projection_points
+    global x_list
     x_list = []
-    for i in range(len(sorted_projection_points)):
-        x = np.linalg.norm((sorted_projection_points[0] - sorted_projection_points[i]))
+    for i in range(len(sorted_projection_points_tri_centerpoints)):
+        x = np.linalg.norm((sorted_projection_points_tri_centerpoints[0] - sorted_projection_points_tri_centerpoints[i]))
         x_list.append(x)
     x_list = np.asarray(x_list)
+
 
     # Die Dreiecksmittelpunkte werden in x-y-Ebene der Trendline projiziert, um ein 2D Abstandsprofil zu erhalten
     tri_distance_xy_point = [startvert_proj]
 
-    for i in range(len(sorted_centerpoints)):
+    for i in range(num_of_triangles):
         tri_distance_xy_point.append(project_pointtoplane(sorted_centerpoints[i], trendline_z_axis,
                                                           center_point_of_cloud_weighted))
     tri_distance_xy_point.append(endvert_proj)
@@ -390,27 +341,30 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
     # xy-Distanzplot
     # berechnet den Abstand der auf xy-Ebene projizierten Dreiecksmittelpunkte zur Trendline
-
-    tri_distance_xy = []
+    global y_list
+    y_list = []
     for i in range(len(tri_distance_xy_point)):
-        dist = np.linalg.norm(sorted_projection_points[i] - tri_distance_xy_point[i])
+        dist = np.linalg.norm(sorted_projection_points_tri_centerpoints[i] - tri_distance_xy_point[i])
 
         # Vorzeichen ermitteln:
-        if ((sorted_projection_points[i] + dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2 < \
-                ((sorted_projection_points[i] - dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2:
-            tri_distance_xy.append(dist)
+        if ((sorted_projection_points_tri_centerpoints[i] + dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2 < \
+                ((sorted_projection_points_tri_centerpoints[i] - dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2:
+            y_list.append(dist)
         else:
-            tri_distance_xy.append(-dist)
-    tri_distance_xy = np.asarray(tri_distance_xy)
+            y_list.append(-dist)
+    y_list = np.asarray(y_list)
 
     # Funktion des xy-Abstands über die Länge der Trendline. Außerdem werden linear Punkte aufgefüllt, um eine
     # äquidistante Schrittgröße zu erreichen
     xy_patch_curve_step_size = equidistant_step_size
-    xy_patch_curve = [] #Comment_DB: Smoothed blue curve points in array!
-    for i in range(len(tri_distance_xy_point)):
-        xy_patch_curve.append([x_list[i], tri_distance_xy[i]])
 
-    for i in range(1, len(tri_distance_xy)):
+    global xy_patch_curve
+    xy_patch_curve = [] #Comment_DB: Smoothed blue curve points in array!
+
+    for i in range(len(tri_distance_xy_point)):
+        xy_patch_curve.append([x_list[i], y_list[i]])
+
+    for i in range(1, len(y_list)):
 
         x_dist = xy_patch_curve[i][0] - xy_patch_curve[i - 1][0]
         if x_dist > xy_patch_curve_step_size:
@@ -427,10 +381,13 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     # Entlang der x-Werte sortieren
     xy_patch_curve = xy_patch_curve[xy_patch_curve[:, 0].argsort()]
 
+
     # Geglättete y-Werte mit SavitzkyGolay
+    global y_smooth
     y_smooth = smooth_savgol(xy_patch_curve,poly_order,savgol_window_quotient)
 
     # 2D Knicklinie: Start - und Endpunkte;
+    global bend_pts_xy
     bend_pts_xy = []
     bend_pts_xy.append([xy_patch_curve[0][0], y_smooth[0]]) #Comment_DB: start point 2D (x coord, y coord)
 
@@ -456,8 +413,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
         bend_pts_xy_curve = np.asarray(bend_pts_xy_curve) #Comment_DB: This is now one linear curve from start to end point. Everything here is dependent on xy_patch_curve. Below will take divergence into consideration
 
-        #Comment_DB: x,y coordinates of sav-gol curve in an array
-        xy_savgol_curve = np.column_stack((xy_patch_curve[:, 0], y_smooth))
 
         #Comment_DB: curve_divergence in terms of y-distance # Größte Abweichung von geglätteter Kurve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
         curve_divergence_y = []
@@ -535,176 +490,29 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     return start_parameter
 
 
-
-def show_startstrip(input_file,poly_order,savgol_window_quotient,max_distance,bestPatch_patternpoints,patch_start,patch_end):
-
-
-    # Singular value decomposition of the pointcloud to determine the main axis / directions of the patch
-    datamean = patch_pc_weighted.mean(axis=0)
-    uu, dd, vv = np.linalg.svd(patch_pc_weighted - datamean)
-
-    # Definition der Hauptachsen, in denen die Winkel berechnet werden sollen
-    trendline_x_axis = vv[0]
-    trendline_x_axis = (1 / np.linalg.norm(trendline_x_axis)) * trendline_x_axis
-    # avg_tri_norm ist nicht senkrecht zur x-Achse
-    # von pcc + avg_tri_norm und zurück auf x-Achse projizieren
-    trendline_avg_norm_point = datamean + np.dot(avg_tri_norm_weighted, trendline_x_axis) / np.dot(trendline_x_axis,
-                                                                                                   trendline_x_axis) \
-                               * trendline_x_axis
-    # y-Achse ist verbindung von pcc+avg_tri_norm mit dem projizierten Punkt
-    trendline_y_axis = (datamean + avg_tri_norm_weighted) - trendline_avg_norm_point
-    trendline_y_axis = (1 / np.linalg.norm(trendline_y_axis)) * trendline_y_axis
-    trendline_z_axis = np.cross(trendline_x_axis, trendline_y_axis)
-
-    # Dreiecksmittelpunkte im Sinne der Trendlinie entlang sortieren
-    sorted_centerpoints = []
-
-    for i in range(len(triangle_vectors_of_stl)):
-        sorted_centerpoints.append(tri_centerpoints[tri_id_sorted[i]])
-    sorted_centerpoints = np.asarray(sorted_centerpoints)
-
-    # Start- und Endkante des Patches finden:
+def calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weighted, triangle_ID_sorted_on_trendline, triangle_vectors_of_stl):
     # -> wenn bei großen Randdreiecken nur der Mittelpunkt benutzt wird, wird das Tape zu kurz. Daher werden
     # bei den Randdreiecken noch die Eckpunkte miteinbezogen
-    startverts = triangle_vectors_of_stl[tri_id_sorted[0]]
-    endverts = triangle_vectors_of_stl[tri_id_sorted[-1]]
+    startverts = triangle_vectors_of_stl[triangle_ID_sorted_on_trendline[0]]  # Comment_DB: startverts is start vertices
+    endverts = triangle_vectors_of_stl[triangle_ID_sorted_on_trendline[-1]]
     dist_startverts = []
     dist_endverts = []
     for i in range(3):
-        dist_startverts.append(distance(startverts[i],datamean))
-        dist_endverts.append(distance(endverts[i],datamean))
+        dist_startverts.append(distance(startverts[i], center_point_of_cloud_weighted))
+        dist_endverts.append(distance(endverts[i], center_point_of_cloud_weighted))
     startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
     endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
-
-    # In Hauptebene projiziert:
-    startvert_proj = project_pointtoplane(startvert_3d, trendline_z_axis, datamean)
-    endvert_proj = project_pointtoplane(endvert_3d, trendline_z_axis, datamean)
+    return endvert_3d, startvert_3d
 
 
-    # x-Werte: Abstand zwischen den sorted_projection_points
-    x_list = []
-    for i in range(len(sorted_projection_points)):
-        x = np.linalg.norm((sorted_projection_points[0] - sorted_projection_points[i]))
-        x_list.append(x)
-    x_list = np.asarray(x_list)
-
-    #Die Dreiecksmittelpunkte werden in x-y-Ebene der Trendline projiziert, um ein 2D Abstandsprofil zu erhalten
-    tri_distance_xy_point = [startvert_proj]
-
-    for i in range(len(sorted_centerpoints)):
-        tri_distance_xy_point.append(project_pointtoplane(sorted_centerpoints[i], trendline_z_axis,
-                                                          datamean))
-    tri_distance_xy_point.append(endvert_proj)
-    tri_distance_xy_point = np.asarray(tri_distance_xy_point)
-
-    # xy-Distanzplot
-    # berechnet den Abstand der auf xy-Ebene projizierten Dreiecksmittelpunkte zur Trendline
-    tri_distance_xy = []
-    for i in range(len(tri_distance_xy_point)):
-        dist = np.linalg.norm(sorted_projection_points[i] - tri_distance_xy_point[i])
-
-        # Vorzeichen ermitteln:
-        if ((sorted_projection_points[i] + dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2 < \
-                ((sorted_projection_points[i] - dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2:
-            tri_distance_xy.append(dist)
-        else:
-            tri_distance_xy.append(-dist)
-    tri_distance_xy = np.asarray(tri_distance_xy)
-
-    # Funktion des xy-Abstands über die Länge der Trendline. Außerdem werden linear Punkte aufgefüllt, um eine
-    # äquidistante Schrittgröße zu erreichen
-    xy_patch_curve_step_size = equidistant_step_size
-    xy_patch_curve = []
-    for i in range(len(tri_distance_xy_point)):
-        xy_patch_curve.append([x_list[i], tri_distance_xy[i]])
-
-    #Die Punkte sicherheitshalber entlang der x_Achse sortieren
-    xy_patch_curve=np.asarray(xy_patch_curve)
-    xy_patch_curve = xy_patch_curve[xy_patch_curve[:, 0].argsort()]
-    #zurück in Liste überführen um Punkte hinzuzufügen
-    xy_patch_curve_raw_list = []
-    for i in range(len(xy_patch_curve)):
-        xy_patch_curve_raw_list.append([xy_patch_curve[i][0],xy_patch_curve[i][1]])
-
-
-    for i in range(1, len(tri_distance_xy)):
-
-        x_dist = xy_patch_curve_raw_list[i][0] - xy_patch_curve_raw_list[i - 1][0]
-        if x_dist > xy_patch_curve_step_size:
-            additional_steps = math.floor(x_dist / xy_patch_curve_step_size)
-
-
-            for j in range(1, additional_steps + 1):
-
-
-                xy_patch_curve_raw_list.append([xy_patch_curve_raw_list[i - 1][0] + j * xy_patch_curve_step_size, \
-                                       (xy_patch_curve_raw_list[i - 1][1] + (xy_patch_curve_raw_list[i][1] - xy_patch_curve_raw_list[i - 1][1]) \
-                                        / (x_dist) * j * xy_patch_curve_step_size)])
-
-    xy_patch_curve = np.asarray(xy_patch_curve_raw_list)
-
-    xy_patch_curve = xy_patch_curve[xy_patch_curve[:, 0].argsort()]
-
-    y_smooth = smooth_savgol(xy_patch_curve, poly_order, savgol_window_quotient)
-
-    # 2D Knicklinie: Start - und Endpunkte; lokale Extrema der geglätteten SavGol-Kurve
-    bend_pts_xy = []
-    bend_pts_xy.append([xy_patch_curve[0][0], y_smooth[0]])
-    bend_pts_xy.append([xy_patch_curve[-1][0], y_smooth[-1]])
-    bend_pts_xy = np.asarray(bend_pts_xy)
-    bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]
-
-    # Einfügen von weiteren Knickpunkten durch Finden von großen Abweichungen zur Kurve:
-    set_max_divergence = max_distance
-    insert_pts = True
-
-    while insert_pts:
-        bend_pts_xy_curve = []
-        bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
-        j = 1
-        for i in range(1, len(bend_pts_xy)):
-            while bend_pts_xy_curve[-1][0] < bend_pts_xy[i][0]:
-                y_add = bend_pts_xy_curve[-1][1] + (bend_pts_xy[i - 1][1] - bend_pts_xy[i][1]) / \
-                        (bend_pts_xy[i - 1][0] - bend_pts_xy[i][0]) * (xy_patch_curve[j][0] - xy_patch_curve[j - 1][0])
-                bend_pts_xy_curve.append([xy_patch_curve[j][0], y_add])
-                j = j + 1
-
-        bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)
-
-        # Größte Abweichung von geglätteter Kurve:
-        curve_divergence = []
-        for i in range(len(bend_pts_xy_curve)):
-            curve_divergence.append([bend_pts_xy_curve[i][0], abs(bend_pts_xy_curve[i][1] - y_smooth[i])])
-        curve_divergence = np.asarray(curve_divergence)
-        max_divergence = (max([(v, i) for i, v in enumerate(curve_divergence[:, 1])]))
-
-        #Comment_DB: x,y coordinates of sav-gol curve in an array
-
-        bend_pts_xy = np.insert(bend_pts_xy, -1,np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]), axis=0)
-        bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]
-        # no further points, if the chosen maximum distance is not surpassed
-        if max_divergence[0] < set_max_divergence:
-            insert_pts = False
-
-        # Aktualisieren der Kurvenfunktion
-        bend_pts_xy_curve = []
-        bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
-
-        j = 1
-        for i in range(1, len(bend_pts_xy)):
-            while bend_pts_xy_curve[-1][0] < bend_pts_xy[i][0]:
-                y_add = bend_pts_xy_curve[-1][1] + (bend_pts_xy[i - 1][1] - bend_pts_xy[i][1]) / \
-                        (bend_pts_xy[i - 1][0] - bend_pts_xy[i][0]) * (xy_patch_curve[j][0] - xy_patch_curve[j - 1][0])
-                bend_pts_xy_curve.append([xy_patch_curve[j][0], y_add])
-                j = j + 1
-
+def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     ###2D-xy-PLOT
     plt.plot(xy_patch_curve[:, 0], xy_patch_curve[:, 1], 'bo', linewidth=2.0,label='ohne Glättung')  # äquidistante Punkte
 
     plt.plot(xy_patch_curve[:, 0], y_smooth, color='r', linewidth = 3, label ='Savitzky-Golay')  # SavGol-Glättung
 
     plt.plot(bend_pts_xy[:, 0], bend_pts_xy[:, 1], color='green', linewidth=3.0, label='lineare Angleichung')  # Streckenweise linear (nur Eckpunkte)
-    plt.axis([x_list[0] - 50, x_list[-1] + 50, -1 * max(tri_distance_xy)-50, max(tri_distance_xy)+50])
+    plt.axis([x_list[0] - 50, x_list[-1] + 50, -1 * max(y_list)-50, max(y_list)+50])
 
     plt.xlabel('[ mm ]')
     plt.ylabel('[ mm ]')
@@ -719,7 +527,7 @@ def show_startstrip(input_file,poly_order,savgol_window_quotient,max_distance,be
 
     axes.scatter([999999990],[9999999900],[9999999900],linewidths=0.0001, alpha = 0.5, label = "Geometriebereich") #Comment_DB: label in legend
 
-    axes.scatter(datamean[0],datamean[1],datamean[2],c='g')
+    axes.scatter(center_point_of_cloud_weighted[0],center_point_of_cloud_weighted[1],center_point_of_cloud_weighted[2],c='g')
 
     pc_axes=np.asarray(trendline)
 
@@ -729,12 +537,12 @@ def show_startstrip(input_file,poly_order,savgol_window_quotient,max_distance,be
     axes.scatter(patch_end[0],patch_end[1],patch_end[2],c='black')
 
     # von PCC gemittelter Normalenvektor
-    x3, y3, z3 = [datamean[0], datamean[0] + 500 * avg_tri_norm_weighted[0]], [datamean[1],
-                                                                               datamean[1] + 500 * avg_tri_norm_weighted[1]], [
-                     datamean[2], datamean[2] + 500 * avg_tri_norm_weighted[2]]
+    x3, y3, z3 = [center_point_of_cloud_weighted[0], center_point_of_cloud_weighted[0] + 500 * avg_tri_norm_weighted[0]], [center_point_of_cloud_weighted[1],
+                                                                               center_point_of_cloud_weighted[1] + 500 * avg_tri_norm_weighted[1]], [
+                     center_point_of_cloud_weighted[2], center_point_of_cloud_weighted[2] + 500 * avg_tri_norm_weighted[2]]
     plt.plot(x3,y3,z3,marker='o',c='green')
 
-    patch_meshpoints = [] #Comment_DB: is not used
+    patch_meshpoints = []
 
     for i in range(len(bestPatch_patternpoints) - 2):
         verts = [list(
@@ -742,7 +550,7 @@ def show_startstrip(input_file,poly_order,savgol_window_quotient,max_distance,be
                 [bestPatch_patternpoints[i][1], bestPatch_patternpoints[i + 1][1], bestPatch_patternpoints[i + 2][1]], \
                 [bestPatch_patternpoints[i][2], bestPatch_patternpoints[i + 1][2], bestPatch_patternpoints[i + 2][2]]))] #Comment_DB: DARK BLUE LoP PATCH
         axes.add_collection3d(Poly3DCollection(verts), zs='z') #Comment_DB: INSERT LoP PATCH IN GRAPH
-        patch_meshpoints.append(verts) #Comment_DB: is not used
+        #patch_meshpoints.append(verts) #Comment_DB: is not used
     axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
     face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])

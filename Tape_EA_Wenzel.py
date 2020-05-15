@@ -763,8 +763,8 @@ def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
     return length_fit
 def calc_avg_dist(chromo):
-    distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[
-        1]  # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
+    distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[1]
+    # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
     return avg_dist
 def calc_distance_fittness(L_aim, chromo):
@@ -926,8 +926,7 @@ startchromo = create_start_chromo()
 p = initialize_Population_with_global_Settings()
 
 # Ergebnisse aus Vorverarbeitung visualisieren:
-stlprep3_6.show_startstrip(input_file, poly_order, window_quotient, max_distance,
-                           ListOfPoints(startchromo)[3], patch_start, patch_end)
+stlprep3_6.show_startstrip(ListOfPoints(startchromo)[3], patch_start, patch_end)
 
 ##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
 num_gen_list = np.array([])
