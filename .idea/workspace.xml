@@ -4,7 +4,6 @@
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Test_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test_file.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
@@ -336,7 +335,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589537991104</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Start_ Endkante des Patches&#10;&#10;show_start_para gekürzt">
+      <created>1589553651140</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1589553651140</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -385,7 +391,8 @@
     <MESSAGE value="introduce global var in stl_preprocessing and ajust methods" />
     <MESSAGE value="trendline&#10;first principal component" />
     <MESSAGE value="avg tri normal weighted&#10;&#10;trendline_axis" />
-    <option name="LAST_COMMIT_MESSAGE" value="avg tri normal weighted&#10;&#10;trendline_axis" />
+    <MESSAGE value="Start_ Endkante des Patches&#10;&#10;show_start_para gekürzt" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start_ Endkante des Patches&#10;&#10;show_start_para gekürzt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

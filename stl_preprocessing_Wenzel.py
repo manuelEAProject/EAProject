@@ -1,21 +1,12 @@
 import numpy as np
 import math
-import trimesh
 from stl import mesh
-import timeit
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
 from scipy.signal import savgol_filter
-from scipy.spatial import distance as distancelist
-from scipy.signal import argrelextrema
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-import plotly.graph_objects as go
-import sys, os
-import plotly.offline
-from PyQt5.QtCore import QUrl
-#from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import QApplication
+
 
 equidistant_step_size = 0.5
 percentile_pc = 5
@@ -170,8 +161,9 @@ def pc_trendline_projection(tri_centerpoints):
     return trendline_projection
 
 def trendline_axis():
+    first_principal_components_pc_weighted = np.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
     # Definition der Hauptachsen
-    trendline_x_axis = first_principal_components_pc_weighted[2][0]
+    trendline_x_axis = first_principal_components_pc_weighted[2][0] # first_principal_components_pc_weighted[2][0]: is direction of trendline
     trendline_x_axis = (1 / np.linalg.norm(trendline_x_axis)) * trendline_x_axis
     # avg_tri_norm ist nicht senkrecht zur x-Achse
     # von pcc + avg_tri_norm und zurück auf x-Achse projizieren
@@ -273,6 +265,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
     global avg_tri_norm_weighted
     avg_tri_norm_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, triangle_normals)
+
     #Creating pointcloud:
     global patch_pc_weighted
     patch_pc_weighted = patch_pointcloud_weighted_by_area() #!!!!!Comment_DB: The blue points!
@@ -281,8 +274,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     center_point_of_cloud_weighted = patch_pc_weighted.mean(axis=0)  # Mean of x,y,z-Values
     # Do Principal Component Analysis(PCA) on the mean-centered data. AKA SVD
     # The first principal component contains [uu, dd, vv] , where vv[0] is the direction
-    global first_principal_components_pc_weighted
-    first_principal_components_pc_weighted = np.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
+
     global trendline_x_axis, trendline_y_axis, trendline_z_axis
     trendline_x_axis, trendline_y_axis, trendline_z_axis = trendline_axis()
     # Creating trendline
@@ -503,7 +495,6 @@ def calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weight
     startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
     endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
     return endvert_3d, startvert_3d
-
 
 def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     ###2D-xy-PLOT

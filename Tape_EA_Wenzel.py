@@ -1,27 +1,18 @@
 import numpy as np
 import inspect
-import sys
 import os
-import pyquaternion
 from pyquaternion import Quaternion
 import math
-import random
-import math
 import trimesh
-from stl import mesh
-import timeit
 from trimesh import proximity
 from galileo_EA_Edit6 import Population
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
-import matplotlib.ticker as ticker
 import stl_preprocessing_Wenzel as stlprep3_6
 from tkinter import *
 from tkinter import filedialog
-import plotly.graph_objects as go
 import xlsxwriter
 from timeit import default_timer as timer
 
@@ -684,7 +675,7 @@ def translate_alpha_beta_length_from_chromo(chromo):
     for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: adjusted for reordered startchromo (lengths)
         l_list.append(chromo[i] * l_factor)
     for i in range(1, len(startchromo) - 4, 3):  # Comment_DB: adjusted for reordered startchromo (alphas)
-        alpha = 0
+
         if chromo[i] < chromo_resolution / 2:
             alpha = (135 + (chromo[i] * 45 / (chromo_resolution / 2))) * 2 * math.pi / 360
         else:
