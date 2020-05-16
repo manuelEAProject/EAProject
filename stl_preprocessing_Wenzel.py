@@ -263,7 +263,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     global tri_areas
     tri_areas = tri_areas()
 
-    global avg_tri_norm_weighted
+    global avg_tri_norm_weighted # Comment_DKu_Wenzel? Warum erkennt er das nicht?
     avg_tri_norm_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, triangle_normals)
 
     #Creating pointcloud:
@@ -428,19 +428,15 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
         bend_pts_xy_curve = []
         bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
 
-        j = 1
 
     ###### Startparameter extrahieren #####
 
-
-    ###Start_r in 2D & 3D###
-    pos_or_neg_adjust_xy = 1
 
     ###Start_r_atstart in 2D & 3D### COMMENT_DB: NEW DEFINITION
     Start_r_2d_atstart = bend_pts_xy[1] - bend_pts_xy[0]
 
     Start_r_3d_atstart = Start_r_2d_atstart[0] * trendline_x_axis + \
-                 pos_or_neg_adjust_xy * Start_r_2d_atstart[1] * trendline_y_axis
+                         Start_r_2d_atstart[1] * trendline_y_axis
     Start_r_3d_atstart = 1 / np.linalg.norm(Start_r_3d_atstart) * Start_r_3d_atstart
 
     ## Start_n_3d_atstart
