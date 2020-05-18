@@ -26,7 +26,7 @@ option menu:
         other side.  Thus if red were at 238 and 25 were added to it, red
         would have the value 7.
 
-    Preserve Distance
+    Preserve distance
         When the increment or decrement would send any of the tied variations
         out of bounds, all tied variations are wrapped as one, so as to
         preserve the distance between them.  Thus if green and blue were tied,
@@ -56,7 +56,7 @@ from tkinter import *
 
 STOP = 'Stop'
 WRAP = 'Wrap Around'
-RATIO = 'Preserve Distance'
+RATIO = 'Preserve distance'
 GRAV = 'Squash'
 
 ADDTOVIEW = 'Details Window...'

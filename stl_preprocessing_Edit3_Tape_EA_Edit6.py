@@ -722,7 +722,7 @@ def show_startstrip(input_file,startpatch,poly_order,savgol_window_quotient,max_
 
     # Creating trendline:
     trendline = pc_trendline_projection(patch_pc, tri_centerpoints(triangles))
-    #trendline2 = pc_trendline_projection(patch_pc, pointsfortrendline)
+    #trendline2 = project_tri_centerpoints_to_trendline(patch_pc, pointsfortrendline)
     # Sorted list of triangle points projected on trendline:
     sorted_projection_points = sorted_trendline_projection(trendline, sort_tri_id_by_trendline(trendline))
 

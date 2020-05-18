@@ -644,8 +644,7 @@ def calc_start_point_direction_normal_vector(chromo):
     Start_direction = np.concatenate(np.array(
         [[Start_direction_prep_fromstart[0] * var_start_r_x], [Start_direction_prep_fromstart[1] * var_start_r_y],
          [Start_direction_prep_fromstart[2] * var_start_r_z]]))
-    Start_direction = 1 / np.linalg.norm(
-        Start_direction) * Start_direction  # Comment_DKu_Wenzel: todo check if normizing?
+    Start_direction = 1 / np.linalg.norm(Start_direction) * Start_direction
 
     Start_quer_zu_direction = np.cross(Start_direction, Start_normal_atstart)
     Start_quer_zu_direction = 1 / np.linalg.norm(Start_quer_zu_direction) * Start_quer_zu_direction
@@ -696,13 +695,13 @@ def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim):  # Comment DKu_We
     # Erste Beobachtung: Auch großen Einfluss auf dist_fit
 
     # Distance_fitness
-    distance_fit, avg_dist = calc_distance_fittness(L_aim, chromo)
+    distance_fit, avg_dist = calc_distance_fitness(L_aim, chromo)
 
     # Lenght_fittnes
-    length_fit = calc_length_fittness(L_aim, chromo, l_factor_chromo_mm)
+    length_fit = calc_length_fitness(L_aim, chromo, l_factor_chromo_mm)
 
     # Border_fittnes start and end
-    border_fit_end, border_fit_start = calc_border_fittness(chromo)
+    border_fit_end, border_fit_start = calc_border_fitness(chromo)
 
     # Adaptiv gamma
     gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat = evalute_adaptiv_gamma_()
@@ -712,7 +711,7 @@ def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim):  # Comment DKu_We
 
     return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist
 
-# todo Fittness!
+
 # Berechnungen in Fittness
 def patch_length_in_mm(chromo, l_factor_chromo_mm):
     # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
@@ -726,7 +725,7 @@ def patch_length_in_mm(chromo, l_factor_chromo_mm):
         for i in range(0, len(startchromo) - 5, 3):
             lengt = lengt + chromo[i]
     return lengt * l_factor_chromo_mm
-def calc_border_fittness(chromo):
+def calc_border_fitness(chromo):
     LoP = ListOfPoints(chromo)
     ###PARABOLIC###
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
@@ -741,7 +740,7 @@ def calc_border_fittness(chromo):
     # border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[1], patch_start)) ** 2)
     # border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.distance(LoP[2], patch_end)) ** 2)
     return border_fit_end, border_fit_start
-def calc_length_fittness(L_aim, chromo, l_factor_chromo_mm):
+def calc_length_fitness(L_aim, chromo, l_factor_chromo_mm):
     L = patch_length_in_mm(chromo, l_factor_chromo_mm)
     ###PARABOLIC###
     k_l = (100 - 50) / ((L_aim * 0.2) ** 2)  # Comment_DB: = 1/128 for L_aim = 400. Higher L_aim yields lower k_l
@@ -758,7 +757,7 @@ def calc_avg_dist(chromo):
     # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
     return avg_dist
-def calc_distance_fittness(L_aim, chromo):
+def calc_distance_fitness(L_aim, chromo):
     # Berechnung durchschnittlicher Abstand
     avg_dist = calc_avg_dist(chromo)
     ###PARABOLIC###
@@ -965,9 +964,9 @@ for i in range(num_gen):
               p.currentGeneration[j].genes,
               "\n\t\tMember Fitness:",
               Fitness(p.currentGeneration[j].genes)[0],
-              "\tMember Distance Fit:",
+              "\tMember distance Fit:",
               Fitness(p.currentGeneration[j].genes)[1],
-              "\tMember Average Distance:",
+              "\tMember Average distance:",
               Fitness(p.currentGeneration[j].genes)[5]
               )
 
@@ -1007,11 +1006,11 @@ for i in range(num_gen):
 
     # print the best fit individual, and its fitness
     print("\nBest Fit Member of Generation ", i, " :", p.bestFitIndividual, "\n\tFitness:", p.bestFitIndividual.fitness,
-          "\n\t\tDistance Fit:", Fitness(p.bestFitIndividual.genes)[1],
+          "\n\t\tdistance Fit:", Fitness(p.bestFitIndividual.genes)[1],
           "\n\t\tLength Fit:", Fitness(p.bestFitIndividual.genes)[2], "\n\t\tBorder Fit Start:",
           Fitness(p.bestFitIndividual.genes)[3],
           "\n\t\tBorder Fit End:", Fitness(p.bestFitIndividual.genes)[4])
-    print("\t\tAverage Distance", Fitness(p.bestFitIndividual.genes)[5])
+    print("\t\tAverage distance", Fitness(p.bestFitIndividual.genes)[5])
 
     print("\n")
 
@@ -1048,7 +1047,7 @@ def print_consol_output_end():
     print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
           "L_Aim (From Preprocessor):", L_aim)
     print("End Fitness: ", p.bestFitIndividual.getFitness(),
-          "\n\tEnd Distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
+          "\n\tEnd distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
           "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes)[2],
           "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes)[3],
           "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes)[4])
@@ -1083,8 +1082,8 @@ def show_fitness_and_subfitness_over_generations_end():
     plt.figure(2)
     plt.plot(distance_fit_list_gen_index[0], distance_fit_list_gen_index[1])
     plt.xlabel('Generation')
-    plt.ylabel('Distance Fitness')
-    plt.title('Distance Fitness 1')
+    plt.ylabel('distance Fitness')
+    plt.title('distance Fitness 1')
     plt.figure(3)
     plt.plot(length_fit_list_gen_index[0], length_fit_list_gen_index[1])
     plt.xlabel('Generation')

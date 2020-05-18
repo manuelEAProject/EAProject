@@ -1,10 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="calc_bends">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/opcode.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/opcode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/deap/tools/emo.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/deap/tools/emo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/matplotlib/axes/_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/matplotlib/axes/_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/matplotlib/mlab.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/matplotlib/mlab.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/matplotlib/quiver.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/matplotlib/quiver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/mpl_toolkits/mplot3d/proj3d.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/mpl_toolkits/mplot3d/proj3d.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/bipartite/cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/bipartite/cluster.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/distance_regular.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/distance_regular.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/similarity.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/similarity.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/smallworld.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/algorithms/smallworld.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/generators/directed.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/generators/directed.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/generators/geometric.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/networkx/generators/geometric.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pandas/tests/reshape/merge/test_multi.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pandas/tests/reshape/merge/test_multi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/plotly/figure_factory/_trisurf.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/plotly/figure_factory/_trisurf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/font/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/font/base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/text/document.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/text/document.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/text/layout.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/text/layout.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/window/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyglet/window/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyquaternion/quaternion.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/pyquaternion/quaternion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/cluster/hierarchy.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/cluster/hierarchy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/ndimage/morphology.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/ndimage/morphology.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/odr/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/odr/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/odr/odrpack.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/odr/odrpack.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/spatial/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/spatial/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/spatial/distance.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/spatial/distance.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/spatial/tests/test_distance.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/spatial/tests/test_distance.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/stats/stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/scipy/stats/stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/convex.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/convex.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/creation.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/creation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/path.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/path.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/polygons.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/polygons.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/simplify.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/simplify.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/traversal.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/path/traversal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/scene/scene.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/trimesh/scene/scene.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/xlsxwriter/worksheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/xlsxwriter/worksheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Tools/pynche/DetailsViewer.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Tools/pynche/DetailsViewer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stl_preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Edit3_Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Edit3_Tape_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -366,7 +406,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589787288199</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="calc_bends">
+      <created>1589813417142</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1589813417142</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -394,7 +441,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="get_Vars_from_GUI" />
     <MESSAGE value="Minor delets" />
     <MESSAGE value="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel" />
     <MESSAGE value="Tape_EA_Wenzel:&#10;• Vieles Auskommentierte gelöscht&#10;• Settinglist direkt übergeben" />
@@ -419,6 +465,7 @@
     <MESSAGE value="first principal components in trendline axis geschoben&#10;&#10;liberies gelöscht" />
     <MESSAGE value="pos_or_neg_adjust_xy" />
     <MESSAGE value="Namen&#10;Global" />
-    <option name="LAST_COMMIT_MESSAGE" value="Namen&#10;Global" />
+    <MESSAGE value="calc_bends" />
+    <option name="LAST_COMMIT_MESSAGE" value="calc_bends" />
   </component>
 </project>

@@ -994,11 +994,11 @@ print("L_aim",L_aim)
 print("Start Chromo",startchromo)
 print("\tStart Length",PatchLength(startchromo,AnzahlKnicke,l_factor))
 print("\tStart Fitness", Fitness(startchromo)[0])
-print("\t\tStart Distance Fit",Fitness(startchromo)[1])
+print("\t\tStart distance Fit",Fitness(startchromo)[1])
 print("\t\tStart Length Fit",Fitness(startchromo)[2])
 print("\t\tStart Border Fit Start",Fitness(startchromo)[3])
 print("\t\tStart Border Fit End",Fitness(startchromo)[4])
-print("\t\tStart Average Distance", Fitness(startchromo)[5])
+print("\t\tStart Average distance", Fitness(startchromo)[5])
 """
 
 
@@ -1163,9 +1163,9 @@ for i in range(num_gen):
               p.currentGeneration[j].genes,
               "\n\t\tMember Fitness:",
               Fitness(p.currentGeneration[j].genes)[0],
-              "\tMember Distance Fit:",
+              "\tMember distance Fit:",
               Fitness(p.currentGeneration[j].genes)[1],
-              "\tMember Average Distance:",
+              "\tMember Average distance:",
               Fitness(p.currentGeneration[j].genes)[5]
               )
 
@@ -1207,11 +1207,11 @@ for i in range(num_gen):
 
     # print the best fit individual, and its fitness
     print("\nBest Fit Member of Generation ", i, " :", p.bestFitIndividual, "\n\tFitness:", p.bestFitIndividual.fitness,
-          "\n\t\tDistance Fit:", Fitness(p.bestFitIndividual.genes)[1],
+          "\n\t\tdistance Fit:", Fitness(p.bestFitIndividual.genes)[1],
           "\n\t\tLength Fit:", Fitness(p.bestFitIndividual.genes)[2], "\n\t\tBorder Fit Start:",
           Fitness(p.bestFitIndividual.genes)[3],
           "\n\t\tBorder Fit End:", Fitness(p.bestFitIndividual.genes)[4])
-    print("\t\tAverage Distance", Fitness(p.bestFitIndividual.genes)[5])
+    print("\t\tAverage distance", Fitness(p.bestFitIndividual.genes)[5])
 
     print("\n")
 
@@ -1271,7 +1271,7 @@ chart1.add_series({
 print("\n\nEnd Patch length: ", PatchLength(p.bestFitIndividual.genes, AnzahlKnicke, l_factor),
       "L_Aim (From Preprocessor):", L_aim)
 print("End Fitness: ", p.bestFitIndividual.getFitness(),
-      "\n\tEnd Distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
+      "\n\tEnd distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
       "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes)[2],
       "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes)[3],
       "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes)[4])
@@ -1311,8 +1311,8 @@ plt.title('Overall Fitness 1')
 plt.figure(2)
 plt.plot(distance_fit_list_gen_index[0], distance_fit_list_gen_index[1])
 plt.xlabel('Generation')
-plt.ylabel('Distance Fitness')
-plt.title('Distance Fitness 1')
+plt.ylabel('distance Fitness')
+plt.title('distance Fitness 1')
 
 plt.figure(3)
 plt.plot(length_fit_list_gen_index[0], length_fit_list_gen_index[1])
