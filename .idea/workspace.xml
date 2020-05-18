@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Edit3_Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Edit3_Tape_EA_Edit6.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -359,7 +359,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589625536422</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Namen&#10;Global">
+      <created>1589787288199</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1589787288199</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -411,6 +418,7 @@
     <MESSAGE value="Start_ Endkante des Patches&#10;&#10;show_start_para gekürzt" />
     <MESSAGE value="first principal components in trendline axis geschoben&#10;&#10;liberies gelöscht" />
     <MESSAGE value="pos_or_neg_adjust_xy" />
-    <option name="LAST_COMMIT_MESSAGE" value="pos_or_neg_adjust_xy" />
+    <MESSAGE value="Namen&#10;Global" />
+    <option name="LAST_COMMIT_MESSAGE" value="Namen&#10;Global" />
   </component>
 </project>

@@ -8,7 +8,7 @@ from scipy.signal import savgol_filter
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-equidistant_step_size = 0.5
+equidistant_step_size = 3
 percentile_pc = 5
 max_points_in_pc = 10000
 
@@ -291,7 +291,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
     # Creating trendline_projection_points:
     trendline_projection_points_tri_centerpoints = pc_trendline_projection(tri_centerpoints)
-
     triangle_ID_sorted_on_trendline = sort_tri_id_by_trendline(trendline_projection_points_tri_centerpoints,trendline)
 
     #Sorted list of triangle points with trendline_projection_points:
@@ -303,141 +302,51 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     endvert_3d, startvert_3d = calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weighted, triangle_ID_sorted_on_trendline,
                                                                                triangle_vectors_of_stl)
     # In Ebene projiziert:
-    startvert_proj = project_pointtoplane(startvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
-    endvert_proj = project_pointtoplane(endvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
+    startpoint_project_to_trendline_plan = project_pointtoplane(startvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
+    endpoint_project_to_trendline_plan = project_pointtoplane(endvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
 
     # auf Trendline projiziert
-    startvert_trendline = project_pointtoline(startvert_3d, center_point_of_cloud_weighted + trendline_x_axis,
-                                              center_point_of_cloud_weighted + 2 * trendline_x_axis)
-    endvert_trendline = project_pointtoline(endvert_3d, center_point_of_cloud_weighted + trendline_x_axis,
-                                            center_point_of_cloud_weighted + 2 * trendline_x_axis)
+    startpoint_project_to_trendline = project_pointtoline(startvert_3d, trendline[0], trendline[1])
+    endpoint_project_to_trendline = project_pointtoline(endvert_3d, trendline[0], trendline[1])
 
     # Für Start und Endpunkte müssen auch die jeweiligen Projektionen auf die Trendline berechnet werden, um den Abstand
     # zu berechnen (COMMENT_DB: insertion of points into sorted_projection_points list)
+    sorted_projection_points_tri_centerpoints = np.insert(sorted_projection_points_tri_centerpoints, 0, startpoint_project_to_trendline, axis=0)
+    sorted_projection_points_tri_centerpoints = np.concatenate((sorted_projection_points_tri_centerpoints, [endpoint_project_to_trendline]))
 
-    sorted_projection_points_tri_centerpoints = np.insert(sorted_projection_points_tri_centerpoints, 0, startvert_trendline, axis=0)
-    sorted_projection_points_tri_centerpoints = np.concatenate((sorted_projection_points_tri_centerpoints, [endvert_trendline]))
+    # Die Dreiecksmittelpunkte werden in Ebene der Trendline projiziert
+    tri_centerpoints_projected_to_trendline_plane = project_tri_centerpoints_to_trendline_plane(
+        endpoint_project_to_trendline_plan, sorted_centerpoints,
+        startpoint_project_to_trendline_plan, trendline_z_axis)
 
+    # Comment_DKu_Wenzel: An dieser Stelle werden die projezierten Punkte vom globalen KOS in ein lokales KOS umgewandelt
     # x-Werte: Abstand zwischen den sorted_projection_points
     global x_list
-    x_list = []
-    for i in range(len(sorted_projection_points_tri_centerpoints)):
-        x = np.linalg.norm((sorted_projection_points_tri_centerpoints[0] - sorted_projection_points_tri_centerpoints[i]))
-        x_list.append(x)
-    x_list = np.asarray(x_list)
-
-
-    # Die Dreiecksmittelpunkte werden in x-y-Ebene der Trendline projiziert, um ein 2D Abstandsprofil zu erhalten
-    tri_distance_xy_point = [startvert_proj]
-
-    for i in range(num_of_triangles):
-        tri_distance_xy_point.append(project_pointtoplane(sorted_centerpoints[i], trendline_z_axis,
-                                                          center_point_of_cloud_weighted))
-    tri_distance_xy_point.append(endvert_proj)
-    tri_distance_xy_point = np.asarray(tri_distance_xy_point)
+    x_list = get_x_values_from_projectetion_on_trendline(sorted_projection_points_tri_centerpoints)
 
 
     # xy-Distanzplot
     # berechnet den Abstand der auf xy-Ebene projizierten Dreiecksmittelpunkte zur Trendline
     global y_list
-    y_list = []
-    for i in range(len(tri_distance_xy_point)):
-        dist = np.linalg.norm(sorted_projection_points_tri_centerpoints[i] - tri_distance_xy_point[i])
-
-        # Vorzeichen ermitteln:
-        if ((sorted_projection_points_tri_centerpoints[i] + dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2 < \
-                ((sorted_projection_points_tri_centerpoints[i] - dist * trendline_y_axis)[0] - tri_distance_xy_point[i][0]) ** 2:
-            y_list.append(dist)
-        else:
-            y_list.append(-dist)
-    y_list = np.asarray(y_list)
+    y_list = get_y_values_from_projection_points(sorted_projection_points_tri_centerpoints, trendline_y_axis,
+                                                tri_centerpoints_projected_to_trendline_plane)
 
     # Funktion des xy-Abstands über die Länge der Trendline. Außerdem werden linear Punkte aufgefüllt, um eine
-    # äquidistante Schrittgröße zu erreichen
-    xy_patch_curve_step_size = equidistant_step_size
+    # nahezu äquidistante Schrittgröße zu erreichen
 
-    global xy_patch_curve
-    xy_patch_curve = [] #Comment_DB: Smoothed blue curve points in array!
-
-    for i in range(len(tri_distance_xy_point)):
-        xy_patch_curve.append([x_list[i], y_list[i]])
-
-    for i in range(1, len(y_list)):
-
-        x_dist = xy_patch_curve[i][0] - xy_patch_curve[i - 1][0]
-        if x_dist > xy_patch_curve_step_size:
-            additional_steps = math.floor(x_dist / xy_patch_curve_step_size)
-
-            for j in range(1, additional_steps + 1):
-
-                xy_patch_curve.append([xy_patch_curve[i - 1][0] + j * xy_patch_curve_step_size, \
-                                       (xy_patch_curve[i - 1][1] + (xy_patch_curve[i][1] - xy_patch_curve[i - 1][1]) \
-                                        / (x_dist) * j * xy_patch_curve_step_size)])
-
-    xy_patch_curve = np.asarray(xy_patch_curve)
-
-    # Entlang der x-Werte sortieren
-    xy_patch_curve = xy_patch_curve[xy_patch_curve[:, 0].argsort()]
-
+    global x_y_points_filled_up
+    x_y_points_filled_up = calc_x_y_points_filled_up(x_list, y_list)
 
     # Geglättete y-Werte mit SavitzkyGolay
     global y_smooth
-    y_smooth = smooth_savgol(xy_patch_curve,poly_order,savgol_window_quotient)
+    y_smooth = smooth_savgol(x_y_points_filled_up, poly_order, savgol_window_quotient)
+
 
     # 2D Knicklinie: Start - und Endpunkte;
     global bend_pts_xy
-    bend_pts_xy = []
-    bend_pts_xy.append([xy_patch_curve[0][0], y_smooth[0]]) #Comment_DB: start point 2D (x coord, y coord)
-
-    bend_pts_xy.append([xy_patch_curve[-1][0], y_smooth[-1]]) #Comment_DB: end point 2D (x coord, y coord)
-    bend_pts_xy = np.asarray(bend_pts_xy)
-    bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()] #Comment_DB: sorted start and endpoints of 2D line that shows bends
-
-    # Einfügen von weiteren Knickpunkten durch Finden von großen Abweichungen zur Kurve:
-    set_max_divergence = max_distance #Comment_DB: User input
-    insert_pts = True
-    while insert_pts: #Comment_DB: this while loop goes all the way till "startparameter extrahieren"
-        bend_pts_xy_curve = []
-        bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]]) #Comment_DB: only the first bend point (starting point at edge) appended to bend points curve list
-
-        j = 1 #Comment_DB: at this point, bend_pts_xy curve only has the starting point in it, thus j = 1 is the number of points in the list. j = 1 is also the index of the NEXT point!
-
-        for i in range(1, len(bend_pts_xy)): #Comment_DB: len(bend_pts_xy) is 2 for first iteration
-            while bend_pts_xy_curve[-1][0] < bend_pts_xy[i][0]: #Comment_DB: while last x coord VALUE less than ith x coord VALUE in bend_pts_xy (If greater, then that means last point is reached)
-                y_add = bend_pts_xy_curve[-1][1] + (bend_pts_xy[i - 1][1] - bend_pts_xy[i][1]) / \
-                        (bend_pts_xy[i - 1][0] - bend_pts_xy[i][0]) * (xy_patch_curve[j][0] - xy_patch_curve[j - 1][0]) #Comment_DB: y = b + mx (finds next change in y linearly --> Produces a linear plot until end point at edge!!)
-                bend_pts_xy_curve.append([xy_patch_curve[j][0], y_add]) #Comment_DB: append the NEXT point into the list
-                j = j + 1 #Comment_DB: NEXT POINT
-
-        bend_pts_xy_curve = np.asarray(bend_pts_xy_curve) #Comment_DB: This is now one linear curve from start to end point. Everything here is dependent on xy_patch_curve. Below will take divergence into consideration
-
-
-        #Comment_DB: curve_divergence in terms of y-distance # Größte Abweichung von geglätteter Kurve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
-        curve_divergence_y = []
-        for i in range(len(bend_pts_xy_curve)):
-            curve_divergence_y.append([bend_pts_xy_curve[i][0], ((bend_pts_xy_curve[i][0]-xy_patch_curve[i][0])**2+(bend_pts_xy_curve[i][1]-y_smooth[i])**2)**0.5]) #Comment_DB: (x-coord vs. change in y-coord) take the x coord and y-distance between linear curve and sav-gol curve and append
-        curve_divergence_y = np.asarray(curve_divergence_y)
-
-        max_divergence = max([(v, i) for i, v in enumerate(curve_divergence_y[:, 1])]) #Comment_DB: returns distance, counter (Uses new curve_divergence)
-
-        #Comment_DB: We know at which x-coord of bend_pts_xy_curve the max_divergence happens --> counter i
-
-        bend_pts_xy = np.insert(bend_pts_xy, -1,
-                                np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]), axis=0) #Comment_DB: insert a corner at x coord (counter i) and y coord (counter i) of max divergence
-        bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()] #Comment_DB: Bend points sorted in an array
-
-        # no further points, if the chosen maximum distance is not surpassed
-        if max_divergence[0] < set_max_divergence: #Comment_DB: This implies that there will be one extra bend, as the above code will have executed already
-            insert_pts = False
-
-        # Aktualisieren der Kurvenfunktion (COMMENT_DB: Same as above, except the corner is also in bend_pts_xy, so two linear lines (next iterations more and more linear lines..))
-        bend_pts_xy_curve = []
-        bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
-
+    bend_pts_xy = calc_bend_pts(max_distance, x_y_points_filled_up, y_smooth)
 
     ###### Startparameter extrahieren #####
-
-
     ###Start_r_atstart in 2D & 3D### COMMENT_DB: NEW DEFINITION
     Start_r_2d_atstart = bend_pts_xy[1] - bend_pts_xy[0]
 
@@ -474,21 +383,132 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
 
     # L_aim of savgol curve:
     L_aim = 0
-    for i in range(1,len(xy_patch_curve)):
-        p0=np.array([xy_patch_curve[i-1][0], y_smooth[i - 1]])
-        p1=np.array([xy_patch_curve[i][0], y_smooth[i]])
+    for i in range(1, len(x_y_points_filled_up)):
+        p0=np.array([x_y_points_filled_up[i - 1][0], y_smooth[i - 1]])
+        p1=np.array([x_y_points_filled_up[i][0], y_smooth[i]])
         L_aim =L_aim + np.linalg.norm(p1-p0)
 
-    start_parameter = [l_list, L_aim, beta_list, startvert_proj,
-                       endvert_proj, Start_r_3d_atstart, Start_n_3d_atstart]
+    start_parameter = [l_list, L_aim, beta_list, startpoint_project_to_trendline_plan,
+                       endpoint_project_to_trendline_plan, Start_r_3d_atstart, Start_n_3d_atstart]
     return start_parameter
+
+
+def calc_bend_pts(max_distance, x_y_points_filled_up, y_smooth):
+
+    bend_pts_xy = []
+    bend_pts_xy.append([x_y_points_filled_up[0][0], y_smooth[0]])  # Comment_DB: start point 2D (x coord, y coord)
+    bend_pts_xy.append([x_y_points_filled_up[-1][0], y_smooth[-1]])  # Comment_DB: end point 2D (x coord, y coord)
+    bend_pts_xy = np.asarray(bend_pts_xy)
+    # Einfügen von weiteren Knickpunkten durch Finden von großen Abweichungen zur Kurve:
+    insert_pts = True
+    while insert_pts:
+        bend_pts_xy_curve = []
+        bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])  # Comment_DB: only the first bend point (starting point at edge) appended to bend points curve list
+
+        j = 1  # Comment_DB: at this point, bend_pts_xy curve only has the starting point in it, thus j = 1 is the number of points in the list. j = 1 is also the index of the NEXT point!
+        for i in range(1, len(bend_pts_xy)):  # Comment_DB: len(bend_pts_xy) is 2 for first iteration
+
+            slope_between_bends = (bend_pts_xy[i - 1][1] - bend_pts_xy[i][1]) / (bend_pts_xy[i - 1][0] - bend_pts_xy[i][0])
+            while bend_pts_xy_curve[-1][0] < bend_pts_xy[i][0]:  # Comment_DB: while last x coord VALUE less than ith x coord VALUE in bend_pts_xy (If greater, then that means last point is reached)
+                y_add = bend_pts_xy_curve[-1][1] + slope_between_bends * (x_y_points_filled_up[j][0] - x_y_points_filled_up[j - 1][0])  # Comment_DB: y = b + mx (finds next change in y linearly --> Produces a linear plot until end point at edge!!)
+                bend_pts_xy_curve.append([x_y_points_filled_up[j][0], y_add])  # Comment_DB: append the NEXT point into the list
+                j = j + 1  # Comment_DB: NEXT POINT
+
+        bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)  # Comment_DB: This is now one linear curve from start to end point. Everything here is dependent on xy_patch_curve. Below will take divergence into consideration
+
+        # Comment_DB: curve_divergence in terms of y-distance # Größte Abweichung von geglätteter Kurve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
+        curve_divergence_y = []
+        for i in range(len(bend_pts_xy_curve)):
+            curve_divergence_y.append([bend_pts_xy_curve[i][0], (
+                        (bend_pts_xy_curve[i][0] - x_y_points_filled_up[i][0]) ** 2 + (
+                            bend_pts_xy_curve[i][1] - y_smooth[
+                        i]) ** 2) ** 0.5])  # Comment_DB: (x-coord vs. change in y-coord) take the x coord and y-distance between linear curve and sav-gol curve and append
+        curve_divergence_y = np.asarray(curve_divergence_y)
+
+        max_divergence = max([(v, i) for i, v in enumerate(
+            curve_divergence_y[:, 1])])  # Comment_DB: returns distance, counter (Uses new curve_divergence)
+
+        # Comment_DB: We know at which x-coord of bend_pts_xy_curve the max_divergence happens --> counter i
+
+        bend_pts_xy = np.insert(bend_pts_xy, -1,
+                                np.array([bend_pts_xy_curve[max_divergence[1]][0], y_smooth[max_divergence[1]]]),
+                                axis=0)  # Comment_DB: insert a corner at x coord (counter i) and y coord (counter i) of max divergence
+        bend_pts_xy = bend_pts_xy[bend_pts_xy[:, 0].argsort()]  # Comment_DB: Bend points sorted in an array
+
+        # no further points, if the chosen maximum distance is not surpassed
+        if max_divergence[
+            0] < max_distance:  # Comment_DB: This implies that there will be one extra bend, as the above code will have executed already, max_distance: User Input
+            insert_pts = False
+
+        # Aktualisieren der Kurvenfunktion (COMMENT_DB: Same as above, except the corner is also in bend_pts_xy, so two linear lines (next iterations more and more linear lines..))
+        bend_pts_xy_curve = []
+        bend_pts_xy_curve.append([bend_pts_xy[0][0], bend_pts_xy[0][1]])
+
+    return bend_pts_xy
+
+def calc_x_y_points_filled_up(x_list, y_list):
+    xy_patch_curve = []  # Comment_DB: Smoothed blue curve points in array!
+    for i in range(len(y_list)):
+        xy_patch_curve.append([x_list[i], y_list[i]])
+    for i in range(1, len(y_list)):
+
+        x_dist = x_list[i] - x_list[i - 1]
+        if x_dist > equidistant_step_size:
+            additional_steps = math.floor(x_dist / equidistant_step_size)
+
+            for j in range(1, additional_steps + 1):
+                xy_patch_curve.append([x_list[i - 1] + j * equidistant_step_size,
+                                       (y_list[i - 1] + (y_list[i] - y_list[i - 1]) / (
+                                           x_dist) * j * equidistant_step_size)])
+    xy_patch_curve = np.asarray(xy_patch_curve)
+    # Entlang der x-Werte sortieren
+    xy_patch_curve = xy_patch_curve[xy_patch_curve[:, 0].argsort()]
+
+    return xy_patch_curve
+
+def get_y_values_from_projection_points(sorted_projection_points_tri_centerpoints, trendline_y_axis,
+                                        tri_centerpoints_projected_to_trendline_plane):
+    y_list = []
+    for i in range(len(tri_centerpoints_projected_to_trendline_plane)):
+        dist = np.linalg.norm(
+            sorted_projection_points_tri_centerpoints[i] - tri_centerpoints_projected_to_trendline_plane[i])
+
+        # Vorzeichen ermitteln:
+        if ((sorted_projection_points_tri_centerpoints[i] + dist * trendline_y_axis)[0] -
+            tri_centerpoints_projected_to_trendline_plane[i][0]) ** 2 < \
+                ((sorted_projection_points_tri_centerpoints[i] - dist * trendline_y_axis)[0] -
+                 tri_centerpoints_projected_to_trendline_plane[i][0]) ** 2:
+            y_list.append(dist)
+        else:
+            y_list.append(-dist)
+    y_list = np.asarray(y_list)
+
+    return y_list
+def project_tri_centerpoints_to_trendline_plane(endpoint_project_to_trendline_plan,
+                                                sorted_centerpoints, startpoint_project_to_trendline_plan, trendline_z_axis):
+    tri_centerpoints_projected_to_trendline_plane = [startpoint_project_to_trendline_plan]
+    for i in range(num_of_triangles):
+        tri_centerpoints_projected_to_trendline_plane.append(
+            project_pointtoplane(sorted_centerpoints[i], trendline_z_axis,
+                                 center_point_of_cloud_weighted))
+    tri_centerpoints_projected_to_trendline_plane.append(endpoint_project_to_trendline_plan)
+    tri_centerpoints_projected_to_trendline_plane = np.asarray(tri_centerpoints_projected_to_trendline_plane)
+    return tri_centerpoints_projected_to_trendline_plane
+def get_x_values_from_projectetion_on_trendline(sorted_projection_points_tri_centerpoints):
+    x_list = []
+    for i in range(len(sorted_projection_points_tri_centerpoints)):
+        x = np.linalg.norm(
+            (sorted_projection_points_tri_centerpoints[0] - sorted_projection_points_tri_centerpoints[i]))
+        x_list.append(x)
+    x_list = np.asarray(x_list)
+    return x_list
 
 
 def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     ###2D-xy-PLOT
-    plt.plot(xy_patch_curve[:, 0], xy_patch_curve[:, 1], 'bo', linewidth=2.0,label='ohne Glättung')  # äquidistante Punkte
+    plt.plot(x_y_points_filled_up[:, 0], x_y_points_filled_up[:, 1], 'bo', linewidth=2.0, label='ohne Glättung')  # äquidistante Punkte
 
-    plt.plot(xy_patch_curve[:, 0], y_smooth, color='r', linewidth = 3, label ='Savitzky-Golay')  # SavGol-Glättung
+    plt.plot(x_y_points_filled_up[:, 0], y_smooth, color='r', linewidth = 3, label ='Savitzky-Golay')  # SavGol-Glättung
 
     plt.plot(bend_pts_xy[:, 0], bend_pts_xy[:, 1], color='green', linewidth=3.0, label='lineare Angleichung')  # Streckenweise linear (nur Eckpunkte)
     plt.axis([x_list[0] - 50, x_list[-1] + 50, -1 * max(y_list)-50, max(y_list)+50])

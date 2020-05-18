@@ -712,7 +712,7 @@ def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim):  # Comment DKu_We
 
     return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist
 
-
+# todo Fittness!
 # Berechnungen in Fittness
 def patch_length_in_mm(chromo, l_factor_chromo_mm):
     # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
