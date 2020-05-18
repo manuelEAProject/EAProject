@@ -33,7 +33,7 @@ def tri_normals(ID_list,triangles,stl_normals):
         normals.append(n)
 
     normals=np.asarray(normals)
-    # check if the generated tri_normals point at the outside of the patch
+    # check if the generated calc_tri_normals_from_stl point at the outside of the patch
     # the following average stl_normal always point at the outside of the object:
     avg_stl_normal = sum(stl_normals) / len(stl_normals)
     # average of the created normals:

@@ -3,7 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stl_preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Edit3_Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Edit3_Tape_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -132,6 +133,9 @@
       <module name="ud_tape_optimization" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
@@ -348,7 +352,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589555140819</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="pos_or_neg_adjust_xy">
+      <created>1589625536422</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1589625536422</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -399,22 +410,7 @@
     <MESSAGE value="avg tri normal weighted&#10;&#10;trendline_axis" />
     <MESSAGE value="Start_ Endkante des Patches&#10;&#10;show_start_para gekürzt" />
     <MESSAGE value="first principal components in trendline axis geschoben&#10;&#10;liberies gelöscht" />
-    <option name="LAST_COMMIT_MESSAGE" value="first principal components in trendline axis geschoben&#10;&#10;liberies gelöscht" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Tape_EA.py</url>
-          <line>29</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
-          <line>251</line>
-          <option name="timeStamp" value="83" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="pos_or_neg_adjust_xy" />
+    <option name="LAST_COMMIT_MESSAGE" value="pos_or_neg_adjust_xy" />
   </component>
 </project>

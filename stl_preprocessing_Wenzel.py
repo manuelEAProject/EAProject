@@ -18,7 +18,7 @@ def distance(p1,p2):
     return distance
 
 #Dreiecksnormalen(sortiert)
-def tri_normals(stl_normals):
+def calc_tri_normals_from_stl(stl_normals,triangle_vectors_of_stl):
     normals=[]
     #We generate our own normals with the id_list. Notice that the triangle order of stl_normals and the vertices
     #(triangles) is not the same
@@ -53,7 +53,7 @@ def tri_normals(stl_normals):
     return normals
 
 #Dreiecksmittelpunkt
-def tri_centerpoints():
+def calc_tri_centerpoints(triangle_vectors_of_stl):
     tri_centerpoints=[]
     for i in range(num_of_triangles):
         center=np.array([(triangle_vectors_of_stl[i][0][0] + triangle_vectors_of_stl[i][1][0] + triangle_vectors_of_stl[i][2][0]) / 3, (triangle_vectors_of_stl[i][0][1] + triangle_vectors_of_stl[i][1][1] + triangle_vectors_of_stl[i][2][1]) / 3, (triangle_vectors_of_stl[i][0][2] + triangle_vectors_of_stl[i][1][2] + triangle_vectors_of_stl[i][2][2]) / 3])
@@ -62,14 +62,14 @@ def tri_centerpoints():
     tri_centerpoints=np.asarray(tri_centerpoints)
     return tri_centerpoints
 
-def tri_areas():
+def calc_tri_areas(triangle_vectors_of_stl):
     #Berechnung der Dreiecksflächen und Speichern in einer Liste
-    tri_surface = []
+    tri_surface_area = []
     for i in range(num_of_triangles):
-        tri_surface.append(0.5 * (
+        tri_surface_area.append(0.5 * (
             np.linalg.norm((triangle_vectors_of_stl[i][0] - triangle_vectors_of_stl[i][1]) - (triangle_vectors_of_stl[i][0] - triangle_vectors_of_stl[i][2]))))
-    tri_surface = np.asarray(tri_surface)
-    return tri_surface
+    tri_surface_area = np.asarray(tri_surface_area)
+    return tri_surface_area
 
 def calc_avg_tri_norm_weighted_by_area(tri_areas,triangle_normals):
     weighted_norms = []
@@ -80,9 +80,9 @@ def calc_avg_tri_norm_weighted_by_area(tri_areas,triangle_normals):
     return avg_tri_normal_weighted
 
 #Punktwolke aus den Dreieckspunkten und Dreiecksmittelpunkten
-def patch_pointcloud_weighted_by_area():
+def patch_pointcloud_weighted_by_area(tri_areas,tri_centerpoints):
     #
-    centerpoints_weights_area_tri = weights_center_points_by_percentil_area()
+    centerpoints_weights_area_tri = weights_center_points_by_percentil_area(tri_areas)
 
     # für jedes Dreieck werden die Mittelpunkte so oft gewertet (in die Punktwolke getan) wie es in centerpoints_weights_area_tri steht
     pointcloud_weighted=[]
@@ -95,15 +95,14 @@ def patch_pointcloud_weighted_by_area():
 
     return pointcloud_weighted
 
-def weights_center_points_by_percentil_area():
+def weights_center_points_by_percentil_area(tri_areas):
     # In dieser Funktion wird eine Punktwolke aus den Dreiecksmittelpunkten der stl Datei generiert. Da mit dieser
     # Punktwolke später die Hauptwertzerlegung erfolgt, müssen große Dreiecke gegenüber kleinen Dreiecken stärker
     # gewichtet werden. Dies geschieht indem das Verhältnis der Dreiecksflächen zueinander berechnet wird und die
     # Mittelpunkte großer Dreiecke öfter zur Punktwolke hinzugefügt werden als die Mittelpunkte kleiner Dreiecke.
-    ####Gewichtung großer Dreiecke
+
+    ###Gewichtung großer Dreiecke
     # 1) Berechnung der Dreiecksflächen und Speichern in einer Liste
-
-
     area_whole_patch = sum(tri_areas)
     # 2) Die Dreiecksflächen werden miteinander verglichen, um später große Dreiecke gegenüber kleinen stärker zu
     # gewichten. Als "kleinste" Referenzfläche wird das 10-er Quantil der Flächen genommen (90% aller anderen Dreiecke
@@ -112,7 +111,6 @@ def weights_center_points_by_percentil_area():
     # hinzugefügt wie hoch der Flächenfaktor aus der centerpoints_weights_area_tri ist (mindestens einmal).
     # Um zu große Rechenzeiten zu vermeiden wird im Vorhinein abgeschätzt wie viele Punkte die Punktwolke
     # haben wird und bei Überschreiten eines Grenzwerts( max_points_in_pc) wird das Programm abgebrochen.
-    #
     lower_percentil_area = np.percentile(tri_areas, percentile_pc)
     estimated_number_points_in_pc = math.ceil(area_whole_patch / lower_percentil_area)
 
@@ -133,7 +131,7 @@ def weights_center_points_by_percentil_area():
     return centerpoints_weights_area_tri
 
 #Gerade durch Punktwolke mit kleinstem Abstand zu allen Punkten (COMMENT_DB: pc --> point cloud)
-def pc_trendline():
+def pc_trendline(patch_pc_weighted,center_point_of_cloud_weighted,trendline_x_axis):
     # ->Hauptkomponentenanalyse: https://de.wikipedia.org/wiki/Hauptkomponentenanalyse/Principal Component Analysis(PCA)
     # aka Singulärwertzerlegung / SVD
     # Generate some data that lies along a line
@@ -160,7 +158,7 @@ def pc_trendline_projection(tri_centerpoints):
 
     return trendline_projection
 
-def trendline_axis():
+def trendline_axis(patch_pc_weighted,center_point_of_cloud_weighted):
     first_principal_components_pc_weighted = np.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
     # Definition der Hauptachsen
     trendline_x_axis = first_principal_components_pc_weighted[2][0] # first_principal_components_pc_weighted[2][0]: is direction of trendline
@@ -177,7 +175,7 @@ def trendline_axis():
     return trendline_x_axis, trendline_y_axis, trendline_z_axis
 
 #Dreiecks-ID Reihenfolge entlang der Trendlinie
-def sort_tri_id_by_trendline():
+def sort_tri_id_by_trendline(trendline_projection_points_tri_centerpoints,trendline):
     # Sortiert die projizierten Punkte der Trendlinie entlang und gibt so eine Reihenfolge der
     # Dreiecke entlang der Trendlinienrichtung an. Es wird eine geordnete Liste der
     # Dreiecks-IDs zurückgegeben
@@ -196,7 +194,7 @@ def sort_tri_id_by_trendline():
     return id_list
 
 #Liste mit den sortierten auf die Trendline projizierten Punkte
-def sort_list_by_tri_id(list_to_sort):
+def sort_list_by_tri_id(list_to_sort,triangle_ID_sorted_on_trendline):
     #Die auf die Trendline projizierten Mittelpunkte der Dreiecke werden entlang der Trendline sortiert
     sorted_trendline = []
     for i in range(num_of_triangles):
@@ -237,6 +235,21 @@ def project_pointtoline(Point_to_project,linept1,linept2):
 
     return proj_point
 
+def calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weighted, triangle_ID_sorted_on_trendline, triangle_vectors_of_stl):
+    # -> wenn bei großen Randdreiecken nur der Mittelpunkt benutzt wird, wird das Tape zu kurz. Daher werden
+    # bei den Randdreiecken noch die Eckpunkte miteinbezogen
+    startverts = triangle_vectors_of_stl[triangle_ID_sorted_on_trendline[0]]  # Comment_DB: startverts is start vertices
+    endverts = triangle_vectors_of_stl[triangle_ID_sorted_on_trendline[-1]]
+    dist_startverts = []
+    dist_endverts = []
+    for i in range(3):
+        dist_startverts.append(distance(startverts[i], center_point_of_cloud_weighted))
+        dist_endverts.append(distance(endverts[i], center_point_of_cloud_weighted))
+    startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
+    endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
+    return endvert_3d, startvert_3d
+
+
 ####MAIN
 def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     print(
@@ -254,44 +267,37 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     global num_of_triangles
     num_of_triangles = len(triangle_vectors_of_stl)
 
-    global triangle_normals
-    triangle_normals = tri_normals(stl_normals)
+    tri_normals = calc_tri_normals_from_stl(stl_normals,triangle_vectors_of_stl)
+    # Comment_DKu_Wenzel: basically the unweighted point cloud
+    tri_centerpoints= calc_tri_centerpoints(triangle_vectors_of_stl)
+    tri_areas = calc_tri_areas(triangle_vectors_of_stl)
 
-    global tri_centerpoints # Comment_DKu_Wenzel: basically the unweighted point cloud
-    tri_centerpoints= tri_centerpoints()
-
-    global tri_areas
-    tri_areas = tri_areas()
-
-    global avg_tri_norm_weighted # Comment_DKu_Wenzel? Warum erkennt er das nicht?
-    avg_tri_norm_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, triangle_normals)
+    global avg_tri_norm_weighted
+    avg_tri_norm_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, tri_normals)
 
     #Creating pointcloud:
-    global patch_pc_weighted
-    patch_pc_weighted = patch_pointcloud_weighted_by_area() #!!!!!Comment_DB: The blue points!
+    patch_pc_weighted = patch_pointcloud_weighted_by_area(tri_areas,tri_centerpoints) #!!!!!Comment_DB: The blue points!
     # Calculate the mean of the points, i.e. the 'center' of the cloud
     global center_point_of_cloud_weighted
     center_point_of_cloud_weighted = patch_pc_weighted.mean(axis=0)  # Mean of x,y,z-Values
     # Do Principal Component Analysis(PCA) on the mean-centered data. AKA SVD
     # The first principal component contains [uu, dd, vv] , where vv[0] is the direction
 
-    global trendline_x_axis, trendline_y_axis, trendline_z_axis
-    trendline_x_axis, trendline_y_axis, trendline_z_axis = trendline_axis()
+
+    trendline_x_axis, trendline_y_axis, trendline_z_axis = trendline_axis(patch_pc_weighted,center_point_of_cloud_weighted)
     # Creating trendline
     global trendline
-    trendline = pc_trendline()
+    trendline = pc_trendline(patch_pc_weighted,center_point_of_cloud_weighted,trendline_x_axis)
 
     # Creating trendline_projection_points:
-    global trendline_projection_points_tri_centerpoints
     trendline_projection_points_tri_centerpoints = pc_trendline_projection(tri_centerpoints)
 
-    global triangle_ID_sorted_on_trendline
-    triangle_ID_sorted_on_trendline = sort_tri_id_by_trendline()
+    triangle_ID_sorted_on_trendline = sort_tri_id_by_trendline(trendline_projection_points_tri_centerpoints,trendline)
 
     #Sorted list of triangle points with trendline_projection_points:
     global sorted_projection_points_tri_centerpoints, sorted_centerpoints
-    sorted_projection_points_tri_centerpoints = sort_list_by_tri_id(trendline_projection_points_tri_centerpoints)
-    sorted_centerpoints = sort_list_by_tri_id(tri_centerpoints)
+    sorted_projection_points_tri_centerpoints = sort_list_by_tri_id(trendline_projection_points_tri_centerpoints,triangle_ID_sorted_on_trendline)
+    sorted_centerpoints = sort_list_by_tri_id(tri_centerpoints,triangle_ID_sorted_on_trendline)
 
     # Start- und Endkante des Patches finden:
     endvert_3d, startvert_3d = calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weighted, triangle_ID_sorted_on_trendline,
@@ -478,20 +484,6 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     return start_parameter
 
 
-def calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weighted, triangle_ID_sorted_on_trendline, triangle_vectors_of_stl):
-    # -> wenn bei großen Randdreiecken nur der Mittelpunkt benutzt wird, wird das Tape zu kurz. Daher werden
-    # bei den Randdreiecken noch die Eckpunkte miteinbezogen
-    startverts = triangle_vectors_of_stl[triangle_ID_sorted_on_trendline[0]]  # Comment_DB: startverts is start vertices
-    endverts = triangle_vectors_of_stl[triangle_ID_sorted_on_trendline[-1]]
-    dist_startverts = []
-    dist_endverts = []
-    for i in range(3):
-        dist_startverts.append(distance(startverts[i], center_point_of_cloud_weighted))
-        dist_endverts.append(distance(endverts[i], center_point_of_cloud_weighted))
-    startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
-    endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
-    return endvert_3d, startvert_3d
-
 def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     ###2D-xy-PLOT
     plt.plot(xy_patch_curve[:, 0], xy_patch_curve[:, 1], 'bo', linewidth=2.0,label='ohne Glättung')  # äquidistante Punkte
@@ -528,8 +520,6 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
                                                                                center_point_of_cloud_weighted[1] + 500 * avg_tri_norm_weighted[1]], [
                      center_point_of_cloud_weighted[2], center_point_of_cloud_weighted[2] + 500 * avg_tri_norm_weighted[2]]
     plt.plot(x3,y3,z3,marker='o',c='green')
-
-    patch_meshpoints = []
 
     for i in range(len(bestPatch_patternpoints) - 2):
         verts = [list(
