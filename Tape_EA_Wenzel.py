@@ -16,9 +16,6 @@ from tkinter import filedialog
 import xlsxwriter
 from timeit import default_timer as timer
 
-
-############## GUI  &  SETTINGS #######################
-
 # GUI-Settings
 def get_Vars_from_GUI():
     master = Tk()
@@ -308,8 +305,6 @@ def get_Vars_from_GUI():
 
     master.destroy()  # Schließt das Settings Fenster
     return step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, poly_order, pop_size, useInteger, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start
-
-
 # functions for GUI-Settings
 def select_stl_file(input_file):
     if os.path.isfile('./settingssheet.txt'):
@@ -449,7 +444,6 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
             print("Bitte settingssheet.txt löschen")
             settingssheet.close()
 
-
 [step_size, testpatch, tape_type, width,
  pointspersection, equidistant_pts_between_bendpts,
  adap_mutation, chromo_resolution,
@@ -463,9 +457,6 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  poly_order, pop_size, useInteger, window_quotient,
  x_end, x_start, y_end, y_start, z_end, z_start] = get_Vars_from_GUI()
 
-############Vorverarbeitung der Geometriedaten###################
-
-# Ruft das stl_preprocessing modul auf und übergibt die stl-Datei an die Funktion startparam
 # Startparam gibt eine Liste mit den berechneten Startparametern zurück:
 
 [start_lengths,
@@ -486,7 +477,6 @@ if manual_start_end:
 
 # Faktor für das Längenallel in den Chromosomen -> eine Länge kann maximal L_aim lang werden
 l_factor = 0.5 * L_aim / chromo_resolution  # Comment_DB: already in [mm]
-
 
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
@@ -544,8 +534,6 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
     return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
-
-
 # Berechnungen in ListofPoints
 def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
     if alpha_list[0] > math.pi / 2:
@@ -668,12 +656,12 @@ def translate_start_varriation_from_chomo(chromo):
     variation_start.append(var_start_n_gamma)
     return variation_start
 def translate_alpha_beta_length_from_chromo(chromo):
-    l_list = []  # Comment_DB: empty list
-    alpha_list = []  # Comment_DB: empty list
-    beta_list = []  # Comment_DB: empty list
-    for i in range(0, len(startchromo) - 5, 3):  # Comment_DB: adjusted for reordered startchromo (lengths)
+    l_list = []
+    alpha_list = []
+    beta_list = []
+    for i in range(0, len(chromo) - 5, 3):
         l_list.append(chromo[i] * l_factor)
-    for i in range(1, len(startchromo) - 4, 3):  # Comment_DB: adjusted for reordered startchromo (alphas)
+    for i in range(1, len(chromo) - 4, 3):
 
         if chromo[i] < chromo_resolution / 2:
             alpha = (135 + (chromo[i] * 45 / (chromo_resolution / 2))) * 2 * math.pi / 360
@@ -681,16 +669,15 @@ def translate_alpha_beta_length_from_chromo(chromo):
             alpha = ((chromo[i] - chromo_resolution / 2) * 45 / (
                     chromo_resolution / 2)) * 2 * math.pi / 360  # Quadratische Vert. von 135°-180°
         alpha_list.append(alpha)
-    for i in range(2, len(startchromo) - 3, 3):  # Comment_DB: adjusted for reordered startchromo (betas)
+    for i in range(2, len(chromo) - 3, 3):
         beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
         beta_list.append(beta)
     return alpha_list, beta_list, l_list  # beta in radians, length in mm
 
-
 # Berechnung der Fitness eines Chromosoms
 def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim):  # Comment DKu_Wenzel L_aim=L_aim
 
-    L_aim  # Comment DKu_Wenzel: Lokales L_aim für Versuch korrigieren
+    L_aim = L_aim # Comment DKu_Wenzel: Lokales L_aim für Versuch korrigieren
     # L_aim = L_aim + 45  # Comment_DKu_Wenzel todo  Versuch mit L_aim korrigiert
     # Erste Beobachtung: Auch großen Einfluss auf dist_fit
 
@@ -710,19 +697,17 @@ def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim):  # Comment DKu_We
     fitness = distance_fit * gamma_d_hat + length_fit * gamma_l_hat + border_fit_end * gamma_pe_hat + border_fit_start * gamma_ps_hat
 
     return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist
-
-
 # Berechnungen in Fittness
 def patch_length_in_mm(chromo, l_factor_chromo_mm):
     # Berechnet die Länge eines Patches. Kann Chomosome als class chromosome oder auch als einfache Liste auslesen.
 
     if inspect.isclass(chromo):
         lengt = 0
-        for i in range(0, len(startchromo) - 5, 3):
+        for i in range(0, len(chromo) - 5, 3):
             lengt = lengt + chromo.genes[i]
     else:
         lengt = 0
-        for i in range(0, len(startchromo) - 5, 3):
+        for i in range(0, len(chromo) - 5, 3):
             lengt = lengt + chromo[i]
     return lengt * l_factor_chromo_mm
 def calc_border_fitness(chromo):
@@ -795,7 +780,6 @@ def evalute_adaptiv_gamma_():
             gamma_ps_hat = gamma_ps
             gamma_pe_hat = gamma_pe
     return gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat
-
 
 # Erstellung Chromosom der Startlösung
 # Chromosom der Startlösung (Comment_DB: independent of chromominmaxvalue limitation from galileo)
@@ -909,8 +893,6 @@ def initialize_Population_with_global_Settings():
     return p
 
 
-
-
 ####################Evolutionärer Algorithmus####################
 startchromo = create_start_chromo()
 p = initialize_Population_with_global_Settings()
@@ -926,6 +908,7 @@ length_fit_list = np.array([])
 border_fit_start_list = np.array([])
 border_fit_end_list = np.array([])
 mutation_rate_list = np.array([])
+
 
 ## Initialisierung
 time_start = timer()  # Comment_DB: start timer
@@ -1025,7 +1008,7 @@ for i in range(num_gen):
     # Comment_DB: append determined values into arrays after each iteration
     num_gen_list = np.append(num_gen_list, [i])
 
-    fitness_list = np.append(fitness_list, [p.bestFitIndividual.fitness])
+    fitness_list = np.append(fitness_list, [Fitness(p.bestFitIndividual.genes)[0]])
     distance_fit_list = np.append(distance_fit_list, [Fitness(p.bestFitIndividual.genes)[1]])
     length_fit_list = np.append(length_fit_list, [Fitness(p.bestFitIndividual.genes)[2]])
     border_fit_start_list = np.append(border_fit_start_list, [Fitness(p.bestFitIndividual.genes)[3]])
@@ -1130,9 +1113,6 @@ def save_patch_file():
 print_consol_output_end()
 show_fitness_and_subfitness_over_generations_end()
 show_chromo(p.bestFitIndividual.genes)
-
-
-# TODO ####Comment_DB: Save End Fitness Values#####
 
 end = Tk()
 Label(end, text="Sind Sie mit dem Patch zufrieden?").grid(row=10, column=1, )
