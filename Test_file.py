@@ -1,6 +1,5 @@
 
 
-
 var_range = 1
 
 chromo_resolution=100

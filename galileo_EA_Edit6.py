@@ -424,7 +424,6 @@ class Population:
         This takes two chromosomes and produces an offspring through linear
         combinations of the parents' genes.
         """
-
         newchromo1 = chromo1.copy()
         newchromo2 = chromo2.copy()
 

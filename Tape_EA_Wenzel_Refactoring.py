@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
-import stl_preprocessing_Wenzel as stlprep3_6
+import stl_preprocessing_Wenzel_Refactoring as stlprep3_6
 from tkinter import *
 from tkinter import filedialog
 import xlsxwriter

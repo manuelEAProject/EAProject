@@ -112,16 +112,27 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
         endpoint_project_to_trendline_plan, sorted_centerpoints,
         startpoint_project_to_trendline_plan, trendline_z_axis)
 
+    tri_corner_points = calc_tri_corner_points(triangle_vectors_of_stl)
+
+    tri_corner_points_projection_to_trendline = project_tri_centerpoints_to_trendline(tri_corner_points)
+
+    tri_corner_points_projected_to_trendline_plane = project_tri_corner_points_to_trendline_plane(tri_corner_points,
+                                                                                                  trendline_z_axis)
+
+    global x_list
+    x_list = calc_x_values_from_projectetion_on_trendline(tri_corner_points_projection_to_trendline)
+    global y_list
+    y_list = calc_y_values_from_projection_points(tri_corner_points_projection_to_trendline, trendline_y_axis,tri_corner_points_projected_to_trendline_plane)
+
     # Comment_DKu_Wenzel: An dieser Stelle werden die projezierten Punkte vom globalen KOS in ein lokales KOS umgewandelt
     # x-Werte: Abstand zwischen den sorted_projection_points
-    global x_list
-    x_list = calc_x_values_from_projectetion_on_trendline(sorted_projection_points_tri_centerpoints)
+
+    #x_list = calc_x_values_from_projectetion_on_trendline(sorted_projection_points_tri_centerpoints)
 
     # xy-Distanzplot
     # berechnet den Abstand der auf xy-Ebene projizierten Dreiecksmittelpunkte zur Trendline
-    global y_list
-    y_list = calc_y_values_from_projection_points(sorted_projection_points_tri_centerpoints, trendline_y_axis,
-                                                  tri_centerpoints_projected_to_trendline_plane)
+
+    #y_list = calc_y_values_from_projection_points(sorted_projection_points_tri_centerpoints, trendline_y_axis, tri_centerpoints_projected_to_trendline_plane)
     # Funktion des xy-Abstands über die Länge der Trendline. Außerdem werden linear Punkte aufgefüllt, um eine
     # nahezu äquidistante Schrittgröße zu erreichen
 
@@ -306,7 +317,7 @@ def calc_trendline(patch_pc_weighted, center_point_of_cloud_weighted, trendline_
 def project_tri_centerpoints_to_trendline(tri_centerpoints):
     #SOURCE: https://gamedev.stackexchange.com/questions/72528/how-can-i-project-a-3d-point-onto-a-3d-line
     trendline_projection = []
-    for i in range(num_of_triangles):
+    for i in range(len(tri_centerpoints)):
         trendline_projection.append(project_pointtoline(tri_centerpoints[i], trendline[0], trendline[1]))
     trendline_projection=np.asarray(trendline_projection)
 
@@ -472,6 +483,26 @@ def calc_x_values_from_projectetion_on_trendline(sorted_projection_points_tri_ce
     x_list = np.asarray(x_list)
     return x_list
 
+def calc_tri_corner_points(triangle_vectors_of_stl):
+    tri_corner_points=[]
+    for i in range(num_of_triangles):
+        triangel = triangle_vectors_of_stl[i]
+        for j in range(3):
+            tri_corner_points.append(triangel[j])
+
+    # Doppelte Ecken gelöscht
+    tri_corner_points = np.unique(tri_corner_points, axis=0)
+
+    return tri_corner_points
+def project_tri_corner_points_to_trendline_plane(tri_corner_points, trendline_z_axis):
+    tri_cornerpoints_projected_to_trendline_plane = []
+    for i in range(len(tri_corner_points)):
+        tri_cornerpoints_projected_to_trendline_plane.append(
+            project_pointtoplane(tri_corner_points[i], trendline_z_axis,
+                                 center_point_of_cloud_weighted))
+
+    tri_cornerpoints_projected_to_trendline_plane = np.asarray(tri_cornerpoints_projected_to_trendline_plane)
+    return tri_cornerpoints_projected_to_trendline_plane
 
 def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     ###2D-xy-PLOT
