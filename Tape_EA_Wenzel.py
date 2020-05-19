@@ -729,8 +729,8 @@ def calc_border_fitness(chromo):
     LoP = ListOfPoints(chromo)
     ###PARABOLIC###
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
-    border_fit_start = 100 - (stlprep3_6.distance(LoP[1], patch_start) ** 2) * k_p
-    border_fit_end = 100 - (stlprep3_6.distance(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
+    border_fit_start = 100 - (stlprep3_6.calc_distance_between_two_points(LoP[1], patch_start) ** 2) * k_p
+    border_fit_end = 100 - (stlprep3_6.calc_distance_between_two_points(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
     ###LINEAR###
     # k_p_lin = (100-90)/5
     # border_fit_start = 100 - abs((stlprep3_6.distance(LoP[1], patch_start)) * k_p_lin)

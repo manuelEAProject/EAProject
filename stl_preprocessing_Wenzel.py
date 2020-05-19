@@ -13,7 +13,7 @@ percentile_pc = 5
 max_points_in_pc = 10000
 
 #Berechnet den Abstand von 2 Punkten
-def distance(p1, p2):
+def calc_distance_between_two_points(p1, p2):
     distance = np.linalg.norm(p2-p1)
     return distance
 def project_pointtoplane(Point_to_project,plane_normal,plane_point):
@@ -40,8 +40,8 @@ def calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weight
     dist_startverts = []
     dist_endverts = []
     for i in range(3):
-        dist_startverts.append(distance(startverts[i], center_point_of_cloud_weighted))
-        dist_endverts.append(distance(endverts[i], center_point_of_cloud_weighted))
+        dist_startverts.append(calc_distance_between_two_points(startverts[i], center_point_of_cloud_weighted))
+        dist_endverts.append(calc_distance_between_two_points(endverts[i], center_point_of_cloud_weighted))
     startvert_3d = startverts[dist_startverts.index(max(dist_startverts))]
     endvert_3d = endverts[dist_endverts.index(max(dist_endverts))]
     return endvert_3d, startvert_3d
@@ -65,23 +65,22 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     num_of_triangles = len(triangle_vectors_of_stl)
 
     tri_normals = calc_tri_normals_from_stl(stl_normals,triangle_vectors_of_stl)
-    # Comment_DKu_Wenzel: basically the unweighted point cloud
-    tri_centerpoints= calc_tri_centerpoints(triangle_vectors_of_stl)
+    tri_centerpoints= calc_tri_centerpoints(triangle_vectors_of_stl) # Comment_DKu_Wenzel: basically the unweighted point cloud
     tri_areas = calc_tri_areas(triangle_vectors_of_stl)
 
-    global avg_tri_norm_weighted
-    avg_tri_norm_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, tri_normals)
+    global avg_tri_normal_weighted
+    avg_tri_normal_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, tri_normals)
 
     #Creating pointcloud:
-    patch_pc_weighted = calc_patch_pointcloud_weighted_by_area(tri_areas, tri_centerpoints) #!!!!!Comment_DB: The blue points!
+    point_cloud_tri_centerpoints_weighted = calc_patch_pointcloud_weighted_by_area(tri_areas, tri_centerpoints) #!!!!!Comment_DB: The blue points!
     # Calculate the mean of the points, i.e. the 'center' of the cloud
     global center_point_of_cloud_weighted
-    center_point_of_cloud_weighted = patch_pc_weighted.mean(axis=0)  # Mean of x,y,z-Values
+    center_point_of_cloud_weighted = point_cloud_tri_centerpoints_weighted.mean(axis=0)  # Mean of x,y,z-Values
 
-    trendline_x_axis, trendline_y_axis, trendline_z_axis = trendline_axis(patch_pc_weighted,center_point_of_cloud_weighted)
+    trendline_x_axis, trendline_y_axis, trendline_z_axis = calc_trendline_axis_with_svd(point_cloud_tri_centerpoints_weighted, center_point_of_cloud_weighted)
     # Creating trendline
     global trendline
-    trendline = calc_trendline(patch_pc_weighted, center_point_of_cloud_weighted, trendline_x_axis)
+    trendline = calc_trendline(point_cloud_tri_centerpoints_weighted, center_point_of_cloud_weighted, trendline_x_axis)
 
     # Creating trendline_projection_points:
     trendline_projection_points_tri_centerpoints = project_tri_centerpoints_to_trendline(tri_centerpoints)
@@ -312,7 +311,7 @@ def project_tri_centerpoints_to_trendline(tri_centerpoints):
     trendline_projection=np.asarray(trendline_projection)
 
     return trendline_projection
-def trendline_axis(patch_pc_weighted,center_point_of_cloud_weighted):
+def calc_trendline_axis_with_svd(patch_pc_weighted, center_point_of_cloud_weighted):
     # Do Principal Component Analysis(PCA) on the mean-centered data. AKA SVD
     # The first principal component contains [uu, dd, vv] , where vv[0] is the direction
     first_principal_components_pc_weighted = np.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
@@ -321,11 +320,11 @@ def trendline_axis(patch_pc_weighted,center_point_of_cloud_weighted):
     trendline_x_axis = (1 / np.linalg.norm(trendline_x_axis)) * trendline_x_axis
     # avg_tri_norm ist nicht senkrecht zur x-Achse
     # von pcc + avg_tri_norm und zurück auf x-Achse projizieren
-    trendline_avg_norm_point = center_point_of_cloud_weighted + np.dot(avg_tri_norm_weighted,
+    trendline_avg_norm_point = center_point_of_cloud_weighted + np.dot(avg_tri_normal_weighted,
                                                                        trendline_x_axis) / np.dot(trendline_x_axis,
                                                                                                   trendline_x_axis) * trendline_x_axis
     # y-Achse ist verbindung von pcc+avg_tri_norm mit dem projizierten Punkt
-    trendline_y_axis = (center_point_of_cloud_weighted + avg_tri_norm_weighted) - trendline_avg_norm_point
+    trendline_y_axis = (center_point_of_cloud_weighted + avg_tri_normal_weighted) - trendline_avg_norm_point
     trendline_y_axis = (1 / np.linalg.norm(trendline_y_axis)) * trendline_y_axis
     trendline_z_axis = np.cross(trendline_x_axis, trendline_y_axis)
     return trendline_x_axis, trendline_y_axis, trendline_z_axis
@@ -506,9 +505,9 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     axes.scatter(patch_end[0],patch_end[1],patch_end[2],c='black')
 
     # von PCC gemittelter Normalenvektor
-    x3, y3, z3 = [center_point_of_cloud_weighted[0], center_point_of_cloud_weighted[0] + 500 * avg_tri_norm_weighted[0]], [center_point_of_cloud_weighted[1],
-                                                                               center_point_of_cloud_weighted[1] + 500 * avg_tri_norm_weighted[1]], [
-                     center_point_of_cloud_weighted[2], center_point_of_cloud_weighted[2] + 500 * avg_tri_norm_weighted[2]]
+    x3, y3, z3 = [center_point_of_cloud_weighted[0], center_point_of_cloud_weighted[0] + 500 * avg_tri_normal_weighted[0]], [center_point_of_cloud_weighted[1],
+                                                                                                                             center_point_of_cloud_weighted[1] + 500 * avg_tri_normal_weighted[1]], [
+                     center_point_of_cloud_weighted[2], center_point_of_cloud_weighted[2] + 500 * avg_tri_normal_weighted[2]]
     plt.plot(x3,y3,z3,marker='o',c='green')
 
     for i in range(len(bestPatch_patternpoints) - 2):

@@ -67,7 +67,7 @@ class Chromosome:
         maxlen = len(self.geneMaxValues)
         if (minlen == 0) or (minlen != maxlen):
             return
-        randFunc = None
+
         if intValues == 1:
             randFunc = generator.randint
         else:
@@ -87,12 +87,10 @@ class Chromosome:
         integers will be created, else random floating point values will
         be generated. Appends startchromo as well (Comment_DB).
         """
-        # first, are the lists empty?
-        lengths = startchromo
+
 
         minlen = len(self.geneMinValues)
-        maxlen = len(self.geneMaxValues)
-        randFunc = None
+
         if intValues == 1:
             randFunc = generator.randint
         else:
@@ -100,10 +98,8 @@ class Chromosome:
         self.genes = []
         for i in range(minlen):
             randIntprob = generator.randint(0,100)
-            randVar = generator.randint(-self.initrange,self.initrange)
             randVar = generator.random()*self.initrange-self.initrange
-            #randVar = generator.random()
-            #print("prob",prob)
+
             if randIntprob <= self.p_randInit:
                 self.genes.append(randFunc(self.geneMinValues[i], self.geneMaxValues[i]))
                 continue
@@ -129,8 +125,6 @@ class Chromosome:
         """Calls evalFunc for this chromosome, and caches the fitness value
         returned. Returns None if evalFunc is not yet defined.
         """
-
-
 
         if self.evalFunc != None:
             self.fitness = self.evalFunc(self.genes)[0] #Comment_DB: Calls Fitness function Fitness(chromo)[0]. Returns first value in Fitness(chromo)
@@ -324,14 +318,6 @@ class Population:
         self.maxFitness = self.currentGeneration[0].getFitness()
         self.minFitness = self.currentGeneration[0].getFitness()
         self.bestFitIndividual = self.currentGeneration[0]
-        #print("self.currentGeneration",self.currentGeneration)
-        #print("self.currentGeneration[0]", self.currentGeneration[0])
-        #print("self.currentGeneration[0][0]", self.currentGeneration[0][0])
-        #print("self.bestFitIndividual", self.bestFitIndividual)
-        #print("self.bestFitIndividual[0]", self.bestFitIndividual[0])
-        #print("self.bestFitIndividual", self.bestFitIndividual)
-
-
 
         for chromo in self.currentGeneration:
             chromo.fitness = None #Comment_DB: make sure getFitness() returns c.evaluate()
@@ -439,9 +425,6 @@ class Population:
         combinations of the parents' genes.
         """
 
-
-
-
         newchromo1 = chromo1.copy()
         newchromo2 = chromo2.copy()
 
@@ -482,6 +465,7 @@ class Population:
         new chromosomes, which are returned in a tuple. Note
         that there is only a crossoverRate chance of crossover happening.
         """
+
         prob = self.generator.random()
         if prob <= self.crossoverRate:
             self.crossoverCount = self.crossoverCount + 1
