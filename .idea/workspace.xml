@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel_Refactoring.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel1.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -385,7 +387,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589886547935</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Fitness und ListofPoints unabhängig von Startchromo. Kann beliebige chromo-länge handeln">
+      <created>1589888413881</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1589888413881</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -413,7 +422,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel" />
     <MESSAGE value="Tape_EA_Wenzel:&#10;• Vieles Auskommentierte gelöscht&#10;• Settinglist direkt übergeben" />
     <MESSAGE value="Fragmentieren der Fittnesfunktion" />
     <MESSAGE value="Änderungen von Namen:&#10;callback = get_Vars_from_GUI&#10;&#10;preprocessed_chromo = create_start_chromo&#10;&#10;Startparameter vereinfacht deklariert" />
@@ -438,6 +446,7 @@
     <MESSAGE value="Namen&#10;Global" />
     <MESSAGE value="calc_bends" />
     <MESSAGE value="renaming some functions&#10;reordering the functions" />
-    <option name="LAST_COMMIT_MESSAGE" value="renaming some functions&#10;reordering the functions" />
+    <MESSAGE value="Fitness und ListofPoints unabhängig von Startchromo. Kann beliebige chromo-länge handeln" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fitness und ListofPoints unabhängig von Startchromo. Kann beliebige chromo-länge handeln" />
   </component>
 </project>
