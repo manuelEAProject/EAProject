@@ -1,13 +1,7 @@
 from scipy.interpolate import griddata
 import numpy as np
 
-rotated_centerpoint_weighted_around_z = Quaternion(axis=z_axis, angle=-anglex).rotate(center_point_of_cloud_weighted)
-centerpoint_weighted_rotated = Quaternion(axis=y_axis, angle=angley).rotate(rotated_centerpoint_weighted_around_z)
 
-# Rotated Points shifted
-tri_corner__points_rotatet[:, 0] = np.subtract(tri_corner__points_rotatet[:, 0], centerpoint_weighted_rotated[0])
-tri_corner__points_rotatet[:, 1] = np.subtract(tri_corner__points_rotatet[:, 1], centerpoint_weighted_rotated[1])
-tri_corner__points_rotatet[:, 2] = np.subtract(tri_corner__points_rotatet[:, 2], centerpoint_weighted_rotated[2])
 
 
 

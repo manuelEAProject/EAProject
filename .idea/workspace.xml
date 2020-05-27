@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="x_list&#10;y_list&#10;tri_corner_points">
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Test_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test_file.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
@@ -451,7 +451,14 @@
       <option name="project" value="LOCAL" />
       <updated>1589902147120</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="x_list,y_list von Interpolated surface">
+      <created>1590566919507</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1590566919507</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -479,7 +486,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Änderungen von Namen:&#10;callback = get_Vars_from_GUI&#10;&#10;preprocessed_chromo = create_start_chromo&#10;&#10;Startparameter vereinfacht deklariert" />
     <MESSAGE value="settings_sheet = settingsshet" />
     <MESSAGE value="alpha beta lenght function in ListofPoints()" />
     <MESSAGE value="calc_start_varriation_from_chromo&#10;&#10;change parameternames&#10;Start_point&#10;Start_direction&#10;Start_quer_zu_direction&#10;..." />
@@ -504,10 +510,23 @@
     <MESSAGE value="Fitness und ListofPoints unabhängig von Startchromo. Kann beliebige chromo-länge handeln" />
     <MESSAGE value="Zwischenergebnis des Refactoring in neue Datei gespeichert" />
     <MESSAGE value="x_list&#10;y_list&#10;tri_corner_points" />
-    <option name="LAST_COMMIT_MESSAGE" value="x_list&#10;y_list&#10;tri_corner_points" />
+    <MESSAGE value="x_list,y_list von Interpolated surface" />
+    <option name="LAST_COMMIT_MESSAGE" value="x_list,y_list von Interpolated surface" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
+          <line>645</line>
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
+          <line>649</line>
+          <option name="timeStamp" value="51" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
