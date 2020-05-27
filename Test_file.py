@@ -1,8 +1,72 @@
+from scipy.interpolate import griddata
+import numpy as np
+
+rotated_centerpoint_weighted_around_z = Quaternion(axis=z_axis, angle=-anglex).rotate(center_point_of_cloud_weighted)
+centerpoint_weighted_rotated = Quaternion(axis=y_axis, angle=angley).rotate(rotated_centerpoint_weighted_around_z)
+
+# Rotated Points shifted
+tri_corner__points_rotatet[:, 0] = np.subtract(tri_corner__points_rotatet[:, 0], centerpoint_weighted_rotated[0])
+tri_corner__points_rotatet[:, 1] = np.subtract(tri_corner__points_rotatet[:, 1], centerpoint_weighted_rotated[1])
+tri_corner__points_rotatet[:, 2] = np.subtract(tri_corner__points_rotatet[:, 2], centerpoint_weighted_rotated[2])
 
 
-var_range = 1
 
-chromo_resolution=100
+
+
+
+
+def func(x, y):
+     return x*(1-x)*np.cos(4*np.pi*x) * np.sin(4*np.pi*y**2)**2
+#on a grid in [0, 1]x[0, 1]
+
+
+grid_x, grid_y = np.mgrid[0:1:100j, 0:1:200j]
+#but we only know its values at 1000 data points:
+
+
+l_list = [[0.12,0.23],[0.32,0.41],[0.12,0.41],[0.23,0.41],[0.45,0.41],[0.21,0.41],[0.89,0.41],[0.78,0.41],
+          [0.14,0.22],[0.98,0.98]]
+points = np.asarray(l_list, dtype=np.complex64)
+
+#points = np.random.rand(1000, 2)
+values = np.array([0.11,0.22,0.34,0.98,0.11,0.22,0.34,0.98,0.34,0.34], dtype=np.complex64)
+
+
+#Thiss can be done with griddata – below, we try out all of the interpolation methods:
+
+
+grid_z0 = griddata(points, values, (grid_x, grid_y), method='nearest')
+grid_z1 = griddata(points, values, (grid_x, grid_y), method='linear')
+grid_z2 = griddata(points, values, (grid_x, grid_y), method='cubic')
+
+grid_z0= np.array(grid_z0, dtype=np.float32)
+grid_z1= np.array(grid_z1, dtype=np.float32)
+grid_z2= np.array(grid_z2, dtype=np.float32)
+
+import matplotlib.pyplot as plt
+#plt.subplot(221)
+#plt.imshow(func(grid_x, grid_y).T, extent=(0,1,0,1), origin='lower')
+#plt.plot(points[:,0], points[:,1], 'k.', ms=1)
+#plt.title('Original')
+plt.subplot(222)
+plt.imshow(grid_z0.T, extent=(0,1,0,1), origin='lower')
+plt.title('Nearest')
+plt.subplot(223)
+plt.imshow(grid_z1.T, extent=(0,1,0,1), origin='lower')
+plt.title('Linear')
+plt.subplot(224)
+plt.imshow(grid_z2.T, extent=(0,1,0,1), origin='lower')
+plt.title('Cubic')
+plt.gcf().set_size_inches(6, 6)
+plt.show()
+
+
+
+
+
+#var_range = 1
+
+#chromo_resolution=100
 
 
 """

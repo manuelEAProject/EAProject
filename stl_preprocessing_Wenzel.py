@@ -1,12 +1,13 @@
 import numpy as np
 import math
 from stl import mesh
-import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
 from scipy.signal import savgol_filter
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-
+from scipy.interpolate import griddata
+import matplotlib.pyplot as plt
+from pyquaternion import Quaternion
 
 equidistant_step_size = 3
 percentile_pc = 5
@@ -61,12 +62,20 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     global triangle_vectors_of_stl
     triangle_vectors_of_stl = patch_vectors_of_stl_input.vectors #Comment_DB: triangle edges (wireframe)
     # Number of triangles, better then using always different len(list)
+
+
     global num_of_triangles
     num_of_triangles = len(triangle_vectors_of_stl)
 
     tri_normals = calc_tri_normals_from_stl(stl_normals,triangle_vectors_of_stl)
-    tri_centerpoints= calc_tri_centerpoints(triangle_vectors_of_stl) # Comment_DKu_Wenzel: basically the unweighted point cloud
     tri_areas = calc_tri_areas(triangle_vectors_of_stl)
+
+    global tri_centerpoints
+    tri_centerpoints = calc_tri_centerpoints(triangle_vectors_of_stl)  # Comment_DKu_Wenzel: basically the unweighted point cloud
+
+    global tri_corner_points
+    # Die Dreiecksmittelpunkte werden in Ebene der Trendline projiziert
+    tri_corner_points = calc_tri_corner_points(triangle_vectors_of_stl)
 
     global avg_tri_normal_weighted
     avg_tri_normal_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, tri_normals)
@@ -77,6 +86,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     global center_point_of_cloud_weighted
     center_point_of_cloud_weighted = point_cloud_tri_centerpoints_weighted.mean(axis=0)  # Mean of x,y,z-Values
 
+    global trendline_x_axis, trendline_y_axis, trendline_z_axis
     trendline_x_axis, trendline_y_axis, trendline_z_axis = calc_trendline_axis_with_svd(point_cloud_tri_centerpoints_weighted, center_point_of_cloud_weighted)
     # Creating trendline
     global trendline
@@ -94,7 +104,10 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     # Start- und Endkante des Patches finden:
     endvert_3d, startvert_3d = calc_start_end_point_3D_from_stl_triangl_vector(center_point_of_cloud_weighted, triangle_ID_sorted_on_trendline,
                                                                                triangle_vectors_of_stl)
+
+
     # In Ebene projiziert:
+    global startpoint_project_to_trendline_plan
     startpoint_project_to_trendline_plan = project_pointtoplane(startvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
     endpoint_project_to_trendline_plan = project_pointtoplane(endvert_3d, trendline_z_axis, center_point_of_cloud_weighted)
 
@@ -107,22 +120,33 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     sorted_projection_points_tri_centerpoints = np.insert(sorted_projection_points_tri_centerpoints, 0, startpoint_project_to_trendline, axis=0)
     sorted_projection_points_tri_centerpoints = np.concatenate((sorted_projection_points_tri_centerpoints, [endpoint_project_to_trendline]))
 
-    # Die Dreiecksmittelpunkte werden in Ebene der Trendline projiziert
-    tri_centerpoints_projected_to_trendline_plane = project_tri_centerpoints_to_trendline_plane(
-        endpoint_project_to_trendline_plan, sorted_centerpoints,
-        startpoint_project_to_trendline_plan, trendline_z_axis)
+    tri_centerpoints_projected_to_trendline_plane = project_tri_centerpoints_to_trendline_plane(endpoint_project_to_trendline_plan,sorted_centerpoints, startpoint_project_to_trendline_plan, trendline_z_axis)
 
-    tri_corner_points = calc_tri_corner_points(triangle_vectors_of_stl)
 
-    tri_corner_points_projection_to_trendline = project_tri_centerpoints_to_trendline(tri_corner_points)
+    #tri_corner_and_center_points = np.concatenate((tri_centerpoints, tri_corner_points))
+    global tri_corner_points_projected_to_trendline
+    tri_corner_points_projected_to_trendline = project_tri_centerpoints_to_trendline(tri_corner_points)
 
+    global tri_corner_points_projected_to_trendline_plane
     tri_corner_points_projected_to_trendline_plane = project_tri_corner_points_to_trendline_plane(tri_corner_points,
                                                                                                   trendline_z_axis)
+    global y_list, x_list
 
-    global x_list
-    x_list = calc_x_values_from_projectetion_on_trendline(tri_corner_points_projection_to_trendline)
-    global y_list
-    y_list = calc_y_values_from_projection_points(tri_corner_points_projection_to_trendline, trendline_y_axis,tri_corner_points_projected_to_trendline_plane)
+    #Interpolation
+    grid_lin_interpolation, x_list_interpol, y_list_interpol = interpolate_start_geometrie()
+
+    #Start und Endwerte meistens NaN!
+    i=0
+    while y_list_interpol[i] != y_list_interpol[i] : i+=1
+    j = -1
+    while y_list_interpol[j] != y_list_interpol[j]:  j-=1
+
+    x_list = x_list_interpol[i:j]
+    y_list = y_list_interpol[i:j]
+
+    #x_list = calc_x_values_from_projectetion_on_trendline(tri_corner_points_projected_to_trendline)
+
+    #y_list = calc_y_values_from_projection_points(tri_corner_points_projected_to_trendline, trendline_y_axis, tri_corner_points_projected_to_trendline_plane)
 
     # Comment_DKu_Wenzel: An dieser Stelle werden die projezierten Punkte vom globalen KOS in ein lokales KOS umgewandelt
     # x-Werte: Abstand zwischen den sorted_projection_points
@@ -189,6 +213,8 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
         p0=np.array([x_y_points_filled_up[i - 1][0], y_smooth[i - 1]])
         p1=np.array([x_y_points_filled_up[i][0], y_smooth[i]])
         L_aim =L_aim + np.linalg.norm(p1-p0)
+
+
 
     start_parameter = [l_list, L_aim, beta_list, startpoint_project_to_trendline_plan,
                        endpoint_project_to_trendline_plan, Start_r_3d_atstart, Start_n_3d_atstart]
@@ -504,6 +530,148 @@ def project_tri_corner_points_to_trendline_plane(tri_corner_points, trendline_z_
     tri_cornerpoints_projected_to_trendline_plane = np.asarray(tri_cornerpoints_projected_to_trendline_plane)
     return tri_cornerpoints_projected_to_trendline_plane
 
+
+def interpolate_start_geometrie(grid_ressolution = 2000j):
+    tri_centerpoints_rotatet_and_translated = translation_Points_from_stl_to_trendline_KOS(tri_centerpoints)
+
+    tri_corner__points_rotatet_and_translated = translation_Points_from_stl_to_trendline_KOS(tri_corner_points)
+
+    points = np.concatenate((tri_centerpoints_rotatet_and_translated, tri_corner__points_rotatet_and_translated))
+
+    corner_points_X_Y_TrendlineKOS = points[:, 0:2]
+    corner_points_Z_TrendlineKOS = points[:, 2]
+
+    max_x = max(corner_points_X_Y_TrendlineKOS[:,0])
+    min_x = min(corner_points_X_Y_TrendlineKOS[:,0])
+    max_y = max(corner_points_X_Y_TrendlineKOS[:,1])
+    min_y = min(corner_points_X_Y_TrendlineKOS[:,1])
+
+    grid_x, grid_y = np.mgrid[min_x:max_x:grid_ressolution, min_y:max_y:grid_ressolution]
+
+    corner_points_X_Y_TrendlineKOS = np.asarray(corner_points_X_Y_TrendlineKOS, dtype=np.float32)
+    corner_points_Z_TrendlineKOS = np.asarray(corner_points_Z_TrendlineKOS, dtype=np.float32)
+
+    # Interpolating  the Surface Geometry
+    z_grid_values_linear = griddata(corner_points_X_Y_TrendlineKOS, corner_points_Z_TrendlineKOS, (grid_x, grid_y), method='linear')
+    z_grid_values_qubic = griddata(corner_points_X_Y_TrendlineKOS, corner_points_Z_TrendlineKOS, (grid_x, grid_y), method='cubic')
+
+
+
+
+    # todo: Hier wird bisher von der trendlinie die Biegelienie entnommen. Können wir eine "Schräge_Ebene auswählen?"
+    ### Comment_DKu_Wenzel: Vorsicht!! Hier gibt die z-Achse das Höhenprofil an. Im
+    y_0_grid_point = np.asarray(max_y/(max_y-min_y)*2000, dtype=np.int16)
+    y = grid_y[0,-y_0_grid_point]
+    y_line = np.full((2000, 1), y)
+
+    # Extract one line from griddata
+    z_values_linear = z_grid_values_linear[:, -y_0_grid_point]
+    #z_values_plane = z_values_plane[::-1]
+    z_values_qubic = z_grid_values_qubic[:, -y_0_grid_point]
+
+    x_values = grid_x[:, 0]
+
+
+
+
+
+    ###2D-xy-PLOT
+    figure = pyplot.figure()  # Comment_DB: create a new figure
+    axes = mplot3d.Axes3D(figure)
+    axes.scatter(corner_points_X_Y_TrendlineKOS[:, 0], corner_points_X_Y_TrendlineKOS[:, 1], corner_points_Z_TrendlineKOS[:], c='y')
+
+    plt.subplot(221)
+    plt.title(np.array2string(y))
+    plt.plot(x_values, z_values_linear, 'bo', linewidth=2.0, label='z_values_linear')
+
+    plt.subplot(222)
+    plt.plot(x_values, z_values_qubic, 'bo', linewidth=2.0, label='z_values_qubic')
+
+    plt.subplot(223)
+    plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
+    plt.plot(x_values, y_line, 'bo', linewidth=2.0, label='Schnitt')
+    plt.title('Linear')
+
+    plt.subplot(224)
+    plt.imshow(z_grid_values_qubic.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
+    plt.title('Cubic')
+    plt.gcf().set_size_inches(6, 6)
+
+    plt.show()
+    return z_grid_values_linear, x_values, z_values_linear
+# Functionen in Interpolate start_geometrie
+def translation_Points_from_stl_to_trendline_KOS(points_in_stl_KOS):
+    # Gesamtidee: Erst wird trendx zu (1,0,0) rotiert, anschließend werden die Punkte in den center point weighted(cpw) verschoben
+
+    # Basic Coordinate System
+    x_axis = np.asarray((1, 0, 0), dtype=np.float32)
+    y_axis = np.asarray((0, 1, 0), dtype=np.float32)
+    z_axis = np.asarray((0, 0, 1), dtype=np.float32)
+
+    # Rotationswinkel
+    anglez, angley = calc_angle_coordinate_rotation_x_trendline(x_axis, z_axis, trendline_x_axis)
+
+    """
+    # Comment_DKu_Wenzel: Test Achtung: y_trendline_axis -> z_rotated direction
+    x_trend_now_1_0_0 = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,
+                                                                          trendline_x_axis)
+    z_trend_now_0_0_1 = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,
+                                                                          trendline_y_axis)
+    y_trend_now_0_1_0 = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,
+                                                                            trendline_z_axis)
+    """
+
+    points_in_trendline_KOS = []
+
+    for i in range(len(points_in_stl_KOS[:, 0])):
+        tri_corner__points_rotatet_i = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,
+                                                                                         points_in_stl_KOS[i])
+        points_in_trendline_KOS.append(tri_corner__points_rotatet_i)
+
+    # Comment_DKu_Wenzel: Startpunkt ist von einem Eckpunkt auf die Trendlinien-x-z-Ebene-Projeziert
+    startpoint_project_to_trendline_plan_rotated = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley,
+                                                                                                     z_axis, y_axis,
+                                                                                                     startpoint_project_to_trendline_plan)
+    points_in_trendline_KOS.append(startpoint_project_to_trendline_plan_rotated)
+
+    points_in_trendline_KOS = np.asarray(points_in_trendline_KOS, dtype=np.float32)
+    centerpoint_weighted_rotated = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,
+                                                                                    center_point_of_cloud_weighted)
+
+    # Rotated Points shifted
+    points_in_trendline_KOS[:, 0] = np.subtract(points_in_trendline_KOS[:, 0], centerpoint_weighted_rotated[0])
+    points_in_trendline_KOS[:, 1] = np.subtract(points_in_trendline_KOS[:, 1], centerpoint_weighted_rotated[1])
+    points_in_trendline_KOS[:, 2] = np.subtract(points_in_trendline_KOS[:, 2], centerpoint_weighted_rotated[2])
+
+    return points_in_trendline_KOS
+def rotate_point_around_z_and_y_axis_with_given_angle(angle1, angle2, axis1, axis2, point_to_rotate):
+    rotated_point_around_z = Quaternion(axis=axis1, angle=-angle1).rotate(
+        point_to_rotate)
+    point_rotated = Quaternion(axis=axis2, angle=angle2).rotate(rotated_point_around_z)
+    return point_rotated
+def calc_angle_coordinate_rotation_x_trendline(x_axis, z_axis,trendline_x_axis):
+    new_x_trendline_projected_to_x_y = project_pointtoplane((trendline_x_axis), z_axis, np.zeros(3))
+    new_x_trendline_projected_to_x_y = 1 / np.linalg.norm(
+        new_x_trendline_projected_to_x_y) * new_x_trendline_projected_to_x_y
+
+    anglez = math.acos(np.dot(x_axis, new_x_trendline_projected_to_x_y) / (
+                np.linalg.norm(new_x_trendline_projected_to_x_y) * np.linalg.norm(x_axis)))
+    # Wenn y negativ, in die x_Rotation in die andere Richtung korrigieren
+    if trendline_x_axis[1] <= 0: anglez = -anglez
+
+
+    rotated_x_trend_around_z = Quaternion(axis=z_axis, angle=-anglez).rotate(trendline_x_axis)
+    rotated_x_trend_around_z = 1 / np.linalg.norm(rotated_x_trend_around_z) * rotated_x_trend_around_z
+
+    angley = math.acos(np.dot(x_axis, rotated_x_trend_around_z) / (
+            np.linalg.norm(x_axis) * np.linalg.norm(rotated_x_trend_around_z)))
+
+    # Wenn y negativ, in die x_Rotation in die andere Richtung korrigieren
+    if trendline_x_axis[2] <= 0: angley = -angley
+
+    return anglez, angley
+
+
 def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     ###2D-xy-PLOT
     plt.plot(x_y_points_filled_up[:, 0], x_y_points_filled_up[:, 1], 'bo', linewidth=2.0, label='ohne Glättung')  # äquidistante Punkte
@@ -536,10 +704,19 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     axes.scatter(patch_end[0],patch_end[1],patch_end[2],c='black')
 
     # von PCC gemittelter Normalenvektor
-    x3, y3, z3 = [center_point_of_cloud_weighted[0], center_point_of_cloud_weighted[0] + 500 * avg_tri_normal_weighted[0]], [center_point_of_cloud_weighted[1],
-                                                                                                                             center_point_of_cloud_weighted[1] + 500 * avg_tri_normal_weighted[1]], [
-                     center_point_of_cloud_weighted[2], center_point_of_cloud_weighted[2] + 500 * avg_tri_normal_weighted[2]]
+    x3, y3, z3 = [center_point_of_cloud_weighted[0], center_point_of_cloud_weighted[0] + 500 * avg_tri_normal_weighted[0]], \
+                 [center_point_of_cloud_weighted[1],center_point_of_cloud_weighted[1] + 500 * avg_tri_normal_weighted[1]], \
+                 [center_point_of_cloud_weighted[2], center_point_of_cloud_weighted[2] + 500 * avg_tri_normal_weighted[2]]
+
     plt.plot(x3,y3,z3,marker='o',c='green')
+
+    x333, y333, z333 = [center_point_of_cloud_weighted[0],center_point_of_cloud_weighted[0] + 500 * trendline_y_axis[0]], \
+                 [center_point_of_cloud_weighted[1],center_point_of_cloud_weighted[1] + 500 * trendline_y_axis[1]], \
+                 [center_point_of_cloud_weighted[2],center_point_of_cloud_weighted[2] + 500 * trendline_y_axis[2]]
+    plt.plot(x333, y333, z333, marker='o', c='blue')
+
+    #axes.scatter(tri_corner_points_projected_to_trendline_plane[:, 0], tri_corner_points_projected_to_trendline_plane[:, 1], tri_corner_points_projected_to_trendline_plane[:, 2], c='r')
+    #axes.scatter(tri_corner_points_projected_to_trendline[:, 0], tri_corner_points_projected_to_trendline[:, 1], tri_corner_points_projected_to_trendline[:, 2], c='g')
 
     for i in range(len(bestPatch_patternpoints) - 2):
         verts = [list(
@@ -548,7 +725,7 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
                 [bestPatch_patternpoints[i][2], bestPatch_patternpoints[i + 1][2], bestPatch_patternpoints[i + 2][2]]))] #Comment_DB: DARK BLUE LoP PATCH
         axes.add_collection3d(Poly3DCollection(verts), zs='z') #Comment_DB: INSERT LoP PATCH IN GRAPH
         #patch_meshpoints.append(verts) #Comment_DB: is not used
-    axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
+    #axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
 
     face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
     patch_visual.set_facecolor(face_color)
