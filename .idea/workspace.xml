@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="Beliebiges Seitenprofil">
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/FinalPart.step" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/Gesamtkoerper.stl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/Oberflaeche.stl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/Oberflaeche_Mittelteil.stl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/Oberflaeche_Mittelteil_grob.stl" afterDir="false" />
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
@@ -469,7 +464,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590591625183</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Beliebiges Seitenprofil in globalen Plot">
+      <created>1590674116518</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1590674116518</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -497,7 +499,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="alpha beta lenght function in ListofPoints()" />
     <MESSAGE value="calc_start_varriation_from_chromo&#10;&#10;change parameternames&#10;Start_point&#10;Start_direction&#10;Start_quer_zu_direction&#10;..." />
     <MESSAGE value="translate_start_varriation_from_chromo()&#10;translate_alpha_beta_length_from_chromo()&#10;calc_start_point_direction()" />
     <MESSAGE value="calc_midpoints&#10;calc_filled_up_points" />
@@ -522,17 +523,11 @@
     <MESSAGE value="x_list&#10;y_list&#10;tri_corner_points" />
     <MESSAGE value="x_list,y_list von Interpolated surface" />
     <MESSAGE value="Beliebiges Seitenprofil" />
-    <option name="LAST_COMMIT_MESSAGE" value="Beliebiges Seitenprofil" />
+    <MESSAGE value="Beliebiges Seitenprofil in globalen Plot" />
+    <option name="LAST_COMMIT_MESSAGE" value="Beliebiges Seitenprofil in globalen Plot" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
-          <line>812</line>
-          <option name="timeStamp" value="56" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">

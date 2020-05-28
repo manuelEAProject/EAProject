@@ -214,7 +214,7 @@ def startparam(input_file,poly_order,savgol_window_quotient,max_distance):
     L_aim = 0
     for i in range(1, len(x_y_points_filled_up)):
         p0=np.array([x_y_points_filled_up[i - 1][0], x_y_points_filled_up[i - 1][1]])
-        p1=np.array([x_y_points_filled_up[i][0], x_y_points_filled_up[i - 1][1]])
+        p1=np.array([x_y_points_filled_up[i][0], x_y_points_filled_up[i][1]])
         L_aim =L_aim + np.linalg.norm(p1-p0)
 
 
@@ -545,8 +545,8 @@ def interpolate_start_geometrie(grid_ressolution = 3000j):
     tri_corner__points_rotatet_and_translated = translation_Points_from_OLD_to_trendline_KOS(tri_corner_points,
                                                                                              trendline_x_axis,
                                                                                              center_point_of_cloud_weighted, True)
-    points = np.concatenate((tri_centerpoints_rotatet_and_translated, tri_corner__points_rotatet_and_translated))
-    #points = tri_corner__points_rotatet_and_translated
+    #points = np.concatenate((tri_centerpoints_rotatet_and_translated, tri_corner__points_rotatet_and_translated))
+    points = tri_corner__points_rotatet_and_translated
 
     corner_points_X_Y_TrendlineKOS = points[:, 0:2]
     corner_points_Z_TrendlineKOS = points[:, 2]
