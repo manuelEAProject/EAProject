@@ -536,7 +536,7 @@ def project_tri_corner_points_to_trendline_plane(tri_corner_points, trendline_z_
     return tri_cornerpoints_projected_to_trendline_plane
 
 
-def interpolate_start_geometrie(grid_ressolution = 3000j):
+def interpolate_start_geometrie(grid_resolution=500j):
     # Comment_DKu_Wenzel: Interpolation mit Centerpoints teils ungenauer
     tri_centerpoints_rotatet_and_translated = translation_Points_from_OLD_to_trendline_KOS(tri_centerpoints,
                                                                                            trendline_x_axis,
@@ -556,7 +556,11 @@ def interpolate_start_geometrie(grid_ressolution = 3000j):
     max_y = max(corner_points_X_Y_TrendlineKOS[:,1])
     min_y = min(corner_points_X_Y_TrendlineKOS[:,1])
 
-    grid_x, grid_y = np.mgrid[min_x:max_x:grid_ressolution, min_y:max_y:grid_ressolution]
+    grid_ressolution_int = int(abs(grid_resolution))
+    y_0_grid_point = np.asarray(max_y / (max_y - min_y) * grid_ressolution_int, dtype=np.int32)
+    x_0_grid_point = np.asarray(max_x / (max_x - min_x) * grid_ressolution_int, dtype=np.int32)
+
+    grid_x, grid_y = np.mgrid[min_x:max_x:grid_resolution, min_y:max_y:grid_resolution]
 
     corner_points_X_Y_TrendlineKOS = np.asarray(corner_points_X_Y_TrendlineKOS, dtype=np.float32)
     corner_points_Z_TrendlineKOS = np.asarray(corner_points_Z_TrendlineKOS, dtype=np.float32)
@@ -565,18 +569,49 @@ def interpolate_start_geometrie(grid_ressolution = 3000j):
     z_grid_values_linear = griddata(corner_points_X_Y_TrendlineKOS, corner_points_Z_TrendlineKOS, (grid_x, grid_y), method='linear')
     z_grid_values_qubic = griddata(corner_points_X_Y_TrendlineKOS, corner_points_Z_TrendlineKOS, (grid_x, grid_y), method='cubic')
 
+
     # todo: Hier sollte die interpolate_start_geometrie dann beendet sein. Eventuell plots. xy-Curve auslagern
+    figure = pyplot.figure()  # Comment_DB: create a new figure
 
+    plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
+    #plt.plot(x_values_trim, y_values, 'bo', linewidth=2.0, label='Schnitt')
+    plt.title('Linear')
+
+    global xdata, ydata
+    xdata = []
+    ydata = []
+
+    def onclick(event):
+        print('button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+              (event.button, event.x, event.y, event.xdata, event.ydata))
+        plt.plot(event.xdata, event.ydata, ',')
+        figure.canvas.draw()
+        global xdata, ydata
+        xdata.append(event.xdata)
+        ydata.append(event.ydata)
+
+    figure.canvas.mpl_connect('button_press_event', onclick)
+
+    global continue_bool
+    continue_bool = False
+
+    def handle_close(event):
+        print('Closed Figure!')
+        global continue_bool
+        continue_bool = True
+
+    figure.canvas.mpl_connect('close_event', handle_close)
+
+    plt.show()
+
+    while continue_bool is False:
+        pyplot.pause(2)
     # todo: Hier wird bisher von der trendlinie die Biegelienie entnommen. Können wir eine "Schräge_Ebene auswählen?"
-    ### Comment_DKu_Wenzel: Vorsicht!! Hier gibt die z-Achse das Höhenprofil an. Im
-    grid_ressolution_int = 3000
-    y_0_grid_point = np.asarray(max_y / (max_y - min_y) * grid_ressolution_int, dtype=np.int32)
-    x_0_grid_point = np.asarray(max_x / (max_x - min_x) * grid_ressolution_int, dtype=np.int32)
-
+    ### Comment_DKu_Wenzel: Vorsicht!! Hier gibt die z-Achse das Höhenprofil an. In start_parameter ist es y.
 
     ####### Gerade mit const y
-    y = grid_y[0,-y_0_grid_point]
-    y_line = np.full((grid_ressolution_int, 1), y)
+    y_value_at_gridpoint = grid_y[0,-y_0_grid_point]
+    y_line = np.full((grid_ressolution_int, 1), y_value_at_gridpoint)
 
 
     # Extract one line from griddata
@@ -593,14 +628,14 @@ def interpolate_start_geometrie(grid_ressolution = 3000j):
     dx = (max_x - min_x) / grid_ressolution_int
     dy = (max_y - min_y) / grid_ressolution_int
 
+    A = np.vstack([xdata, np.ones(len(xdata))]).T
+    m, b = np.linalg.lstsq(A, ydata)[0]
 
     #x-y-Achsenabschnitt in Coordinaten
     # y = m*x + b
-    b = 0
-    m = 0.5
+
     x_values = grid_x[:, 0]
     y_values = np.add(np.multiply(x_values,m),b)
-
 
     # x-y-Achsenabschnitt in Indizies
     x_values_indizes = list(range(grid_ressolution_int))
@@ -608,11 +643,9 @@ def interpolate_start_geometrie(grid_ressolution = 3000j):
     y_values_indizes = np.asarray(y_values_indizes, dtype=np.int32)
     # x und y indizies nur im Rahmen von grid_ressolution_int
 
-
     # -1 default wert
     y_start_index = -1
     y_end_index = -1
-
 
     for k in range(grid_ressolution_int):
 
@@ -657,31 +690,31 @@ def interpolate_start_geometrie(grid_ressolution = 3000j):
     new_bending_direction_points = translation_Points_from_OLD_to_trendline_KOS(new_bending_direction_points_current_KOS,x_trans_new_direction,new_zero)
 
     ###2D-xy-PLOT
-    figure = pyplot.figure()  # Comment_DB: create a new figure
-    axes = mplot3d.Axes3D(figure)
-    axes.scatter(corner_points_X_Y_TrendlineKOS[:, 0], corner_points_X_Y_TrendlineKOS[:, 1], corner_points_Z_TrendlineKOS[:], c='y')
+    figure = pyplot.figure()
 
     plt.subplot(221)
-    plt.title(np.array2string(y))
-    plt.plot(x_values, z_values_linear, 'bo', linewidth=2.0, label='z_values_linear')
-
-    plt.subplot(222)
-    plt.plot(new_bending_direction_points[:,0],new_bending_direction_points[:,2], 'bo', linewidth=2.0, label='z_values_qubic')
-
-    plt.subplot(223)
     plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
     plt.plot(x_values_trim, y_values, 'bo', linewidth=2.0, label='Schnitt')
     plt.title('Linear')
 
-    plt.subplot(224)
-    plt.imshow(z_grid_values_qubic.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
-    plt.title('Cubic')
-    plt.gcf().set_size_inches(6, 6)
+    plt.subplot(223)
+    plt.title(np.array2string(y_value_at_gridpoint))
+    plt.plot(x_values, z_values_linear, 'bo', linewidth=2.0, label='z_values_linear')
+    plt.show()
+
+    plt.subplot(222)
+    plt.plot(new_bending_direction_points[:,0],new_bending_direction_points[:,2], 'bo', linewidth=2.0, label='z_values_qubic')
+
+
+
 
     plt.show()
+
+
+
     return z_grid_values_linear, x_values, z_values_linear, new_bending_direction_points_previous_KOS
 # Functionen in Interpolate start_geometrie
-def translation_Points_from_OLD_to_trendline_KOS(points_in_stl_KOS, trendline_x_axis_in_old_KOS, new_zero_point_in_old_KOS, add_start_point_to_pointset = False, reverse = False):
+def translation_Points_from_OLD_to_trendline_KOS(points_in_old_KOS, new_x_axis_in_old_KOS, new_zero_point_in_old_KOS, add_start_point_to_pointset = False, reverse = False):
     # Gesamtidee: Erst wird trendx zu (1,0,0) rotiert, anschließend werden die Punkte in den center point weighted(cpw) verschoben
 
     # Basic Coordinate System
@@ -690,7 +723,7 @@ def translation_Points_from_OLD_to_trendline_KOS(points_in_stl_KOS, trendline_x_
     z_axis = np.asarray((0, 0, 1), dtype=np.float32)
 
     # Rotationswinkel
-    anglez, angley = calc_angle_coordinate_rotation_x_trendline(x_axis, z_axis, trendline_x_axis_in_old_KOS)
+    anglez, angley = calc_angle_coordinate_rotation_x_trendline(x_axis, z_axis, new_x_axis_in_old_KOS)
     if reverse:
         anglez=-anglez
         angley=-angley
@@ -707,9 +740,9 @@ def translation_Points_from_OLD_to_trendline_KOS(points_in_stl_KOS, trendline_x_
 
     points_in_trendline_KOS = []
 
-    for i in range(len(points_in_stl_KOS[:, 0])):
+    for i in range(len(points_in_old_KOS[:, 0])):
         tri_corner__points_rotatet_i = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,
-                                                                                         points_in_stl_KOS[i])
+                                                                                         points_in_old_KOS[i])
         points_in_trendline_KOS.append(tri_corner__points_rotatet_i)
 
     # Comment_DKu_Wenzel: Startpunkt ist von einem Eckpunkt auf die Trendlinien-x-z-Ebene-Projeziert
@@ -808,8 +841,7 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
                  [center_point_of_cloud_weighted[2],center_point_of_cloud_weighted[2] + 500 * trendline_y_axis[2]]
     plt.plot(x333, y333, z333, marker='o', c='blue')
 
-    global new_bending_direction_points_previous_KOS
-    #new_bending_direction_points_previous_KOS = list(new_bending_direction_points_previous_KOS)
+    # Plot new tildet bending Points
     plt.plot(list(new_bending_direction_points_previous_KOS[:,0]), list(new_bending_direction_points_previous_KOS[:,1]), list(new_bending_direction_points_previous_KOS[:,2]), marker='o', c='blue')
 
     #axes.scatter(tri_corner_points_projected_to_trendline_plane[:, 0], tri_corner_points_projected_to_trendline_plane[:, 1], tri_corner_points_projected_to_trendline_plane[:, 2], c='r')

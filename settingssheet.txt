@@ -1,8 +1,8 @@
-C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Beispiel_IRTG_Demonstrator/Oberflaeche_Mittelteil_grob.stl
+C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Testgeometrien/test3.stl
 True
 False
 15.0
-True
+False
 7
 0.0
 6.0
@@ -27,7 +27,7 @@ True
 30.0
 50
 49
-100
+1000
 0.1
 0.0
 0.05
