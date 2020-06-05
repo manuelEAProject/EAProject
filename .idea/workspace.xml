@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
@@ -35,7 +35,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="TODO_SCOPE" value="All Places" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -488,7 +488,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590757538654</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="Cleaning up und Vorzeichenfehler von x-trendline korrigiert">
+      <created>1591118795463</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1591118795463</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -516,8 +523,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="calc_midpoints&#10;calc_filled_up_points" />
-    <MESSAGE value="length left and right put together" />
     <MESSAGE value="List of Points done" />
     <MESSAGE value="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end" />
     <MESSAGE value="stl_preprocessing wird gekürzt" />
@@ -541,7 +546,9 @@
     <MESSAGE value="Beliebiges Seitenprofil in globalen Plot" />
     <MESSAGE value="Fehler Laim" />
     <MESSAGE value="Draw two points and line coeffs from that" />
-    <option name="LAST_COMMIT_MESSAGE" value="Draw two points and line coeffs from that" />
+    <MESSAGE value="Cleaning up und Vorzeichenfehler von x-trendline korrigiert" />
+    <MESSAGE value="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End" />
+    <option name="LAST_COMMIT_MESSAGE" value="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
