@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End">
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
@@ -495,7 +495,14 @@
       <option name="project" value="LOCAL" />
       <updated>1591118795463</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End">
+      <created>1591377829579</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1591377829579</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -552,6 +559,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
+          <line>995</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
