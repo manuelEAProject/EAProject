@@ -502,7 +502,14 @@
       <option name="project" value="LOCAL" />
       <updated>1591377829579</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="calc left right glob bend points&#10;local bend points&#10;correct rotation error">
+      <created>1591775778616</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1591775778616</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -530,7 +537,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="List of Points done" />
     <MESSAGE value="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end" />
     <MESSAGE value="stl_preprocessing wird gekürzt" />
     <MESSAGE value="stl_preprocessing wird gekürzt weiterhin" />
@@ -555,15 +561,16 @@
     <MESSAGE value="Draw two points and line coeffs from that" />
     <MESSAGE value="Cleaning up und Vorzeichenfehler von x-trendline korrigiert" />
     <MESSAGE value="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End" />
-    <option name="LAST_COMMIT_MESSAGE" value="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End" />
+    <MESSAGE value="calc left right glob bend points&#10;local bend points&#10;correct rotation error" />
+    <option name="LAST_COMMIT_MESSAGE" value="calc left right glob bend points&#10;local bend points&#10;correct rotation error" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
-          <line>995</line>
-          <option name="timeStamp" value="38" />
+          <line>872</line>
+          <option name="timeStamp" value="50" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

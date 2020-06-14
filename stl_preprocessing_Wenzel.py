@@ -463,6 +463,8 @@ def calc_bend_pts(max_distance, x_y_points_filled_up, y_smooth):
         if max_divergence[0] < max_distance:  # Comment_DB: This implies that there will be one extra bend, as the above code will have executed already, max_distance: User Input
             insert_pts = False
 
+
+
     return bend_pts_xy
 def calc_point_of_max_divergence_between_smooth_and_lin_curve(points_on_line_between_bends_filled_up, x_y_points_filled_up, y_smooth):
     # Comment_DB: curve_divergence in terms of y-distance # Größte Abweichung von geglätteter Kurve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
@@ -582,7 +584,8 @@ def interpolate_start_geometrie(max_distance,poly_order, savgol_window_quotient,
 
     # Tilted line, line given by two points xdata and ydata
     new_bending_direction_points_tilted_KOS, new_bending_direction_points_tilted_KOS_left, new_bending_direction_points_tilted_KOS_right, new_bending_direction_points_global_KOS, x_values, x_values_trim, y_values_trim, bend_pts_xz_global = calc_tilted_bending_points(
-        grid_ressolution_int, grid_x, max_y, min_y ,max_x, min_x, y_0_grid_point_index, x_0_grid_point_index, z_grid_values_linear,xdata,ydata,max_distance,poly_order, savgol_window_quotient)
+        grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
+        z_grid_values_linear, xdata, ydata, max_distance)
 
 
 
@@ -593,6 +596,9 @@ def interpolate_start_geometrie(max_distance,poly_order, savgol_window_quotient,
     plt.subplot(221)
     plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
     plt.plot(x_values_trim, y_values_trim, 'bo', linewidth=2.0, label='Schnitt')
+
+
+
     plt.title('Linear')
 
     plt.subplot(222)
@@ -600,6 +606,8 @@ def interpolate_start_geometrie(max_distance,poly_order, savgol_window_quotient,
              label='z_values_new_bending_direction')
     plt.plot(bend_pts_xz_local[:, 0], bend_pts_xz_local[:, 1], color='green', linewidth=3.0,
              label='lineare Angleichung')  # Streckenweise linear (nur Eckpunkte)
+
+    plt.plot(new_bending_direction_points_tilted_KOS[0:-1, 0], np.diff(new_bending_direction_points_tilted_KOS[:, 2],1), color='green', linewidth=2.0, label='Schnitt')
 
     plt.subplot(223)
     plt.title('left')
@@ -610,304 +618,13 @@ def interpolate_start_geometrie(max_distance,poly_order, savgol_window_quotient,
     plt.subplot(224)
     plt.title('right')
     plt.plot(new_bending_direction_points_tilted_KOS_right[:, 0], new_bending_direction_points_tilted_KOS_right[:, 2], 'bo', linewidth=2.0, label='z_values_at_y_0')
-    plt.plot(bend_pts_xy_local_right[:, 0], bend_pts_xy_local_right[:, 1], color='green', linewidth=3.0,
+    plt.plot(bend_pts_xz_local_right[:, 0], bend_pts_xz_local_right[:, 1], color='green', linewidth=3.0,
              label='lineare Angleichung')  # Streckenweise linear (nur Eckpunkte)
     plt.show()
 
 
 
     return z_grid_values_linear, new_bending_direction_points_tilted_KOS[:, 0], new_bending_direction_points_tilted_KOS[:, 2], new_bending_direction_points_global_KOS
-
-def calc_tilted_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index, z_grid_values_linear, xdata, ydata,max_distance,poly_order, savgol_window_quotient):
-    ###### Schräge Gerade mit y(x)
-    # Wir brauchen 2 Geraden:   • Einmal die mathematische beschreibung mit Coordinaten für Plot.
-    #                           • Einmal die mit Indizies für die Extraction aus dem Grid
-
-    # Schrittweite
-    dy = (max_y - min_y) / grid_ressolution_int
-    dx = (max_x - min_x) / grid_ressolution_int
-
-
-
-    # Steigung(x_slope) und y-Achsenabschnitt(y_intercept) mit Leastsquare, y = x_slope*x + y_intercept
-    A = np.vstack([xdata, np.ones(len(xdata))]).T
-    x_slope, y_intercept = np.linalg.lstsq(A, ydata,rcond=None)[0]
-
-    x_values = grid_x[:, 0]
-
-
-    # x_y_z_Axis of new KOS
-    trendline_new_direction_current_KOS, x_trendline_new_direction, z_trendline_new_direction = calc_local_trendline_KOS(x_slope)
-
-    end_point_drawn, start_point_drawn, x_start_index, x_end_index= calculate_3D_Start_End_from_xdata_ydata(dx, dy, grid_ressolution_int,
-                                                                                 x_0_grid_point_index, xdata,
-                                                                                 y_0_grid_point_index, ydata,
-                                                                                 z_grid_values_linear)
-
-
-    # Eckpunkte
-    width =5
-    delta_length_start_bend = 0
-    delta_length_end_bend = 0
-
-    end_point_drawn_left, start_point_drawn_left, x_end_index_left, x_start_index_left = calc_start_end_point_side(True,delta_length_end_bend,delta_length_start_bend,
-                                                                                                                   dx, dy,end_point_drawn,grid_ressolution_int,
-                                                                                                                   start_point_drawn, width, x_0_grid_point_index, x_trendline_new_direction,
-                                                                                                                   y_0_grid_point_index, z_grid_values_linear,z_trendline_new_direction)
-
-    end_point_drawn_right, start_point_drawn_right, x_end_index_right, x_start_index_right = calc_start_end_point_side(False,delta_length_end_bend,delta_length_start_bend,
-                                                                                                                   dx,dy,end_point_drawn,grid_ressolution_int, start_point_drawn,
-                                                                                                                   width, x_0_grid_point_index,x_trendline_new_direction, y_0_grid_point_index,
-                                                                                                                   z_grid_values_linear, z_trendline_new_direction)
-
-
-
-    # Calculate points on line  # Comment_DKu_Wenzel: Rename this function
-    new_bending_direction_points_left_current_KOS, y_intercept_left, x_values_indizes_trim_left, x_values_trim_left, y_values_indizes_trim_left, y_values_trim_left = calc_new_direction_bending_points(
-        start_point_drawn_left, end_point_drawn_left,dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index, z_grid_values_linear, x_start_index_left, x_end_index_left)
-    ### Rotating 3D-Points to global and tilted KOS
-    global new_bending_direction_points_global_KOS_left, start_end_point_drawn_global_KOS_left
-    new_bending_direction_points_tilted_KOS_left, new_bending_direction_points_global_KOS_left, start_end_point_drawn_global_KOS_left, trendline_new_direction_global_KOS_left = new_bending_points_in_global_and_tilted_KOS(
-        start_point_drawn_left, end_point_drawn_left, y_intercept_left, new_bending_direction_points_left_current_KOS,
-        trendline_new_direction_current_KOS)
-    global bend_pts_xz_local_left, bend_pts_xz_global_left
-    bend_pts_xz_local_left, bend_pts_xz_global_left = calc_local_and_global_bendpoints(max_distance,
-                                                                                       new_bending_direction_points_tilted_KOS_left,
-                                                                                       poly_order,
-                                                                                       savgol_window_quotient,
-                                                                                       trendline_new_direction_current_KOS,
-                                                                                       y_intercept_left)
-
-
-
-    new_bending_direction_points_right_current_KOS, y_intercept_right, x_values_indizes_trim_right, x_values_trim_right, y_values_indizes_trim_right, y_values_trim_right = calc_new_direction_bending_points(
-        end_point_drawn_right, start_point_drawn_right, dy, grid_ressolution_int, x_slope, x_values,
-        y_0_grid_point_index, z_grid_values_linear, x_start_index_right, x_end_index_right)
-    global new_bending_direction_points_global_KOS_right, start_end_point_drawn_global_KOS_right
-    new_bending_direction_points_tilted_KOS_right, new_bending_direction_points_global_KOS_right, start_end_point_drawn_global_KOS_right, trendline_new_direction_global_KOS_right = new_bending_points_in_global_and_tilted_KOS(
-        start_point_drawn_right, end_point_drawn_right, y_intercept_right, new_bending_direction_points_right_current_KOS,
-        trendline_new_direction_current_KOS)
-    global bend_pts_xy_local_right, bend_pts_xy_global_right
-    bend_pts_xy_local_right, bend_pts_xy_global_right = calc_local_and_global_bendpoints(max_distance,
-                                                                                       new_bending_direction_points_tilted_KOS_right,
-                                                                                       poly_order,
-                                                                                       savgol_window_quotient,
-                                                                                       trendline_new_direction_current_KOS,
-                                                                                       y_intercept_right)
-
-
-
-    new_bending_direction_points_current_KOS, y_intercept, x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim = calc_new_direction_bending_points(
-        start_point_drawn, end_point_drawn, dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index,
-        z_grid_values_linear, x_start_index, x_end_index)
-
-    global start_end_point_drawn_global_KOS, trendline_new_direction_global_KOS
-    new_bending_direction_points_tilted_KOS, new_bending_direction_points_global_KOS, start_end_point_drawn_global_KOS, trendline_new_direction_global_KOS = new_bending_points_in_global_and_tilted_KOS(
-        start_point_drawn, end_point_drawn, y_intercept, new_bending_direction_points_current_KOS,
-        trendline_new_direction_current_KOS)
-    global bend_pts_xz_local, bend_pts_xy_global
-    bend_pts_xz_local, bend_pts_xy_global = calc_local_and_global_bendpoints(max_distance,
-                                                                             new_bending_direction_points_tilted_KOS,
-                                                                             poly_order,
-                                                                             savgol_window_quotient,
-                                                                             trendline_new_direction_current_KOS,
-                                                                             y_intercept)
-
-
-
-
-
-    return new_bending_direction_points_tilted_KOS, new_bending_direction_points_tilted_KOS_left,new_bending_direction_points_tilted_KOS_right, new_bending_direction_points_global_KOS, x_values, x_values_trim, y_values_trim, bend_pts_xy_global
-
-
-def calc_local_trendline_KOS(x_slope):
-    x_trendline_new_direction = np.asarray((1, x_slope, 0), dtype=np.float32)
-    x_trendline_new_direction = 1 / np.linalg.norm(x_trendline_new_direction) * x_trendline_new_direction
-    y_trendline_new_direction = np.asarray((-x_slope, 1, 0), dtype=np.float32)
-    y_trendline_new_direction = 1 / np.linalg.norm(y_trendline_new_direction) * y_trendline_new_direction
-    z_trendline_new_direction = np.asarray((0, 0, 1), dtype=np.float32)
-    trendline_new_direction_current_KOS = np.vstack(
-        (x_trendline_new_direction, y_trendline_new_direction, z_trendline_new_direction))
-    return trendline_new_direction_current_KOS, x_trendline_new_direction, z_trendline_new_direction
-
-
-def calc_start_end_point_side(calc_left_side, delta_length_end_bend, delta_length_start_bend, dx, dy, end_point_drawn,
-                              grid_ressolution_int, start_point_drawn, width, x_0_grid_point_index,
-                              x_trendline_new_direction, y_0_grid_point_index, z_grid_values_linear,
-                              z_trendline_new_direction):
-
-    if calc_left_side:
-        Start_point_left = start_point_drawn - np.cross(x_trendline_new_direction,
-                                                    z_trendline_new_direction) * width / 2 + delta_length_start_bend * x_trendline_new_direction
-        End_point_left = end_point_drawn - np.cross(x_trendline_new_direction,
-                                                z_trendline_new_direction) * width / 2 + delta_length_end_bend * x_trendline_new_direction
-
-    else:
-        Start_point_left = start_point_drawn + np.cross(x_trendline_new_direction,
-                                                        z_trendline_new_direction) * width / 2 + delta_length_start_bend * x_trendline_new_direction
-        End_point_left = end_point_drawn + np.cross(x_trendline_new_direction,
-                                                    z_trendline_new_direction) * width / 2 + delta_length_end_bend * x_trendline_new_direction
-
-    x_data_left_start_end = (Start_point_left[0], End_point_left[0])
-    y_data_left_start_end = (Start_point_left[1], End_point_left[1])
-    end_point_drawn_left, start_point_drawn_left, x_start_index_left, x_end_index_left = calculate_3D_Start_End_from_xdata_ydata(
-        dx, dy, grid_ressolution_int,
-        x_0_grid_point_index, x_data_left_start_end,
-        y_0_grid_point_index, y_data_left_start_end,
-        z_grid_values_linear)
-    return end_point_drawn_left, start_point_drawn_left, x_end_index_left, x_start_index_left
-
-    # todo: left remove
-def calc_local_and_global_bendpoints(max_distance, new_bending_direction_points_tilted_KOS, poly_order,
-                                     savgol_window_quotient, trendline_new_direction_current_KOS, y_intercept):
-
-    x_z_points_filled_up = calc_x_z_points_filled_up(new_bending_direction_points_tilted_KOS[:, 0],
-                                                     new_bending_direction_points_tilted_KOS[:, 2])
-    #y_smooth_left = smooth_savgol(x_z_points_filled_up, poly_order, savgol_window_quotient)
-    bend_pts_xz_local = calc_bend_pts(max_distance, x_z_points_filled_up,
-                                           x_z_points_filled_up[:,1])
-    # in tilted KOS y=0. Insert this to bendpoints to get (x,y,z)
-    bend_pts_xyz_left = np.insert(bend_pts_xz_local, 1, np.zeros(len(bend_pts_xz_local)), axis=1)
-    bend_pts_xyz_global = new_bending_points_tilted_to_global(y_intercept, bend_pts_xyz_left,
-                                                                  trendline_new_direction_current_KOS)
-    return bend_pts_xz_local, bend_pts_xyz_global
-
-def calculate_3D_Start_End_from_xdata_ydata(dx, dy, grid_ressolution_int, x_0_grid_point_index, xdata,
-                                            y_0_grid_point_index, ydata, z_grid_values_linear):
-    # Start und Endpunkt der Eingezeichnet wurde
-
-    y_end_index = np.asarray(np.round(np.add(np.divide(ydata[1], dy), (grid_ressolution_int - y_0_grid_point_index))),
-                             dtype=np.int32)
-    x_end_index = np.asarray(np.round(np.add(np.divide(xdata[1], dx), (grid_ressolution_int - x_0_grid_point_index))),
-                             dtype=np.int32)
-    y_start_index = np.asarray(np.round(np.add(np.divide(ydata[0], dy), (grid_ressolution_int - y_0_grid_point_index))),
-                               dtype=np.int32)
-    x_start_index = np.asarray(np.round(np.add(np.divide(xdata[0], dx), (grid_ressolution_int - x_0_grid_point_index))),
-                               dtype=np.int32)
-
-    # Left and right starting point can be outside the grit, when they are outside, they get a default value. The z-Data would be needed for the plot.
-    if x_start_index < 0 or x_start_index >= grid_ressolution_int or \
-            y_start_index < 0 or y_start_index >= grid_ressolution_int:
-        z_start_data = z_grid_values_linear[0, 0]
-    else: z_start_data = z_grid_values_linear[x_start_index, y_start_index]
-
-    if x_end_index < 0 or x_end_index >= grid_ressolution_int or \
-            y_end_index < 0 or y_end_index >= grid_ressolution_int:
-        z_end_data = z_grid_values_linear[grid_ressolution_int - 1, grid_ressolution_int - 1]
-    else: z_end_data = z_grid_values_linear[x_end_index, y_end_index]
-
-
-    start_point_drawn = (np.vstack((xdata[0], ydata[0], z_start_data)).T)[0][:]
-    end_point_drawn = (np.vstack((xdata[1], ydata[1], z_end_data)).T)[0][:]
-    return end_point_drawn, start_point_drawn, x_start_index, x_end_index
-
-def calc_new_direction_bending_points(Start_point, End_point, dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index,
-                                      z_grid_values_linear, x_start_index, x_end_index):
-
-
-    # Neuer y-Achsen Abschnitt für Eckpunkte: y = x_slope*x + y_intercept
-    y_intercept = Start_point[1] - Start_point[0] * x_slope
-    # x-y-Achsenabschnitt in Coordinaten
-    # y = x_slope*x + y_intercept
-
-    y_values = np.add(np.multiply(x_values, x_slope), y_intercept)
-    # x-y-Achsenabschnitt in Indizies
-    x_values_indizes = np.asarray(list(range(grid_ressolution_int)), dtype=np.int32)
-    y_values_indizes = np.add(np.divide(y_values, dy), (grid_ressolution_int - y_0_grid_point_index))
-    y_values_indizes = np.asarray(np.round(y_values_indizes), dtype=np.int32)
-
-
-    # Trim x and y valules to start/end point and if nec
-    x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim = trim_x_y_values_to_start_end_point(
-            x_start_index, x_end_index, x_values, x_values_indizes, y_values, y_values_indizes)
-
-    if min(y_values_indizes) < 0 or  max(y_values_indizes) > grid_ressolution_int-1:
-      x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim = trim_x_y_values_to_geometry(
-                grid_ressolution_int, x_slope, x_values_trim, x_values_indizes_trim, y_values_trim, y_values_indizes_trim)
-
-    # z Values from grid
-    z_values_new_bending_direction = []
-    for i in range(len(x_values_indizes_trim)):
-        z_values_new_bending_direction.append(
-            z_grid_values_linear[x_values_indizes_trim[i], y_values_indizes_trim[i]])
-    z_values_new_bending_direction = np.asarray(z_values_new_bending_direction, dtype=np.float32)
-    # x, y and z stacked together to 3D-Points
-    new_bending_direction_points_current_KOS = np.vstack(
-        (x_values_trim, y_values_trim, z_values_new_bending_direction)).T
-    return new_bending_direction_points_current_KOS, y_intercept, x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
-
-def new_bending_points_in_global_and_tilted_KOS(start_point_drawn, end_point_drawn, y_intercept,
-                                                new_bending_direction_points_current_KOS,
-                                                trendline_new_direction_current_KOS):
-    # new zero
-    new_zero = np.asarray((0, y_intercept, 0), dtype=np.float32)
-
-    start_end_point_current_KOS = np.vstack((start_point_drawn, end_point_drawn))
-
-    start_end_point_drawn_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
-        start_end_point_current_KOS,
-        trendline_global_KOS,
-        center_point_of_cloud_weighted, False, True)
-    trendline_new_direction_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
-        trendline_new_direction_current_KOS,
-        trendline_global_KOS,
-        (center_point_of_cloud_weighted-center_point_of_cloud_weighted), False, True)
-
-    new_bending_direction_points_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
-        new_bending_direction_points_current_KOS,
-        trendline_global_KOS,
-        center_point_of_cloud_weighted, False, True)
-
-    new_bending_direction_points_tilted_KOS = translation_Points_from_OLD_to_trendline_KOS(
-        new_bending_direction_points_current_KOS, trendline_new_direction_current_KOS, new_zero)
-
-    return new_bending_direction_points_tilted_KOS, new_bending_direction_points_global_KOS, start_end_point_drawn_global_KOS, trendline_new_direction_global_KOS
-
-def new_bending_points_tilted_to_global(y_intercept,
-                                                new_bending_direction_points_current_KOS,
-                                                trendline_new_direction_current_KOS):
-    # new zero
-    new_zero = np.asarray((0, y_intercept, 0), dtype=np.float32)
-
-    new_bending_direction_points_trendline_KOS = translation_Points_from_OLD_to_trendline_KOS(
-        new_bending_direction_points_current_KOS, trendline_new_direction_current_KOS, new_zero, False, True)
-
-    new_bending_direction_points_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
-        new_bending_direction_points_trendline_KOS,
-        trendline_global_KOS,
-        center_point_of_cloud_weighted, False, True)
-
-    return new_bending_direction_points_global_KOS
-
-def trim_x_y_values_to_geometry(grid_ressolution_int, x_slope, x_values, x_values_indizes, y_values, y_values_indizes):
-    # -1 default wert
-    y_start_index = -1
-    y_end_index = -1
-    for k in range(len(x_values)):
-
-        if x_slope >= 0:
-            if (y_values_indizes[k] >= 0) & (y_start_index < 0): y_start_index = k
-            if (y_values_indizes[k] > grid_ressolution_int) & (y_end_index < 0): y_end_index = k - 1
-
-        if x_slope < 0:
-            if (y_values_indizes[k] < grid_ressolution_int) & (y_start_index < 0): y_start_index = k
-            if (y_values_indizes[k] <= 0) & (y_end_index < 0): y_end_index = k - 1
-    if y_end_index <= 0: y_end_index = grid_ressolution_int - 1
-    # Trim indizes and coordinates to grid size
-    x_values_indizes_trim = x_values_indizes[y_start_index:y_end_index]
-    y_values_indizes_trim = y_values_indizes[y_start_index:y_end_index]
-    x_values_trim = x_values[y_start_index:y_end_index]
-    y_values_trim = y_values[y_start_index:y_end_index]
-    return x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
-
-def trim_x_y_values_to_start_end_point(x_start_index, x_end_index, x_values, x_values_indizes, y_values,
-                                       y_values_indizes):
-   # Trim indizes and coordinates to grid size
-    x_values_indizes_trim = x_values_indizes[x_start_index:x_end_index]
-    y_values_indizes_trim = y_values_indizes[x_start_index:x_end_index]
-    x_values_trim = x_values[x_start_index:x_end_index]
-    y_values_trim = y_values[x_start_index:x_end_index]
-    return x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
 
 # Functionen in Interpolate start_geometrie
 def show_interpolation_and_draw_start_end_points(max_x, max_y, min_x, min_y, z_grid_values_linear):
@@ -951,13 +668,6 @@ def interpolate_geometrie(grid_resolution):
                                                                                              center_point_of_cloud_weighted,
                                                                                               True)
 
-    global tri_corner__points_rotatet_and_translated_reverse
-    tri_corner__points_rotatet_and_translated_reverse = translation_Points_from_OLD_to_trendline_KOS(tri_corner__points_rotatet_and_translated,
-                                                                                             trendline_global_KOS,
-                                                                                             center_point_of_cloud_weighted,
-                                                                                              False, True)
-
-
     interpolate_with_corner_and_centerpoints = False
     if interpolate_with_corner_and_centerpoints:
         points = np.concatenate((tri_centerpoints_rotatet_and_translated, tri_corner__points_rotatet_and_translated))
@@ -997,20 +707,24 @@ def translation_Points_from_OLD_to_trendline_KOS(points_in_old_KOS, new_trendlin
 
     for i in range(len(points_in_old_KOS[:, 0])):
         tri_corner__points_rotatet_i = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,
-                                                                                         points_in_old_KOS[i],new_trendline_axis_in_old_KOS,reverse)
+                                                                                         points_in_old_KOS[i], reverse)
         points_in_trendline_KOS.append(tri_corner__points_rotatet_i)
 
     # Comment_DKu_Wenzel: Startpunkt ist von einem Eckpunkt auf die Trendlinien-x-z-Ebene-Projeziert
     if add_start_point_to_pointset :
         startpoint_project_to_trendline_plan_rotated = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley,
-                                                                                                     z_axis, y_axis,
-                                                                                                     startpoint_project_to_trendline_plan,new_trendline_axis_in_old_KOS,reverse)
+                                                                                                         z_axis, y_axis,
+                                                                                                         startpoint_project_to_trendline_plan,
+                                                                                                         reverse)
         points_in_trendline_KOS.append(startpoint_project_to_trendline_plan_rotated)
 
     points_in_trendline_KOS = np.asarray(points_in_trendline_KOS, dtype=np.float32)
 
     # rotation of translation vector/new zero
-    new_zero_point_in_old_KOS_rotated = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis, y_axis,new_zero_point_in_old_KOS,new_trendline_axis_in_old_KOS,reverse)
+    new_zero_point_in_old_KOS_rotated = rotate_point_around_z_and_y_axis_with_given_angle(anglez, angley, z_axis,
+                                                                                          y_axis,
+                                                                                          new_zero_point_in_old_KOS,
+                                                                                          reverse)
 
     # At the reverse case we have to shift in the old unrotated KOS
     if reverse: new_zero_point_in_old_KOS_rotated = -(new_zero_point_in_old_KOS)
@@ -1022,7 +736,7 @@ def translation_Points_from_OLD_to_trendline_KOS(points_in_old_KOS, new_trendlin
     points_in_trendline_KOS[:, 2] = np.subtract(points_in_trendline_KOS[:, 2], new_zero_point_in_old_KOS_rotated[2])
 
     return points_in_trendline_KOS
-def rotate_point_around_z_and_y_axis_with_given_angle(angle1, angle2, axis1, axis2, point_to_rotate, new_trendline_axis_in_old_KOS,reverse):
+def rotate_point_around_z_and_y_axis_with_given_angle(angle1, angle2, axis1, axis2, point_to_rotate, reverse):
     if reverse:
         point_rotated_around_axis2 = Quaternion(axis=axis2, angle=angle2).rotate(point_to_rotate)
         point_rotated_around_1_and_2 = Quaternion(axis=axis1, angle=-angle1).rotate(point_rotated_around_axis2)
@@ -1031,11 +745,6 @@ def rotate_point_around_z_and_y_axis_with_given_angle(angle1, angle2, axis1, axi
             point_to_rotate)
         point_rotated_around_1_and_2 = Quaternion(axis=axis2, angle=angle2).rotate(rotated_point_around_axis1)
 
-    # If case
-        # The first trendline created is defined x,z,y. If the normal of the plain goes in to negativ direction, rotate around x = 180°
-        # For all following lokal KOS this statement should be false
-    #if new_trendline_axis_in_old_KOS[1][2] < 0: # todo: demonstrator tool
-    #    point_rotated_around_1_and_2 = Quaternion(axis=(1,0,0), angle=np.pi).rotate(point_rotated_around_1_and_2)
     return point_rotated_around_1_and_2
 def calc_angle_coordinate_rotation_x_trendline(x_axis, z_axis, new_trendline_axis_in_old_KOS):
     new_x_trendline_projected_to_x_y = project_pointtoplane((new_trendline_axis_in_old_KOS[0][:]), z_axis, np.zeros(3))
@@ -1057,6 +766,315 @@ def calc_angle_coordinate_rotation_x_trendline(x_axis, z_axis, new_trendline_axi
     if rotated_x_trend_around_z[2] <= -0.01: angley = -angley
 
     return anglez, angley
+def calc_tilted_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index,
+                               x_0_grid_point_index, z_grid_values_linear, xdata, ydata, max_distance):
+    ###### Schräge Gerade mit y(x)
+    # Wir brauchen 2 Geraden:   • Einmal die mathematische beschreibung mit Coordinaten für Plot.
+    #                           • Einmal die mit Indizies für die Extraction aus dem Grid
+
+    # Schrittweite
+    dy = (max_y - min_y) / grid_ressolution_int
+    dx = (max_x - min_x) / grid_ressolution_int
+
+
+    # Steigung(x_slope) und y-Achsenabschnitt(y_intercept) mit Leastsquare, y = x_slope*x + y_intercept
+    A = np.vstack([xdata, np.ones(len(xdata))]).T
+    x_slope, y_intercept = np.linalg.lstsq(A, ydata,rcond=None)[0]
+
+    x_values = grid_x[:, 0]
+
+
+    # x_y_z_Axis of new KOS
+    trendline_new_direction_current_KOS, x_trendline_new_direction, y_trendline_new_direction, z_trendline_new_direction = calc_local_trendline_KOS(x_slope)
+
+    # Eckpunkte
+    width = 3
+    alpha_list = [math.pi / 100, -math.pi / 100]
+    delta_length_start_bend = calc_delta_length_at_bend(width,alpha_list[0])
+    delta_length_end_bend = calc_delta_length_at_bend(width,alpha_list[1])
+
+
+
+
+
+    # Start und Endpunkt des Tapeabschnitts
+    end_point_drawn, start_point_drawn, x_start_index, x_end_index= calculate_3D_Start_End_from_xdata_ydata(dx, dy, grid_ressolution_int,x_0_grid_point_index, xdata,
+                                                                                                                y_0_grid_point_index, ydata,z_grid_values_linear)
+
+    end_point_drawn_left, start_point_drawn_left, x_end_index_left, x_start_index_left = calc_start_end_point_side(True,delta_length_end_bend,delta_length_start_bend,
+                                                                                                                   dx,dy,end_point_drawn,  grid_ressolution_int,
+                                                                                                                   start_point_drawn, width,  x_0_grid_point_index,
+                                                                                                                   x_trendline_new_direction, y_0_grid_point_index,
+                                                                                                                   z_grid_values_linear,y_trendline_new_direction)
+
+    end_point_drawn_right, start_point_drawn_right, x_end_index_right, x_start_index_right = calc_start_end_point_side(False, delta_length_end_bend, delta_length_start_bend, dx, dy, end_point_drawn, grid_ressolution_int,
+                                                                                                                        start_point_drawn, width, x_0_grid_point_index, x_trendline_new_direction, y_0_grid_point_index,
+                                                                                                                        z_grid_values_linear, y_trendline_new_direction)
+
+    global new_bending_direction_points_global_KOS_left, start_end_point_drawn_global_KOS_left, bend_pts_xz_local_left, bend_pts_xyz_global_left
+
+    # Calculate points on line  # Comment_DKu_Wenzel: Rename this function
+    new_bending_direction_points_left_current_KOS, y_intercept_left, x_values_indizes_trim_left, x_values_trim_left, y_values_indizes_trim_left, y_values_trim_left = calc_new_direction_bending_points(
+        start_point_drawn_left, end_point_drawn_left,dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index, z_grid_values_linear, x_start_index_left, x_end_index_left)
+
+    ### Rotating 3D-Points to global and tilted KOS
+    new_bending_direction_points_tilted_KOS_left, new_bending_direction_points_global_KOS_left, start_end_point_drawn_global_KOS_left, trendline_new_direction_global_KOS_left = new_bending_points_in_global_and_tilted_KOS(
+        start_point_drawn_left, end_point_drawn_left, y_intercept_left, new_bending_direction_points_left_current_KOS,
+        trendline_new_direction_current_KOS)
+
+    bend_pts_xz_local_left, bend_pts_xyz_global_left = calc_local_and_global_bendpoints(max_distance,
+                                                                                        new_bending_direction_points_tilted_KOS_left,
+                                                                                        trendline_new_direction_current_KOS,
+                                                                                        y_intercept_left)
+
+    global new_bending_direction_points_global_KOS_right, start_end_point_drawn_global_KOS_right,bend_pts_xz_local_right, bend_pts_xyz_global_right
+    new_bending_direction_points_right_current_KOS, y_intercept_right, x_values_indizes_trim_right, x_values_trim_right, y_values_indizes_trim_right, y_values_trim_right = calc_new_direction_bending_points(
+        end_point_drawn_right, start_point_drawn_right, dy, grid_ressolution_int, x_slope, x_values,
+        y_0_grid_point_index, z_grid_values_linear, x_start_index_right, x_end_index_right)
+
+    new_bending_direction_points_tilted_KOS_right, new_bending_direction_points_global_KOS_right, start_end_point_drawn_global_KOS_right, trendline_new_direction_global_KOS_right = new_bending_points_in_global_and_tilted_KOS(
+        start_point_drawn_right, end_point_drawn_right, y_intercept_right, new_bending_direction_points_right_current_KOS,
+        trendline_new_direction_current_KOS)
+
+    bend_pts_xz_local_right, bend_pts_xyz_global_right = calc_local_and_global_bendpoints(max_distance,
+                                                                                          new_bending_direction_points_tilted_KOS_right,
+                                                                                          trendline_new_direction_current_KOS,
+                                                                                          y_intercept_right)
+
+    global start_end_point_drawn_global_KOS, trendline_new_direction_global_KOS,bend_pts_xz_local, bend_pts_xyz_global
+    new_bending_direction_points_current_KOS, y_intercept, x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim = calc_new_direction_bending_points(
+        start_point_drawn, end_point_drawn, dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index,
+        z_grid_values_linear, x_start_index, x_end_index)
+
+    new_bending_direction_points_tilted_KOS, new_bending_direction_points_global_KOS, start_end_point_drawn_global_KOS, trendline_new_direction_global_KOS = new_bending_points_in_global_and_tilted_KOS(
+        start_point_drawn, end_point_drawn, y_intercept, new_bending_direction_points_current_KOS,
+        trendline_new_direction_current_KOS)
+
+    bend_pts_xz_local, bend_pts_xyz_global = calc_local_and_global_bendpoints(max_distance,
+                                                                              new_bending_direction_points_tilted_KOS,
+                                                                              trendline_new_direction_current_KOS,
+                                                                              y_intercept)
+    if len(bend_pts_xyz_global_right) == len(bend_pts_xyz_global_left):
+        edge_directions = []
+        for i in range(len(bend_pts_xyz_global_left)):
+            edge_direction = bend_pts_xyz_global_right[i]-bend_pts_xyz_global_left[i]
+            edge_direction = 1 / np.linalg.norm(edge_direction) * edge_direction
+            edge_directions.append(edge_direction)
+
+    else:
+        print("left and right not same amount of bendingpoints")
+        exit()
+
+    global edge_line_global
+    edge_line_global = [np.add(bend_pts_xyz_global,np.multiply(edge_directions,150)), np.subtract(bend_pts_xyz_global,np.multiply(edge_directions,150))]
+
+
+    x_direction = bend_pts_xyz_global[1]-bend_pts_xyz_global[0]
+    x_direction = 1 / np.linalg.norm(x_direction) * x_direction
+
+    normal_at_bendpoint_0_tape = calc_tape_normal(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, 0)
+    normal_at_bendpoint_1_tape = calc_tape_normal(bend_pts_xyz_global, bend_pts_xyz_global_left,
+                                                  bend_pts_xyz_global_right, 1)
+    angle_between_planes = math.acos(np.dot(normal_at_bendpoint_0_tape, normal_at_bendpoint_1_tape))
+
+    rotated_x_trend_around_z = Quaternion(axis=edge_direction[0], angle=angle_between_planes).rotate(x_direction)
+
+
+    return new_bending_direction_points_tilted_KOS, new_bending_direction_points_tilted_KOS_left, new_bending_direction_points_tilted_KOS_right, new_bending_direction_points_global_KOS, x_values, x_values_trim, y_values_trim, bend_pts_xyz_global
+
+
+def calc_tape_normal(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bendpoint_index):
+    v1 = bend_pts_xyz_global_left[bendpoint_index] - bend_pts_xyz_global[bendpoint_index + 1]
+    v2 = bend_pts_xyz_global_right[bendpoint_index] - bend_pts_xyz_global[bendpoint_index + 1]
+    normal_at_bendpoint_index_tape = np.cross(v1, v2)
+    normal_at_bendpoint_index_tape = (1 / np.linalg.norm(
+        normal_at_bendpoint_index_tape)) * normal_at_bendpoint_index_tape
+    return normal_at_bendpoint_index_tape
+
+# Functions in calc tilted bending points
+def calc_delta_length_at_bend(width,alpha):
+    if alpha > math.pi / 2:
+        delta_length_bend = (width / 2) * math.tan(math.pi - alpha)
+
+    else:  # alpha_list[0] < math.pi / 2:
+        delta_length_bend = - (width / 2) * math.tan(alpha)
+    return delta_length_bend
+def calc_local_trendline_KOS(x_slope):
+    x_trendline_new_direction = np.asarray((1, x_slope, 0), dtype=np.float32)
+    x_trendline_new_direction = 1 / np.linalg.norm(x_trendline_new_direction) * x_trendline_new_direction
+    y_trendline_new_direction = np.asarray((-x_slope, 1, 0), dtype=np.float32)
+    y_trendline_new_direction = 1 / np.linalg.norm(y_trendline_new_direction) * y_trendline_new_direction
+    z_trendline_new_direction = np.asarray((0, 0, 1), dtype=np.float32)
+    trendline_new_direction_current_KOS = np.vstack(
+        (x_trendline_new_direction, y_trendline_new_direction,y_trendline_new_direction, z_trendline_new_direction))
+    return trendline_new_direction_current_KOS, x_trendline_new_direction,y_trendline_new_direction, z_trendline_new_direction
+def calc_start_end_point_side(calc_left_side, delta_length_end_bend, delta_length_start_bend, dx, dy, end_point_drawn,
+                              grid_ressolution_int, start_point_drawn, width, x_0_grid_point_index,
+                              x_trendline_new_direction, y_0_grid_point_index, z_grid_values_linear,
+                              y_trendline_new_direction):
+
+    if calc_left_side:
+        Start_point_side = start_point_drawn - y_trendline_new_direction * width / 2 + delta_length_start_bend * x_trendline_new_direction
+        End_point_side = end_point_drawn - y_trendline_new_direction * width / 2 + delta_length_end_bend * x_trendline_new_direction
+
+    else:
+        Start_point_side = start_point_drawn + y_trendline_new_direction * width / 2 - delta_length_start_bend * x_trendline_new_direction
+        End_point_side = end_point_drawn + y_trendline_new_direction * width / 2 - delta_length_end_bend * x_trendline_new_direction
+
+    x_data_side_start_end = (Start_point_side[0], End_point_side[0])
+    y_data_side_start_end = (Start_point_side[1], End_point_side[1])
+    end_point_drawn_side, start_point_drawn_side, x_start_index_side, x_end_index_side = calculate_3D_Start_End_from_xdata_ydata(
+        dx, dy, grid_ressolution_int,
+        x_0_grid_point_index, x_data_side_start_end,
+        y_0_grid_point_index, y_data_side_start_end,
+        z_grid_values_linear)
+    return end_point_drawn_side, start_point_drawn_side, x_end_index_side, x_start_index_side
+def calc_local_and_global_bendpoints(max_distance, new_bending_direction_points_tilted_KOS,
+                                     trendline_new_direction_current_KOS, y_intercept):
+
+    x_z_points_filled_up = calc_x_z_points_filled_up(new_bending_direction_points_tilted_KOS[:, 0],
+                                                     new_bending_direction_points_tilted_KOS[:, 2])
+    #y_smooth_left = smooth_savgol(x_z_points_filled_up, poly_order, savgol_window_quotient)
+    bend_pts_xz_local = calc_bend_pts(max_distance, x_z_points_filled_up,
+                                           x_z_points_filled_up[:,1])
+    # in tilted KOS y=0. Insert this to bendpoints to get (x,y,z)
+    bend_pts_xyz_left = np.insert(bend_pts_xz_local, 1, np.zeros(len(bend_pts_xz_local)), axis=1)
+    bend_pts_xyz_global = new_bending_points_tilted_to_global(y_intercept, bend_pts_xyz_left,
+                                                                  trendline_new_direction_current_KOS)
+    return bend_pts_xz_local, bend_pts_xyz_global
+def calculate_3D_Start_End_from_xdata_ydata(dx, dy, grid_ressolution_int, x_0_grid_point_index, xdata,
+                                            y_0_grid_point_index, ydata, z_grid_values_linear):
+    # Start und Endpunkt der Eingezeichnet wurde
+
+    y_end_index = np.asarray(np.round(np.add(np.divide(ydata[1], dy), (grid_ressolution_int - y_0_grid_point_index))),
+                             dtype=np.int32)
+    x_end_index = np.asarray(np.round(np.add(np.divide(xdata[1], dx), (grid_ressolution_int - x_0_grid_point_index))),
+                             dtype=np.int32)
+    y_start_index = np.asarray(np.round(np.add(np.divide(ydata[0], dy), (grid_ressolution_int - y_0_grid_point_index))),
+                               dtype=np.int32)
+    x_start_index = np.asarray(np.round(np.add(np.divide(xdata[0], dx), (grid_ressolution_int - x_0_grid_point_index))),
+                               dtype=np.int32)
+
+    # Left and right starting point can be outside the grit, when they are outside, they get a default value. The z-Data would be needed for the plot.
+    if x_start_index < 0 or x_start_index >= grid_ressolution_int or \
+            y_start_index < 0 or y_start_index >= grid_ressolution_int:
+        z_start_data = z_grid_values_linear[0, 0]
+    else: z_start_data = z_grid_values_linear[x_start_index, y_start_index]
+
+    if x_end_index < 0 or x_end_index >= grid_ressolution_int or \
+            y_end_index < 0 or y_end_index >= grid_ressolution_int:
+        z_end_data = z_grid_values_linear[grid_ressolution_int - 1, grid_ressolution_int - 1]
+    else: z_end_data = z_grid_values_linear[x_end_index, y_end_index]
+
+
+    start_point_drawn = (np.vstack((xdata[0], ydata[0], z_start_data)).T)[0][:]
+    end_point_drawn = (np.vstack((xdata[1], ydata[1], z_end_data)).T)[0][:]
+    return end_point_drawn, start_point_drawn, x_start_index, x_end_index
+def calc_new_direction_bending_points(Start_point, End_point, dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index,
+                                      z_grid_values_linear, x_start_index, x_end_index):
+
+
+    # Neuer y-Achsen Abschnitt für Eckpunkte: y = x_slope*x + y_intercept
+    y_intercept = Start_point[1] - Start_point[0] * x_slope
+    # x-y-Achsenabschnitt in Coordinaten
+    # y = x_slope*x + y_intercept
+
+    y_values = np.add(np.multiply(x_values, x_slope), y_intercept)
+    # x-y-Achsenabschnitt in Indizies
+    x_values_indizes = np.asarray(list(range(grid_ressolution_int)), dtype=np.int32)
+    y_values_indizes = np.add(np.divide(y_values, dy), (grid_ressolution_int - y_0_grid_point_index))
+    y_values_indizes = np.asarray(np.round(y_values_indizes), dtype=np.int32)
+
+
+    # Trim x and y valules to start/end point and if nec
+    x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim = trim_x_y_values_to_start_end_point(
+            x_start_index, x_end_index, x_values, x_values_indizes, y_values, y_values_indizes)
+
+    if min(y_values_indizes) < 0 or  max(y_values_indizes) > grid_ressolution_int-1:
+      x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim = trim_x_y_values_to_geometry(
+                grid_ressolution_int, x_slope, x_values_trim, x_values_indizes_trim, y_values_trim, y_values_indizes_trim)
+
+    # z Values from grid
+    z_values_new_bending_direction = []
+    for i in range(len(x_values_indizes_trim)):
+        z_values_new_bending_direction.append(
+            z_grid_values_linear[x_values_indizes_trim[i], y_values_indizes_trim[i]])
+    z_values_new_bending_direction = np.asarray(z_values_new_bending_direction, dtype=np.float32)
+    # x, y and z stacked together to 3D-Points
+    new_bending_direction_points_current_KOS = np.vstack(
+        (x_values_trim, y_values_trim, z_values_new_bending_direction)).T
+    return new_bending_direction_points_current_KOS, y_intercept, x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
+def new_bending_points_in_global_and_tilted_KOS(start_point_drawn, end_point_drawn, y_intercept,
+                                                new_bending_direction_points_current_KOS,
+                                                trendline_new_direction_current_KOS):
+    # new zero
+    new_zero = np.asarray((0, y_intercept, 0), dtype=np.float32)
+
+    start_end_point_current_KOS = np.vstack((start_point_drawn, end_point_drawn))
+
+    start_end_point_drawn_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
+        start_end_point_current_KOS,
+        trendline_global_KOS,
+        center_point_of_cloud_weighted, False, True)
+    trendline_new_direction_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
+        trendline_new_direction_current_KOS,
+        trendline_global_KOS,
+        (center_point_of_cloud_weighted-center_point_of_cloud_weighted), False, True)
+
+    new_bending_direction_points_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
+        new_bending_direction_points_current_KOS,
+        trendline_global_KOS,
+        center_point_of_cloud_weighted, False, True)
+
+    new_bending_direction_points_tilted_KOS = translation_Points_from_OLD_to_trendline_KOS(
+        new_bending_direction_points_current_KOS, trendline_new_direction_current_KOS, new_zero)
+
+    return new_bending_direction_points_tilted_KOS, new_bending_direction_points_global_KOS, start_end_point_drawn_global_KOS, trendline_new_direction_global_KOS
+def new_bending_points_tilted_to_global(y_intercept,
+                                                new_bending_direction_points_current_KOS,
+                                                trendline_new_direction_current_KOS):
+    # new zero
+    new_zero = np.asarray((0, y_intercept, 0), dtype=np.float32)
+
+    new_bending_direction_points_trendline_KOS = translation_Points_from_OLD_to_trendline_KOS(
+        new_bending_direction_points_current_KOS, trendline_new_direction_current_KOS, new_zero, False, True)
+
+    new_bending_direction_points_global_KOS = translation_Points_from_OLD_to_trendline_KOS(
+        new_bending_direction_points_trendline_KOS,
+        trendline_global_KOS,
+        center_point_of_cloud_weighted, False, True)
+
+    return new_bending_direction_points_global_KOS
+def trim_x_y_values_to_geometry(grid_ressolution_int, x_slope, x_values, x_values_indizes, y_values, y_values_indizes):
+    # -1 default wert
+    y_start_index = -1
+    y_end_index = -1
+    for k in range(len(x_values)):
+
+        if x_slope >= 0:
+            if (y_values_indizes[k] >= 0) & (y_start_index < 0): y_start_index = k
+            if (y_values_indizes[k] > grid_ressolution_int) & (y_end_index < 0): y_end_index = k - 1
+
+        if x_slope < 0:
+            if (y_values_indizes[k] < grid_ressolution_int) & (y_start_index < 0): y_start_index = k
+            if (y_values_indizes[k] <= 0) & (y_end_index < 0): y_end_index = k - 1
+    if y_end_index <= 0: y_end_index = grid_ressolution_int - 1
+    # Trim indizes and coordinates to grid size
+    x_values_indizes_trim = x_values_indizes[y_start_index:y_end_index]
+    y_values_indizes_trim = y_values_indizes[y_start_index:y_end_index]
+    x_values_trim = x_values[y_start_index:y_end_index]
+    y_values_trim = y_values[y_start_index:y_end_index]
+    return x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
+def trim_x_y_values_to_start_end_point(x_start_index, x_end_index, x_values, x_values_indizes, y_values,
+                                       y_values_indizes):
+   # Trim indizes and coordinates to grid size
+    x_values_indizes_trim = x_values_indizes[x_start_index:x_end_index]
+    y_values_indizes_trim = y_values_indizes[x_start_index:x_end_index]
+    x_values_trim = x_values[x_start_index:x_end_index]
+    y_values_trim = y_values[x_start_index:x_end_index]
+    return x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
+
+
 
 
 def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
@@ -1082,14 +1100,7 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     axes.scatter([999999990],[9999999900],[9999999900],linewidths=0.0001, alpha = 0.5, label = "Geometriebereich") #Comment_DB: label in legend
 
     axes.scatter(center_point_of_cloud_weighted[0],center_point_of_cloud_weighted[1],center_point_of_cloud_weighted[2],c='g')
-    axes.scatter(bend_pts_xy_global[:,0], bend_pts_xy_global[:,1],
-                 bend_pts_xy_global[:,2], c='g')
-    axes.scatter(bend_pts_xz_global_left[:, 0], bend_pts_xz_global_left[:, 1],
-                 bend_pts_xz_global_left[:, 2], c='g')
-    axes.scatter(bend_pts_xy_global_right[:, 0], bend_pts_xy_global_right[:, 1],
-                 bend_pts_xy_global_right[:, 2], c='g')
 
-    axes.plot([bend_pts_xy_global_right[1, 0], bend_pts_xz_global_left[1, 0]], [bend_pts_xy_global_right[1, 1], bend_pts_xz_global_left[1, 1]], [bend_pts_xy_global_right[1, 2], bend_pts_xz_global_left[1, 2]], label='Trendlinie', c='red')  # Comment_DB: *pc_axes is *args, and .T is np.transpose
     pc_axes=np.asarray(trendline)
     
     # TRENDLINE
@@ -1125,11 +1136,6 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     plt.plot(x331, y331, z331, marker='o', c='blue')
     """
 
-    # Plot new tildet bending Points
-    plt.plot(list(tri_corner__points_rotatet_and_translated_reverse[:, 0]), list(tri_corner__points_rotatet_and_translated_reverse[:, 1]),
-             list(tri_corner__points_rotatet_and_translated_reverse[:, 2]), marker='o', c='blue')
-
-    """
     plt.plot(list(new_bending_direction_points_global_KOS[:, 0]), list(new_bending_direction_points_global_KOS[:, 1]), list(new_bending_direction_points_global_KOS[:, 2]), marker='o', c='blue')
     plt.plot(list(new_bending_direction_points_global_KOS_left[:, 0]), list(new_bending_direction_points_global_KOS_left[:, 1]),
              list(new_bending_direction_points_global_KOS_left[:, 2]), marker='o', c='blue')
@@ -1138,8 +1144,23 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
              list(new_bending_direction_points_global_KOS_right[:, 2]), marker='o', c='blue')
     #axes.scatter(tri_corner_points_projected_to_trendline_plane[:, 0], tri_corner_points_projected_to_trendline_plane[:, 1], tri_corner_points_projected_to_trendline_plane[:, 2], c='r')
     #axes.scatter(tri_corner_points_projected_to_trendline[:, 0], tri_corner_points_projected_to_trendline[:, 1], tri_corner_points_projected_to_trendline[:, 2], c='g')
+
+
+    axes.scatter(bend_pts_xyz_global[:, 0], bend_pts_xyz_global[:, 1],
+                 bend_pts_xyz_global[:, 2], c='g')
+    axes.scatter(bend_pts_xyz_global_left[:, 0], bend_pts_xyz_global_left[:, 1],
+                 bend_pts_xyz_global_left[:, 2], c='g')
+    axes.scatter(bend_pts_xyz_global_right[:, 0], bend_pts_xyz_global_right[:, 1],
+                 bend_pts_xyz_global_right[:, 2], c='g')
+    edge_line_global
+
+    for i in range(len(edge_line_global[0])):
+        axes.plot([edge_line_global[0][i, 0], edge_line_global[1][i, 0]],
+                [edge_line_global[0][i, 1], edge_line_global[1][i, 1]],
+                [edge_line_global[0][i, 2], edge_line_global[1][i, 2]], label='Edge',
+                 c='green')  # Comment_DB: *pc_axes is *args, and .T is np.transpose
+
     """
-    
     for i in range(len(bestPatch_patternpoints) - 2):
         verts = [list(
             zip([bestPatch_patternpoints[i][0], bestPatch_patternpoints[i + 1][0], bestPatch_patternpoints[i + 2][0]], \
@@ -1149,7 +1170,7 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
         axes.add_collection3d(Poly3DCollection(verts), zs='z')  # Comment_DB: INSERT LoP PATCH IN GRAPH
         # patch_meshpoints.append(verts) #Comment_DB: is not used
     axes.scatter(bestPatch_patternpoints[:, 0], bestPatch_patternpoints[:, 1], bestPatch_patternpoints[:, 2], c='r')
-
+    """
     face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
     patch_visual.set_facecolor(face_color)
     axes.legend()
