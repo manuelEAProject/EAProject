@@ -537,16 +537,13 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
 # Berechnungen in ListofPoints
 def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
-    if alpha_list[0] > math.pi / 2:
-        delta_length_start_bend = (width / 2) * math.tan(math.pi - alpha_list[0])
-
-    else:  # alpha_list[0] < math.pi / 2:
-        delta_length_start_bend = - (width / 2) * math.tan(alpha_list[0])
     delta_length_start_bend = 0
     delta_length_at_bendpoint = [delta_length_start_bend]
     length_left_list = []
     length_right_list = []
-    for i in range(1, len(length_list)):
+
+    i = 1
+    while i <= len(length_list):
         if alpha_list[i-1] > math.pi / 2:
             # Delta at bend i
             delta_length_at_bendpoint_i = -(width / 2) * math.tan(math.pi - alpha_list[i-1])
@@ -563,11 +560,7 @@ def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
 
         delta_length_at_bendpoint.append(delta_length_at_bendpoint_i)
 
-        # falls keine weiteren Knicke:
-        delta_l_end = - delta_length_at_bendpoint_i
-        if i == len(length_list) - 1:
-            length_left_list.append((length_list[-1] + delta_l_end))
-            length_right_list.append((length_list[-1] - delta_l_end))
+        i += 1
     return delta_length_start_bend, length_left_list, length_right_list
 def calc_filled_up_points(direction_vector_list, length_list, point_list):
     filled_up_list = []
