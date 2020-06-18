@@ -3,6 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Test_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test_file.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
@@ -509,7 +511,14 @@
       <option name="project" value="LOCAL" />
       <updated>1591775778616</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="try normal at bendingpoint">
+      <created>1592129216376</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1592129216421</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -537,8 +546,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="show chromo&#10;initialize Population&#10;print console output&#10;show fitness and subfitness end" />
-    <MESSAGE value="stl_preprocessing wird gekürzt" />
     <MESSAGE value="stl_preprocessing wird gekürzt weiterhin" />
     <MESSAGE value="stl_preprocessing wird gekürzt weiterhin&#10;Nicht gebrauchte Variablen rausgeschmissen" />
     <MESSAGE value="start param:&#10;patch_pointcloud_weighted_by_area&#10;pc_trendline_projection" />
@@ -562,15 +569,17 @@
     <MESSAGE value="Cleaning up und Vorzeichenfehler von x-trendline korrigiert" />
     <MESSAGE value="Line links und rechts von der Mittelline&#10;• mit alpha winkel für start und end punkt&#10;• abgeschnitten nach geometrie oder start end&#10;&#10;func: rotate around z and y: Anstatt avg tri norm die trendline&#10;&#10;Tape Richtung Start/End" />
     <MESSAGE value="calc left right glob bend points&#10;local bend points&#10;correct rotation error" />
-    <option name="LAST_COMMIT_MESSAGE" value="calc left right glob bend points&#10;local bend points&#10;correct rotation error" />
+    <MESSAGE value="try normal at bendingpoint" />
+    <MESSAGE value="stl:&#10;norm_vector&#10;Correcting global Trendline KOS x,y,z (svd)&#10;start_r, start_n, alpha, beta aus Interpol Bendline&#10;Coordinate Transformation, Adding angle x&#10;tapeEA:&#10;Introducing alpha at start&#10;calc_direction_vectors&#10;creat_start_chromo" />
+    <option name="LAST_COMMIT_MESSAGE" value="stl:&#10;norm_vector&#10;Correcting global Trendline KOS x,y,z (svd)&#10;start_r, start_n, alpha, beta aus Interpol Bendline&#10;Coordinate Transformation, Adding angle x&#10;tapeEA:&#10;Introducing alpha at start&#10;calc_direction_vectors&#10;creat_start_chromo" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
-          <line>872</line>
-          <option name="timeStamp" value="50" />
+          <url>file://$PROJECT_DIR$/Test_file.py</url>
+          <line>6</line>
+          <option name="timeStamp" value="60" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

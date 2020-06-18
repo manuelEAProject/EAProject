@@ -4,90 +4,15 @@ import time
 from matplotlib import pyplot
 
 
+i = True
+a=1
+while i:
+    if a > 4:
+       break
+    a+=1
 
 
 
-
-
-def func(x, y):
-     return x*(1-x)*np.cos(4*np.pi*x) * np.sin(4*np.pi*y**2)**2
-#on a grid in [0, 1]x[0, 1]
-
-
-grid_x, grid_y = np.mgrid[0:1:100j, 0:1:200j]
-#but we only know its values at 1000 data points:
-
-
-l_list = [[0.12,0.23],[0.32,0.41],[0.12,0.41],[0.23,0.41],[0.45,0.41],[0.21,0.41],[0.89,0.41],[0.78,0.41],
-          [0.14,0.22],[0.98,0.98]]
-points = np.asarray(l_list, dtype=np.float32)
-
-#points = np.random.rand(1000, 2)
-values = np.array([0.11,0.22,0.34,0.98,0.11,0.22,0.34,0.98,0.34,0.34], dtype=np.float32)
-
-
-#Thiss can be done with griddata – below, we try out all of the interpolation methods:
-
-
-grid_z0 = griddata(points, values, (grid_x, grid_y), method='nearest')
-grid_z1 = griddata(points, values, (grid_x, grid_y), method='linear')
-grid_z2 = griddata(points, values, (grid_x, grid_y), method='cubic')
-
-grid_z0= np.array(grid_z0, dtype=np.float32)
-grid_z1= np.array(grid_z1, dtype=np.float32)
-grid_z2= np.array(grid_z2, dtype=np.float32)
-
-import matplotlib.pyplot as plt
-fig = plt.figure()
-#plt.subplot(221)
-#plt.imshow(func(grid_x, grid_y).T, extent=(0,1,0,1), origin='lower')
-#plt.plot(points[:,0], points[:,1], 'k.', ms=1)
-#plt.title('Original')
-plt.subplot(222)
-plt.imshow(grid_z0.T, extent=(0,1,0,1), origin='lower')
-plt.title('Nearest')
-plt.subplot(223)
-plt.imshow(grid_z1.T, extent=(0,1,0,1), origin='lower')
-plt.title('Linear')
-plt.subplot(224)
-plt.imshow(grid_z2.T, extent=(0,1,0,1), origin='lower')
-plt.title('Cubic')
-plt.gcf().set_size_inches(6, 6)
-plt.show()
-
-
-xdata = []
-ydata = []
-def onclick(event):
-    print('button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-          (event.button, event.x, event.y, event.xdata, event.ydata))
-    plt.plot(event.xdata, event.ydata, ',')
-    fig.canvas.draw()
-    global xdata, ydata
-    xdata.append(event.xdata)
-    ydata.append(event.ydata)
-fig.canvas.mpl_connect('button_press_event', onclick)
-
-
-global continue_bool
-continue_bool = False
-
-def handle_close(event):
-    print('Closed Figure!')
-    global continue_bool
-    continue_bool = True
-fig.canvas.mpl_connect('close_event', handle_close)
-
-
-plt.show()
-
-while continue_bool is False:
-    pyplot.pause(2)
-#plt.plot(x_values_trim, y_values, 'bo', linewidth=2.0, label='Schnitt')
-   points = [xdata, ydata]
-    x_coords, y_coords = zip(*points)
-    A = np.vstack([x_coords, np.ones(len(x_coords))]).T
-    m, c = lstsq(A, y_coords)[0]
 """
 var_range = 0.8
 variation_start = [(1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value) for gen_value in chromo[-3:-1:1]]

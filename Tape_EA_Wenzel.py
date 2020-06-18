@@ -462,6 +462,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
 [start_lengths,
  L_aim,  # Comment_DB: already in [mm]
  start_betas,
+ start_alphas,
 
  patch_start,
  patch_end,
@@ -541,16 +542,17 @@ def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
 
     else:  # alpha_list[0] < math.pi / 2:
         delta_length_start_bend = - (width / 2) * math.tan(alpha_list[0])
+    delta_length_start_bend = 0
     delta_length_at_bendpoint = [delta_length_start_bend]
     length_left_list = []
     length_right_list = []
     for i in range(1, len(length_list)):
-        if alpha_list[i] > math.pi / 2:
+        if alpha_list[i-1] > math.pi / 2:
             # Delta at bend i
-            delta_length_at_bendpoint_i = (width / 2) * math.tan(math.pi - alpha_list[i])
+            delta_length_at_bendpoint_i = -(width / 2) * math.tan(math.pi - alpha_list[i-1])
         else:  # alpha_list[i] < math.pi / 2:
             # Delta at bend i
-            delta_length_at_bendpoint_i = - (width / 2) * math.tan(alpha_list[i])
+            delta_length_at_bendpoint_i =  (width / 2) * math.tan(alpha_list[i-1])
 
         # Length
         length_left_new = length_list[i - 1] + delta_length_at_bendpoint_i - delta_length_at_bendpoint[i - 1]
@@ -601,19 +603,21 @@ def calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, bet
         # Rotate Direction Vector around alpha
         if alpha_list[i - 1] < math.pi / 2:
             direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
-                                                  angle=(alpha_list[i - 1] - (math.pi) / 2)).rotate(
-                direction_vector_list[i - 1])
-        else:
-            direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
-                                                  angle=(alpha_list[i - 1] - 3 * (math.pi) / 2)).rotate(
+                                                  angle=(-alpha_list[i - 1] - (math.pi) / 2)).rotate(
                 direction_vector_list[i - 1])
 
+        else:
+            direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
+                                                  angle=(-alpha_list[i - 1] - 3 * (math.pi) / 2)).rotate(
+                direction_vector_list[i - 1])
+
+
         # Rotate new Direction Vector around beta
-        direction_rotation_alpha_beta = Quaternion(axis=direction_rotation_alpha, angle=beta_list[i - 1]).rotate(
+        direction_rotation_alpha_beta = Quaternion(axis=direction_rotation_alpha, angle=-beta_list[i - 1]).rotate(
             direction_vector_list[i - 1])
         # Save Direction vector
         direction_vector_list.append(direction_rotation_alpha_beta)
-        n_new = Quaternion(axis=direction_rotation_alpha, angle=beta_list[i - 1]).rotate(normal_vector_list[i - 1])
+        n_new = Quaternion(axis=direction_rotation_alpha, angle=-beta_list[i - 1]).rotate(normal_vector_list[i - 1])
         normal_vector_list.append(n_new)
 
     direction_vector_list = np.stack(direction_vector_list)
@@ -792,9 +796,15 @@ def create_start_chromo():
     for i in range(len(start_lengths)):
         start_chromo.append(int(start_lengths[i] / l_factor))
         if i < len(start_betas):  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
-            start_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
-            beta_chromo = (start_betas[i] + 90) * chromo_resolution / 180
-            start_chromo.append(int(beta_chromo))
+
+            #start_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
+            if start_alphas[i] > math.pi/2:
+                start_chromo.append(int(round( (start_alphas[i]-((3/4)*math.pi))*(4/(math.pi))* (chromo_resolution / 2))))
+            else:
+                start_chromo.append(int((chromo_resolution / 2)+ round( (start_alphas[i]/(math.pi/4)) * (chromo_resolution / 2))))
+
+            beta_chromo = (start_betas[i]/(math.pi) + 1/2)* chromo_resolution
+            start_chromo.append(int(round(beta_chromo)))
 
     # Variable Startparameter werden standardmäßig auf chromo_resolution/2 gesetzt
     for i in range(7):
