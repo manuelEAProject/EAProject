@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_Grob.stl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_Grober.stl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
@@ -524,7 +526,14 @@
       <option name="project" value="LOCAL" />
       <updated>1592465271641</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="renaming&#10;explainations&#10;&#10;EA: calc delta lenghts">
+      <created>1592475887545</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1592475887545</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -552,7 +561,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="stl_preprocessing wird gekürzt weiterhin" />
     <MESSAGE value="stl_preprocessing wird gekürzt weiterhin&#10;Nicht gebrauchte Variablen rausgeschmissen" />
     <MESSAGE value="start param:&#10;patch_pointcloud_weighted_by_area&#10;pc_trendline_projection" />
     <MESSAGE value="introduce global var in stl_preprocessing and ajust methods" />
@@ -577,7 +585,8 @@
     <MESSAGE value="calc left right glob bend points&#10;local bend points&#10;correct rotation error" />
     <MESSAGE value="try normal at bendingpoint" />
     <MESSAGE value="stl:&#10;norm_vector&#10;Correcting global Trendline KOS x,y,z (svd)&#10;start_r, start_n, alpha, beta aus Interpol Bendline&#10;Coordinate Transformation, Adding angle x&#10;tapeEA:&#10;Introducing alpha at start&#10;calc_direction_vectors&#10;creat_start_chromo" />
-    <option name="LAST_COMMIT_MESSAGE" value="stl:&#10;norm_vector&#10;Correcting global Trendline KOS x,y,z (svd)&#10;start_r, start_n, alpha, beta aus Interpol Bendline&#10;Coordinate Transformation, Adding angle x&#10;tapeEA:&#10;Introducing alpha at start&#10;calc_direction_vectors&#10;creat_start_chromo" />
+    <MESSAGE value="renaming&#10;explainations&#10;&#10;EA: calc delta lenghts" />
+    <option name="LAST_COMMIT_MESSAGE" value="renaming&#10;explainations&#10;&#10;EA: calc delta lenghts" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -586,11 +595,6 @@
           <url>file://$PROJECT_DIR$/Test_file.py</url>
           <line>6</line>
           <option name="timeStamp" value="60" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>578</line>
-          <option name="timeStamp" value="109" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -601,5 +605,10 @@
         </breakpoint>
       </default-breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="edge_line_global_current_direction" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

@@ -1,11 +1,11 @@
-C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Testgeometrien/test3.stl
+C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Beispiel_IRTG_Demonstrator/IRTG_Gen1_Grober.stl
 True
 False
-20.0
-True
+10.0
+False
 7
 0.0
-6.0
+1.0
 5.8
 5.8
 5.8
@@ -34,4 +34,4 @@ True
 0.7
 3
 5
-5
+3

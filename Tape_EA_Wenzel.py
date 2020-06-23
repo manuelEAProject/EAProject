@@ -546,14 +546,14 @@ def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
     while i <= len(length_list):
         if alpha_list[i-1] > math.pi / 2:
             # Delta at bend i
-            delta_length_at_bendpoint_i = -(width / 2) * math.tan(math.pi - alpha_list[i-1])
+            delta_length_at_bendpoint_i = +(width / 2) * math.tan(math.pi - alpha_list[i-1])
         else:  # alpha_list[i] < math.pi / 2:
             # Delta at bend i
-            delta_length_at_bendpoint_i =  (width / 2) * math.tan(alpha_list[i-1])
+            delta_length_at_bendpoint_i = -(width / 2) * math.tan(alpha_list[i-1])
 
         # Length
-        length_left_new = length_list[i - 1] + delta_length_at_bendpoint_i - delta_length_at_bendpoint[i - 1]
-        length_right_new = length_list[i - 1] - delta_length_at_bendpoint_i + delta_length_at_bendpoint[i - 1]
+        length_left_new = length_list[i - 1] - delta_length_at_bendpoint_i + delta_length_at_bendpoint[i - 1]
+        length_right_new = length_list[i - 1] + delta_length_at_bendpoint_i - delta_length_at_bendpoint[i - 1]
 
         length_left_list.append(length_left_new)
         length_right_list.append(length_right_new)
@@ -601,7 +601,7 @@ def calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, bet
 
         else:
             direction_rotation_alpha = Quaternion(axis=normal_vector_list[i - 1],
-                                                  angle=(-alpha_list[i - 1] - 3 * (math.pi) / 2)).rotate(
+                                                  angle=(-alpha_list[i - 1] + (math.pi) / 2)).rotate(
                 direction_vector_list[i - 1])
 
 
