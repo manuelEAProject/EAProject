@@ -4,13 +4,7 @@ import time
 from matplotlib import pyplot
 
 
-i = True
-a=1
-while i:
-    if a > 4:
-       break
-    a+=1
-
+a=np.random.random((10, 33))
 
 
 """

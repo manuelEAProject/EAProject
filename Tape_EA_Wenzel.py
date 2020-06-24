@@ -91,7 +91,7 @@ def get_Vars_from_GUI():
     tape_type.grid(row=46, column=1, sticky=W)
     Label(master, text="Tapebreite [mm]:").grid(row=47, sticky=W)
     width = Entry(master)
-    width.insert(0, 20)
+    width.insert(0, 15)
     width.grid(row=47, column=1, sticky=W)
     Label(master, justify=LEFT, text=" ").grid(row=48, sticky=W)
     Label(master, text="Punktauflösung Patch").grid(row=55, sticky=W)
@@ -176,10 +176,13 @@ def get_Vars_from_GUI():
     gamma_pe4.grid(row=77, column=4, sticky=W)
     Label(master, text="Point of Change (# of Generations) : ").grid(row=78, column=0, sticky=W)
     num_gen_set2 = Entry(master)
+    num_gen_set2.insert(0, 5)
     num_gen_set2.grid(row=78, column=2)
     num_gen_set3 = Entry(master)
+    num_gen_set3.insert(0, 15)
     num_gen_set3.grid(row=78, column=3)
     num_gen_set4 = Entry(master)
+    num_gen_set4.insert(0, 30)
     num_gen_set4.grid(row=78, column=4)
     Label(master, justify=LEFT, text=" ").grid(row=79, sticky=W)
     Label(master, text="Einstellungen für den Evolutionären Algorithmus").grid(row=80, sticky=W)
@@ -279,7 +282,7 @@ def get_Vars_from_GUI():
     init_preprocess = bool(init_preprocess.get())
     poly_order = int(poly_order.get())
     window_quotient = int(window_quotient.get())
-    max_distance = int(max_distance.get())
+    max_distance = float(max_distance.get())
 
     # Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
     useInteger = 1
@@ -342,7 +345,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
             settingssheet = open('./settingssheet.txt')
             if not settingssheet.readline() == "Datei auswählen...":
                 settingssheet.seek(0)
-                input_file.delete(0, 'end')
+                input_file.delete(0,"end")
                 input = settingssheet.readline()
                 input_file.insert(0, input[0:-1])
                 if settingssheet.readline() == t:
@@ -438,7 +441,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
                 window_quotient.delete(0, 'end')
                 window_quotient.insert(0, int(settingssheet.readline()))
                 max_distance.delete(0, 'end')
-                max_distance.insert(0, int(settingssheet.readline()))
+                max_distance.insert(0, float(settingssheet.readline()))
                 settingssheet.close()
         except:
             print("Bitte settingssheet.txt löschen")
@@ -468,7 +471,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  patch_end,
 
  Start_direction_prep_fromstart,
- Start_normal_atstart ] = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
+ Start_normal_atstart ] = stlprep3_6.startparam(input_file, max_distance)
 
 AnzahlKnicke = len(start_lengths) - 1
 
