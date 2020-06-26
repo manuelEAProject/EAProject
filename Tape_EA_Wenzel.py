@@ -71,18 +71,27 @@ def get_Vars_from_GUI():
     y_end.grid(row=36, column=3, sticky=W)
     z_end = Entry(master)
     z_end.grid(row=37, column=3, sticky=W)
-    Label(master, text="Savitkzy-Golay").grid(row=42, sticky=W)
-    Label(master, text="Ordnungsgrad").grid(row=43, sticky=W)
-    poly_order = Entry(master)
-    poly_order.insert(0, 3)
-    poly_order.grid(row=43, column=1, sticky=W)
-    Label(master, text="Fensterquotient").grid(row=43, column=2, sticky=W)
-    window_quotient = Entry(master)
-    window_quotient.insert(0, 5)
-    window_quotient.grid(row=43, column=3, sticky=W)
-    Label(master, text='Maximaler Abstand zur SavGol-Kurve (Zunaechst)').grid(row=44, sticky=W)
+    Label(master, text="Preprozessor Einstellungen").grid(row=42, sticky=W)
+    Label(master, text="Rasterauflösung Interpolation").grid(row=43, sticky=W)
+    grid_resolution = Entry(master)
+    grid_resolution.insert(0, 1000)
+    grid_resolution.grid(row=43, column=1, sticky=W)
+    Label(master, text="Width Edge Detection").grid(row=43, column=2, sticky=W)
+    width_for_edge_detection = Entry(master)
+    width_for_edge_detection.insert(0, 2)
+    width_for_edge_detection.grid(row=43, column=3, sticky=W)
+
+    interpolate_with_corner_and_centerpoints = BooleanVar()
+    interpolate_with_corner_and_centerpoints.set(False)
+    interpolate_with_corner_and_centerpoints_cb = Checkbutton(master, text="Interpolate with centerpoints", variable=interpolate_with_corner_and_centerpoints,
+                                     command=lambda: init_random.set(False))
+    interpolate_with_corner_and_centerpoints_cb.grid(row=43, column=4, sticky=W)
+
+
+
+    Label(master, text='Maximaler Abstand zur interpolierten Oberfläche (Zunaechst)').grid(row=44, sticky=W)
     max_distance = Entry(master)
-    max_distance.insert(0, 10)  # Comment_DB: insert 10 at front of list
+    max_distance.insert(0, 1)  # Comment_DB: insert 10 at front of list
     max_distance.grid(row=44, column=1, sticky=W)
     Label(master, justify=LEFT, text=" ").grid(row=45, sticky=W)
     Label(master, text="Tape-Typ :").grid(row=46, sticky=W)
@@ -223,8 +232,8 @@ def get_Vars_from_GUI():
                                         gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
                                         gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, init_random, input_file,
                                         max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover,
-                                        p_mutate_range, p_mutation, pointspersection, poly_order, pop_size,
-                                        step_size, width, window_quotient)
+                                        p_mutate_range, p_mutation, pointspersection, grid_resolution, pop_size,
+                                        step_size, width, width_for_edge_detection,interpolate_with_corner_and_centerpoints)
 
     mainloop()  # führt das GUI aus
 
@@ -280,9 +289,10 @@ def get_Vars_from_GUI():
 
     # Soll die Initialisierung mit den Startwerten des Preprozesses erfolgen? 1 = True
     init_preprocess = bool(init_preprocess.get())
-    poly_order = int(poly_order.get())
-    window_quotient = int(window_quotient.get())
+    grid_resolution = int(grid_resolution.get())
+    width_for_edge_detection = float(width_for_edge_detection.get())
     max_distance = float(max_distance.get())
+    interpolate_with_corner_and_centerpoints= bool(interpolate_with_corner_and_centerpoints.get())
 
     # Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
     useInteger = 1
@@ -303,11 +313,11 @@ def get_Vars_from_GUI():
                    gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4,
                    num_gen_set2, num_gen_set3, num_gen_set4,
                    pop_size, num_gen, chromo_resolution,
-                   p_mutation, adap_mutation, p_mutate_range, p_crossover, poly_order,
-                   window_quotient, max_distance])  # Speichert die gewählten Einstellungen
+                   p_mutation, adap_mutation, p_mutate_range, p_crossover, grid_resolution,
+                   width_for_edge_detection, max_distance,interpolate_with_corner_and_centerpoints])  # Speichert die gewählten Einstellungen
 
     master.destroy()  # Schließt das Settings Fenster
-    return step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, poly_order, pop_size, useInteger, window_quotient, x_end, x_start, y_end, y_start, z_end, z_start
+    return step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, grid_resolution, pop_size, useInteger, width_for_edge_detection, x_end, x_start, y_end, y_start, z_end, z_start,interpolate_with_corner_and_centerpoints
 # functions for GUI-Settings
 def select_stl_file(input_file):
     if os.path.isfile('./settingssheet.txt'):
@@ -336,8 +346,8 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
                                         gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
                                         gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, init_random, input_file,
                                         max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover,
-                                        p_mutate_range, p_mutation, pointspersection, poly_order, pop_size,
-                                        step_size, width, window_quotient):
+                                        p_mutate_range, p_mutation, pointspersection, grid_resolution, pop_size,
+                                        step_size, width, width_for_edge_detection,interpolate_with_corner_and_centerpoints):
     if os.path.isfile('./settingssheet.txt'):
 
         t = "True" + '\n'
@@ -436,12 +446,19 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
                 p_mutate_range.insert(0, float(settingssheet.readline()))
                 p_crossover.delete(0, 'end')
                 p_crossover.insert(0, float(settingssheet.readline()))
-                poly_order.delete(0, 'end')
-                poly_order.insert(0, int(settingssheet.readline()))
-                window_quotient.delete(0, 'end')
-                window_quotient.insert(0, int(settingssheet.readline()))
+                grid_resolution.delete(0, 'end')
+                grid_resolution.insert(0, int(settingssheet.readline()))
+                width_for_edge_detection.delete(0, 'end')
+                width_for_edge_detection.insert(0, float(settingssheet.readline()))
                 max_distance.delete(0, 'end')
                 max_distance.insert(0, float(settingssheet.readline()))
+
+                if settingssheet.readline() == t:
+                    interpolate_with_corner_and_centerpoints.set(True)
+                else:
+                    interpolate_with_corner_and_centerpoints.set(False)
+
+
                 settingssheet.close()
         except:
             print("Bitte settingssheet.txt löschen")
@@ -457,8 +474,8 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  init_preprocess, input_file, manual_start_end, max_distance,
  num_gen, num_gen_set2, num_gen_set3, num_gen_set4,
  p_crossover, p_mutate_range, p_mutation,
- poly_order, pop_size, useInteger, window_quotient,
- x_end, x_start, y_end, y_start, z_end, z_start] = get_Vars_from_GUI()
+ grid_resolution, pop_size, useInteger, width_for_edge_detection,
+ x_end, x_start, y_end, y_start, z_end, z_start, interpolate_with_corner_and_centerpoints] = get_Vars_from_GUI()
 
 # Startparam gibt eine Liste mit den berechneten Startparametern zurück:
 
@@ -471,7 +488,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  patch_end,
 
  Start_direction_prep_fromstart,
- Start_normal_atstart ] = stlprep3_6.startparam(input_file, max_distance)
+ Start_normal_atstart ] = stlprep3_6.startparam(input_file, max_distance,width_for_edge_detection, grid_resolution, interpolate_with_corner_and_centerpoints)
 
 AnzahlKnicke = len(start_lengths) - 1
 
@@ -480,7 +497,7 @@ if manual_start_end:
     patch_end = np.asarray([x_end, y_end, z_end])
 
 # Faktor für das Längenallel in den Chromosomen -> eine Länge kann maximal L_aim lang werden
-l_factor = 0.5 * L_aim / chromo_resolution  # Comment_DB: already in [mm]
+l_factor = 0.75 * L_aim / chromo_resolution  # Comment_DB: already in [mm]
 
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
