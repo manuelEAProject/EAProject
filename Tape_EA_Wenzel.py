@@ -5,7 +5,7 @@ from pyquaternion import Quaternion
 import math
 import trimesh
 from trimesh import proximity
-from galileo_EA_Edit6 import Population
+from galileo_EA_Wenzel import Population
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits import mplot3d

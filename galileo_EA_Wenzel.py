@@ -226,7 +226,8 @@ class Population:
         self.nextGeneration = [] #Comment_DB: for replacement function
         self.chromoMaxValues = []
         self.chromoMinValues = []
-        self.startchromo = None
+        self.startchromo3D = None
+        self.startchromo2D = None
         self.selectionSize = int(self.numChromosomes/4)
 
 
@@ -277,13 +278,24 @@ class Population:
             c = Chromosome() #Comment_DB: create chromosome object
             c.geneMinValues = self.chromoMinValues #Comment_DB: input in tape_EA
             c.geneMaxValues = self.chromoMaxValues #Comment_DB: input in tape_EA
-            for i in range(len(self.startchromo)): #Comment_DB: startchromo is the startchromo in tape_EA
-                c.genes.append(self.startchromo[i]) #Comment_DB: append the initial startchromo from tape EA!
+            for i in range(len(self.startchromo3D)): #Comment_DB: startchromo is the startchromo in tape_EA
+                c.genes.append(self.startchromo3D[i]) #Comment_DB: append the initial startchromo from tape EA!
             #print("start_c_",c.genes)
             c.fitness = None
             c.evalFunc = self.evalFunc
             self.currentGeneration.append(c) #Comment_DB: append the startchromo into the current generation
             c.initrange=self.initrange #Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
+
+            c = Chromosome()  # Comment_DB: create chromosome object
+            c.geneMinValues = self.chromoMinValues  # Comment_DB: input in tape_EA
+            c.geneMaxValues = self.chromoMaxValues  # Comment_DB: input in tape_EA
+            for i in range(len(self.startchromo2D)):  # Comment_DB: startchromo is the startchromo in tape_EA
+                c.genes.append(self.startchromo2D[i])  # Comment_DB: append the initial startchromo from tape EA!
+            # print("start_c_",c.genes)
+            c.fitness = None
+            c.evalFunc = self.evalFunc
+            self.currentGeneration.append(c)  # Comment_DB: append the startchromo into the current generation
+            c.initrange = self.initrange  # Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
 
         # Erstellen der Startpopulation, falls PreprocessedInit = True wird Population um Startchromo herum erstellt
         for i in range(self.numChromosomes): #Comment_DB: numChromosomes is the # of chromosomes (population) in each generation
@@ -295,7 +307,7 @@ class Population:
             c.p_prepInit = self.p_prepInit
             # Using the preprocessed parameters (#Comment_DB: to generate the start population?)
             if self.preprocessedInit == True:
-                c.preprocessedInit(self.generator,self.startchromo,self.useInteger)
+                c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
             else:
                 c.randomInit(self.generator, self.useInteger)
             c.evalFunc = self.evalFunc
@@ -538,6 +550,7 @@ class Population:
                 highstop = min(self.chromoMaxValues[i], chromo.genes[i] + self.mutationRange * chromorange)
 
                 if lowstop > 100: lowstop = 100 # Comment_DKu_Wenzel: Fehler: lowstop > highstop. Highstop min() ist max 100. Lowstop max() kann höher sein. Problem?
+                if highstop < 0: highstop = 0
 
                 if self.useInteger == 1:
                     f = self.generator.randint(int(lowstop), int(highstop))

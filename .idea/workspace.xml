@@ -2,16 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="löschen von interpolate with centerpoints&#10;Start/Endpoint EA ist Auswahl im Plot&#10;2D/3D Auswahlmöglichkeit in Tape EA">
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T001.stl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T010_2.stl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T100.stl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/galileo_EA_Wenzel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/galileo_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/galileo_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -71,7 +67,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Tape_EA_Wenzel">
+  <component name="RunManager" selected="Python.Tape_EA_Wenzel_Refactoring">
     <configuration name="Tape_EA" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="ud_tape_optimization" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -558,7 +554,14 @@
       <option name="project" value="LOCAL" />
       <updated>1593182763495</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="TapeEA:&#10;GUI, 2D und 3D Lösung, Anzahl Knicke &#10;stl preprocessing:&#10;2D Lösung, Endpunkt">
+      <created>1594297296022</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1594297296022</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -586,7 +589,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="trendline&#10;first principal component" />
     <MESSAGE value="avg tri normal weighted&#10;&#10;trendline_axis" />
     <MESSAGE value="Start_ Endkante des Patches&#10;&#10;show_start_para gekürzt" />
     <MESSAGE value="first principal components in trendline axis geschoben&#10;&#10;liberies gelöscht" />
@@ -611,7 +613,8 @@
     <MESSAGE value="start cleaning up&#10;plots&#10;Vorzeichen" />
     <MESSAGE value="deleting old way of calc alpha beta gamma, projection to trendline &#10;Laim neu berechnet&#10;Change SVD method!!!" />
     <MESSAGE value="GUI&#10;Aufräumen" />
-    <option name="LAST_COMMIT_MESSAGE" value="GUI&#10;Aufräumen" />
+    <MESSAGE value="TapeEA:&#10;GUI, 2D und 3D Lösung, Anzahl Knicke &#10;stl preprocessing:&#10;2D Lösung, Endpunkt" />
+    <option name="LAST_COMMIT_MESSAGE" value="TapeEA:&#10;GUI, 2D und 3D Lösung, Anzahl Knicke &#10;stl preprocessing:&#10;2D Lösung, Endpunkt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
