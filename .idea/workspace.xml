@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="deleting old way of calc alpha beta gamma, projection to trendline &#10;Laim neu berechnet&#10;Change SVD method!!!">
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_creo.stl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_reference_Structure_Tool__20170317__Oberteil.stp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_reference_Structure_Tool__20170317__Unterteil.stp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_reference_Structure_Tool_noRibs_20170228.stp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/asm0008__out.log.1" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/asm0008_asm.stp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/prt0014.prt.1" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/prt15.prt.1" afterDir="false" />
+    <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="löschen von interpolate with centerpoints&#10;Start/Endpoint EA ist Auswahl im Plot&#10;2D/3D Auswahlmöglichkeit in Tape EA">
+      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T001.stl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T010_2.stl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T100.stl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/galileo_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/galileo_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
     </list>
@@ -210,8 +208,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Tape_EA_Edit6" />
         <item itemvalue="Python.Tape_EA_Wenzel_Refactoring" />
+        <item itemvalue="Python.Tape_EA_Edit6" />
         <item itemvalue="Python.Tape_EA_Wenzel1" />
         <item itemvalue="Python.Tape_EA" />
       </list>
@@ -553,7 +551,14 @@
       <option name="project" value="LOCAL" />
       <updated>1593005620603</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="GUI&#10;Aufräumen">
+      <created>1593182763494</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1593182763495</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -581,7 +586,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="introduce global var in stl_preprocessing and ajust methods" />
     <MESSAGE value="trendline&#10;first principal component" />
     <MESSAGE value="avg tri normal weighted&#10;&#10;trendline_axis" />
     <MESSAGE value="Start_ Endkante des Patches&#10;&#10;show_start_para gekürzt" />
@@ -606,7 +610,8 @@
     <MESSAGE value="renaming&#10;explainations&#10;&#10;EA: calc delta lenghts" />
     <MESSAGE value="start cleaning up&#10;plots&#10;Vorzeichen" />
     <MESSAGE value="deleting old way of calc alpha beta gamma, projection to trendline &#10;Laim neu berechnet&#10;Change SVD method!!!" />
-    <option name="LAST_COMMIT_MESSAGE" value="deleting old way of calc alpha beta gamma, projection to trendline &#10;Laim neu berechnet&#10;Change SVD method!!!" />
+    <MESSAGE value="GUI&#10;Aufräumen" />
+    <option name="LAST_COMMIT_MESSAGE" value="GUI&#10;Aufräumen" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -615,16 +620,6 @@
           <url>file://$PROJECT_DIR$/Test_file.py</url>
           <line>6</line>
           <option name="timeStamp" value="252" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
-          <line>210</line>
-          <option name="timeStamp" value="253" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
-          <line>970</line>
-          <option name="timeStamp" value="256" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

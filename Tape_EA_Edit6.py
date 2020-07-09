@@ -1073,7 +1073,7 @@ stlprep3_6.show_startstrip(input_file, ListOfPoints(startchromo)[0], poly_order,
 ## Erzeuge ein Objekt der Klasse Population:
 p = Population(pop_size)  # Comment_DB: pop_size is user input in dialog box
 ## Startwerte aus Preprocessing werden an die Population gegeben
-p.startchromo = startchromo
+p.startchromo3D = startchromo
 # Soll die Initialisierung mit den Startwerten des Preprozesses erfolgen?
 p.preprocessedInit = init_preprocess  # Comment_DB: init_preprocess also user input, preprocessedInit is from chromosome class in Galileo module
 p.initrange = 10  # Comment_DB: in chromosome class in Galileo module. Interval for variation of preprocessed gene

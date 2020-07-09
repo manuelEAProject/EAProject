@@ -81,13 +81,6 @@ def get_Vars_from_GUI():
     width_for_edge_detection.insert(0, 2)
     width_for_edge_detection.grid(row=43, column=3, sticky=W)
 
-    interpolate_with_corner_and_centerpoints = BooleanVar()
-    interpolate_with_corner_and_centerpoints.set(False)
-    interpolate_with_corner_and_centerpoints_cb = Checkbutton(master, text="Interpolate with centerpoints", variable=interpolate_with_corner_and_centerpoints,
-                                     command=lambda: init_random.set(False))
-    interpolate_with_corner_and_centerpoints_cb.grid(row=43, column=4, sticky=W)
-
-
 
     Label(master, text='Maximaler Abstand zur interpolierten Oberfläche (Zunaechst)').grid(row=44, sticky=W)
     max_distance = Entry(master)
@@ -233,7 +226,7 @@ def get_Vars_from_GUI():
                                         gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, init_random, input_file,
                                         max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover,
                                         p_mutate_range, p_mutation, pointspersection, grid_resolution, pop_size,
-                                        step_size, width, width_for_edge_detection,interpolate_with_corner_and_centerpoints)
+                                        step_size, width, width_for_edge_detection)
 
     mainloop()  # führt das GUI aus
 
@@ -292,7 +285,7 @@ def get_Vars_from_GUI():
     grid_resolution = int(grid_resolution.get())
     width_for_edge_detection = float(width_for_edge_detection.get())
     max_distance = float(max_distance.get())
-    interpolate_with_corner_and_centerpoints= bool(interpolate_with_corner_and_centerpoints.get())
+
 
     # Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
     useInteger = 1
@@ -314,10 +307,10 @@ def get_Vars_from_GUI():
                    num_gen_set2, num_gen_set3, num_gen_set4,
                    pop_size, num_gen, chromo_resolution,
                    p_mutation, adap_mutation, p_mutate_range, p_crossover, grid_resolution,
-                   width_for_edge_detection, max_distance,interpolate_with_corner_and_centerpoints])  # Speichert die gewählten Einstellungen
+                   width_for_edge_detection, max_distance])  # Speichert die gewählten Einstellungen
 
     master.destroy()  # Schließt das Settings Fenster
-    return step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, grid_resolution, pop_size, useInteger, width_for_edge_detection, x_end, x_start, y_end, y_start, z_end, z_start,interpolate_with_corner_and_centerpoints
+    return step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, input_file, manual_start_end, max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, grid_resolution, pop_size, useInteger, width_for_edge_detection, x_end, x_start, y_end, y_start, z_end, z_start
 # functions for GUI-Settings
 def select_stl_file(input_file):
     if os.path.isfile('./settingssheet.txt'):
@@ -347,7 +340,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
                                         gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, init_random, input_file,
                                         max_distance, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover,
                                         p_mutate_range, p_mutation, pointspersection, grid_resolution, pop_size,
-                                        step_size, width, width_for_edge_detection,interpolate_with_corner_and_centerpoints):
+                                        step_size, width, width_for_edge_detection):
     if os.path.isfile('./settingssheet.txt'):
 
         t = "True" + '\n'
@@ -453,10 +446,6 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
                 max_distance.delete(0, 'end')
                 max_distance.insert(0, float(settingssheet.readline()))
 
-                if settingssheet.readline() == t:
-                    interpolate_with_corner_and_centerpoints.set(True)
-                else:
-                    interpolate_with_corner_and_centerpoints.set(False)
 
 
                 settingssheet.close()
@@ -475,7 +464,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  num_gen, num_gen_set2, num_gen_set3, num_gen_set4,
  p_crossover, p_mutate_range, p_mutation,
  grid_resolution, pop_size, useInteger, width_for_edge_detection,
- x_end, x_start, y_end, y_start, z_end, z_start, interpolate_with_corner_and_centerpoints] = get_Vars_from_GUI()
+ x_end, x_start, y_end, y_start, z_end, z_start] = get_Vars_from_GUI()
 
 # Startparam gibt eine Liste mit den berechneten Startparametern zurück:
 
@@ -488,16 +477,17 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  patch_end,
 
  Start_direction_prep_fromstart,
- Start_normal_atstart ] = stlprep3_6.startparam(input_file, max_distance,width_for_edge_detection, grid_resolution, interpolate_with_corner_and_centerpoints)
+ Start_normal_atstart ] = stlprep3_6.startparam(input_file, max_distance,width_for_edge_detection, grid_resolution)
 
-AnzahlKnicke = len(start_lengths) - 1
+if len(start_lengths[0])>len(start_lengths[1]): AnzahlKnicke = len(start_lengths[0]) - 1
+else: AnzahlKnicke = len(start_lengths[1]) - 1
 
 if manual_start_end:
     patch_start = np.asarray([x_start, y_start, z_start])
     patch_end = np.asarray([x_end, y_end, z_end])
 
 # Faktor für das Längenallel in den Chromosomen -> eine Länge kann maximal L_aim lang werden
-l_factor = 0.75 * L_aim / chromo_resolution  # Comment_DB: already in [mm]
+l_factor = 0.75 * float(L_aim) / chromo_resolution  # Comment_DB: already in [mm]
 
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
@@ -554,7 +544,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
-    return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction  # Comment_DB: Not dependent on preprocessed_chromo
+    return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction,mid_point_list  # Comment_DB: Not dependent on preprocessed_chromo
 # Berechnungen in ListofPoints
 def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
     delta_length_start_bend = 0
@@ -755,7 +745,7 @@ def calc_length_fitness(L_aim, chromo, l_factor_chromo_mm):
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
     return length_fit
 def calc_avg_dist(chromo):
-    distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[1]
+    distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[1] #DKu_Wenzel: signed_distance
     # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
     return avg_dist
@@ -800,23 +790,24 @@ def evalute_adaptiv_gamma_():
 
 # Erstellung Chromosom der Startlösung
 # Chromosom der Startlösung (Comment_DB: independent of chromominmaxvalue limitation from galileo)
-def create_start_chromo():
+def create_start_chromo(start_2D_or_3D):
     # Nimmt die Startparameter aus der Geometriedatenvorverarbeitung und wandelt diese in ein Chromosom mit der
     # entsprechenden Auflösung um. Rückgabewert ist das Chromosom der Startlösung.
     start_chromo = []
 
+    start_2D_or_3D
     # Fill length1, alpha1, beta1, length2...
-    for i in range(len(start_lengths)):
-        start_chromo.append(int(start_lengths[i] / l_factor))
-        if i < len(start_betas):  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
+    for i in range(len(start_lengths[start_2D_or_3D])):
+        start_chromo.append(int(start_lengths[start_2D_or_3D][i] / l_factor))
+        if i < len(start_betas[start_2D_or_3D]):  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
 
             #start_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
-            if start_alphas[i] > math.pi/2:
-                start_chromo.append(int(round( (start_alphas[i]-((3/4)*math.pi))*(4/(math.pi))* (chromo_resolution / 2))))
+            if start_alphas[start_2D_or_3D][i] > math.pi/2:
+                start_chromo.append(int(round( (start_alphas[start_2D_or_3D][i]-((3/4)*math.pi))*(4/(math.pi))* (chromo_resolution / 2))))
             else:
-                start_chromo.append(int((chromo_resolution / 2)+ round( (start_alphas[i]/(math.pi/4)) * (chromo_resolution / 2))))
+                start_chromo.append(int(round((chromo_resolution/2)+ (start_alphas[start_2D_or_3D][i]/(math.pi/4)) * (chromo_resolution / 2))))
 
-            beta_chromo = (start_betas[i]/(math.pi) + 1/2)* chromo_resolution
+            beta_chromo = (start_betas[start_2D_or_3D][i]/(math.pi) + 1/2)* chromo_resolution
             start_chromo.append(int(round(beta_chromo)))
 
     # Variable Startparameter werden standardmäßig auf chromo_resolution/2 gesetzt
@@ -868,7 +859,8 @@ def initialize_Population_with_global_Settings():
     # Erzeuge ein Objekt der Klasse Population:
     p = Population(pop_size)  # Comment_DB: pop_size is user input in dialog box
     # Startwerte aus Preprocessing werden an die Population gegeben
-    p.startchromo = startchromo
+    p.startchromo3D = startchromo3D
+    p.startchromo2D = startchromo2D
     # Soll die Initialisierung mit den Startwerten des Preprozesses erfolgen?
     p.preprocessedInit = init_preprocess  # Comment_DB: init_preprocess also user input, preprocessedInit is from chromosome class in Galileo module
     p.initrange = 10  # Comment_DB: in chromosome class in Galileo module. Interval for variation of preprocessed gene
@@ -917,11 +909,139 @@ def initialize_Population_with_global_Settings():
 
 
 ####################Evolutionärer Algorithmus####################
-startchromo = create_start_chromo()
+
+startchromo3D = create_start_chromo(0) # 0, for 3D. 1, for 2D start solution
+startchromo2D = create_start_chromo(1) #
+
+
+def repair_start_chromo():
+    global i
+    while len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]):
+        # length lists
+        listlength3D = ListOfPoints(startchromo3D)[4]
+        listlength2D = ListOfPoints(startchromo2D)[4]
+        # total length
+        totallength3D = sum(listlength3D)
+        totallength2D = sum(listlength2D)
+
+        # length normed to total length
+        listlength2D_norm = list(np.zeros(len(listlength2D)))
+        for i in range(len(listlength2D)):
+            listlength2D_norm[i] = listlength2D[i] / totallength2D
+        listlength3D_norm = list(np.zeros(len(listlength3D)))
+        for i in range(len(listlength3D)):
+            listlength3D_norm[i] = listlength3D[i] / totallength3D
+
+        # compare_end_2D_3D = listlength3D_norm
+        if len(listlength3D) < len(listlength2D):
+            compare_2D_3D = list(np.zeros(len(listlength3D)))
+            point_of_differenz = 0
+
+            for i in range(len(listlength3D)):
+                compare_2D_3D[i] = listlength2D_norm[i] / listlength3D_norm[i]
+                # compare_end_2D_3D[-i-1] = listlength3D_norm[-i-1]/listlength2D_norm[-i-1]
+                if compare_2D_3D[i] < 0.75:  # mehr als 25% Abweichung
+                    point_of_differenz = i
+                    break
+            # Two possibilities
+            option_1 = listlength2D_norm[point_of_differenz] + listlength2D_norm[point_of_differenz - 1]
+            option_2 = listlength2D_norm[point_of_differenz] + listlength2D_norm[point_of_differenz + 1]
+
+            if option_1 / listlength3D_norm[point_of_differenz - 1] > 0.90 and option_1 / listlength3D_norm[
+                point_of_differenz - 1] < 1.10:
+                division = listlength2D_norm[point_of_differenz - 1] / option_1
+
+                # Insert the new bendingpoint:
+                startchromo3D.insert((point_of_differenz - 1) * 3 + 3,
+                                     startchromo3D[(point_of_differenz - 1) * 3 + 2])  # old alpha
+                startchromo3D.insert((point_of_differenz - 1) * 3 + 3,
+                                     startchromo3D[(point_of_differenz - 1) * 3 + 1])  # old beta
+                startchromo3D.insert((point_of_differenz - 1) * 3 + 3, int(
+                    listlength3D[point_of_differenz - 1] * (1 - division) / l_factor))  # (1-division) * length
+
+                # Update old/previous bendingpoint with 0° angels:
+                startchromo3D[(point_of_differenz - 1) * 3] = int(listlength3D[point_of_differenz - 1] * division / l_factor) # (division) * length
+                startchromo3D[(point_of_differenz - 1) * 3 + 1] = chromo_resolution / 2  # 0° angel
+                startchromo3D[(point_of_differenz - 1) * 3 + 2] = chromo_resolution / 2  # 0° angel
+
+
+            else:  # option_2/listlength3D_norm[point_of_differenz]>0.95:
+                division = listlength2D_norm[point_of_differenz] / option_2
+
+                # Insert the new bendingpoint::
+                startchromo3D.insert((point_of_differenz) * 3 + 3,
+                                     startchromo3D[(point_of_differenz) * 3 + 2])  # old alpha
+                startchromo3D.insert((point_of_differenz) * 3 + 3,
+                                     startchromo3D[(point_of_differenz) * 3 + 1])  # new beta
+                startchromo3D.insert((point_of_differenz) * 3 + 3, int(
+                    listlength3D[point_of_differenz] * (1 - division) / l_factor))  # (1-division) * length
+
+                # Update old/previous bendingpoint with 0° angels:
+                startchromo3D[(point_of_differenz) * 3] = int(listlength3D[point_of_differenz] * division / l_factor) # (division) * length
+                startchromo3D[(point_of_differenz) * 3 + 1] = chromo_resolution / 2  # 0° angel
+                startchromo3D[(point_of_differenz) * 3 + 2] = chromo_resolution / 2  # 0° angel
+
+        else:
+            compare_2D_3D = list(np.zeros(len(listlength2D)))
+            point_of_differenz = 0
+
+            for i in range(len(listlength2D)):
+                compare_2D_3D[i] = listlength3D_norm[i] / listlength2D_norm[i]
+                # compare_end_2D_3D[-i-1] = listlength3D_norm[-i-1]/listlength2D_norm[-i-1]
+                if compare_2D_3D[i] < 0.75:  # mehr als 25% Abweichung
+                    point_of_differenz = i
+                    break
+            # Two possibilities
+            option_1 = listlength3D_norm[point_of_differenz] + listlength3D_norm[point_of_differenz - 1]
+            option_2 = listlength3D_norm[point_of_differenz] + listlength3D_norm[point_of_differenz + 1]
+
+            if option_1 / listlength2D_norm[point_of_differenz - 1] > 0.90 and option_1 / listlength2D_norm[
+                point_of_differenz - 1] < 1.10:
+                division = listlength3D_norm[point_of_differenz - 1] / option_1
+
+                # Insert the new bendingpoint:
+                startchromo2D.insert((point_of_differenz - 1) * 3 + 3,
+                                     startchromo2D[(point_of_differenz - 1) * 3 + 2])  # old alpha
+                startchromo2D.insert((point_of_differenz - 1) * 3 + 3,
+                                     startchromo2D[(point_of_differenz - 1) * 3 + 1])  # old beta
+                startchromo2D.insert((point_of_differenz - 1) * 3 + 3, int(
+                    listlength3D[point_of_differenz - 1] * (1 - division) / l_factor))  # (1-division) * length
+
+                # Update old/previous bendingpoint with 0° angels:
+                startchromo2D[(point_of_differenz - 1) * 3] = int(
+                    listlength3D[point_of_differenz - 1] * division / l_factor) # (division) * length
+                startchromo2D[(point_of_differenz - 1) * 3 + 1] = chromo_resolution / 2  # 0° angel
+                startchromo2D[(point_of_differenz - 1) * 3 + 2] = chromo_resolution / 2  # 0° angel
+
+
+            else:  # option_2/listlength3D_norm[point_of_differenz]>0.95:
+                division = listlength3D_norm[point_of_differenz] / option_2
+
+                # Insert the new bendingpoint:
+                startchromo2D.insert((point_of_differenz) * 3 + 3,
+                                     startchromo2D[(point_of_differenz) * 3 + 2])  # old alpha
+                startchromo2D.insert((point_of_differenz) * 3 + 3,
+                                     startchromo2D[(point_of_differenz) * 3 + 1])  # old beta
+                startchromo2D.insert((point_of_differenz) * 3 + 3, int(
+                    listlength3D[point_of_differenz] * (1 - division) / l_factor))  # (1-division) * length
+
+                # Update old/previous bendingpoint with 0° angels:
+                startchromo2D[(point_of_differenz) * 3] = int(listlength2D[
+                                                                  point_of_differenz] * division / l_factor)  # (division) * length
+                startchromo2D[(point_of_differenz) * 3 + 1] = chromo_resolution / 2  # 0° angel
+                startchromo2D[(point_of_differenz) * 3 + 2] = chromo_resolution / 2  # 0° angel
+
+
+if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]): # Lenght lists
+    print("2D and 3D Solution dont have same amout of bending points. ")
+    repair_start_chromo() # Insert additional bending points
+
+
 p = initialize_Population_with_global_Settings()
 
-# Ergebnisse aus Vorverarbeitung visualisieren:
-stlprep3_6.show_startstrip(ListOfPoints(startchromo)[3], patch_start, patch_end)
+# visulize results from preprocessor:
+stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "3D")
+stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
 
 ##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
 num_gen_list = np.array([])
@@ -1145,3 +1265,4 @@ Button(end, text="Patchparameter speichern", command=save_patch_file).grid(row=3
 Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 
 mainloop()
+
