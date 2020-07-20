@@ -502,7 +502,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
      Start_point] = calc_start_point_direction_normal_vector(chromo)
 
     # Direction vector at each beding point
-    direction_vector_list = calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, beta_list,
+    direction_vector_list, normal_vector_list = calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, beta_list,
                                                    length_list)
 
     # Lengths of left and right side from tape,
@@ -544,7 +544,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
-    return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction,mid_point_list  # Comment_DB: Not dependent on preprocessed_chromo
+    return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction,direction_vector_list, normal_vector_list, mid_point_list  # Comment_DB: Not dependent on preprocessed_chromo
 # Berechnungen in ListofPoints
 def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
     delta_length_start_bend = 0
@@ -623,8 +623,9 @@ def calc_direction_vectors(Start_direction, Start_normale_gamma, alpha_list, bet
         n_new = Quaternion(axis=direction_rotation_alpha, angle=-beta_list[i - 1]).rotate(normal_vector_list[i - 1])
         normal_vector_list.append(n_new)
 
+    normal_vector_list = np.stack(normal_vector_list)
     direction_vector_list = np.stack(direction_vector_list)
-    return direction_vector_list
+    return direction_vector_list,normal_vector_list
 def calc_start_point_direction_normal_vector(chromo):
     # Startpunktvariation aus Chromosom übersetzt
     [var_start_pt_x, var_start_pt_y, var_start_pt_z,
@@ -650,7 +651,7 @@ def calc_start_point_direction_normal_vector(chromo):
     Start_normale_gamma = 1 / np.linalg.norm(Start_normale_gamma) * Start_normale_gamma
     return Start_direction, Start_normale_gamma, Start_point
 def translate_start_varriation_from_chomo(chromo):
-    # From Gen Value(0-100) to Startvariation (1 +/- var_range)
+    # From Gen Value(0-c_max) to Startvariation (1 +/- var_range)
     var_range = 0.8
     # Last vales in chromo ar start variation variables
     variation_start = [(1 - var_range + (var_range / (chromo_resolution / 2)) * gen_value) for gen_value in
@@ -907,15 +908,8 @@ def initialize_Population_with_global_Settings():
 
     return p
 
+def repair_start_chromo(startchromo3D,startchromo2D):
 
-####################Evolutionärer Algorithmus####################
-
-startchromo3D = create_start_chromo(0) # 0, for 3D. 1, for 2D start solution
-startchromo2D = create_start_chromo(1) #
-
-
-def repair_start_chromo():
-    global i
     while len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]):
         # length lists
         listlength3D = ListOfPoints(startchromo3D)[4]
@@ -925,117 +919,264 @@ def repair_start_chromo():
         totallength2D = sum(listlength2D)
 
         # length normed to total length
-        listlength2D_norm = list(np.zeros(len(listlength2D)))
-        for i in range(len(listlength2D)):
-            listlength2D_norm[i] = listlength2D[i] / totallength2D
-        listlength3D_norm = list(np.zeros(len(listlength3D)))
-        for i in range(len(listlength3D)):
-            listlength3D_norm[i] = listlength3D[i] / totallength3D
+        listlength2D_norm = length_normed(listlength2D, totallength2D)
+        listlength3D_norm = length_normed(listlength3D, totallength3D)
 
-        # compare_end_2D_3D = listlength3D_norm
+
         if len(listlength3D) < len(listlength2D):
-            compare_2D_3D = list(np.zeros(len(listlength3D)))
-            point_of_differenz = 0
+            # 3D is shorter
+            startchromo3D = calc_point_of_diff_and_insert_neutral_bendpoint(listlength2D_norm, listlength3D,
+                                                                            listlength3D_norm, startchromo3D)
+        else: #2D shorter
+            startchromo2D = calc_point_of_diff_and_insert_neutral_bendpoint(listlength3D_norm, listlength2D,
+                                                                            listlength2D_norm, startchromo2D)
 
-            for i in range(len(listlength3D)):
-                compare_2D_3D[i] = listlength2D_norm[i] / listlength3D_norm[i]
-                # compare_end_2D_3D[-i-1] = listlength3D_norm[-i-1]/listlength2D_norm[-i-1]
-                if compare_2D_3D[i] < 0.75:  # mehr als 25% Abweichung
-                    point_of_differenz = i
-                    break
-            # Two possibilities
-            option_1 = listlength2D_norm[point_of_differenz] + listlength2D_norm[point_of_differenz - 1]
-            option_2 = listlength2D_norm[point_of_differenz] + listlength2D_norm[point_of_differenz + 1]
+    return startchromo3D,startchromo2D
+# functions in repair start chromo
+def length_normed(list_lengths, total_length):
+    listlength2D_norm = list(np.zeros(len(list_lengths)))
+    for i in range(len(list_lengths)):
+        listlength2D_norm[i] = list_lengths[i] / total_length
+    return listlength2D_norm
+def calc_point_of_diff_and_insert_neutral_bendpoint(listlength_longer_norm, listlength_shorter, listlength_shorter_norm,chromo_shorter):
+    point_of_differenz = calc_points_of_differenz(listlength_longer_norm, listlength_shorter, listlength_shorter_norm)
+    # Two possibilities
+    option_1_added_lengths = listlength_longer_norm[point_of_differenz] + listlength_longer_norm[point_of_differenz - 1]
+    option_2_added_lengths = listlength_longer_norm[point_of_differenz] + listlength_longer_norm[point_of_differenz + 1]
+    if option_1_added_lengths / listlength_shorter_norm[point_of_differenz - 1] > 0.85 and \
+            option_1_added_lengths / listlength_shorter_norm[point_of_differenz - 1] < 1.15:
 
-            if option_1 / listlength3D_norm[point_of_differenz - 1] > 0.90 and option_1 / listlength3D_norm[
-                point_of_differenz - 1] < 1.10:
-                division = listlength2D_norm[point_of_differenz - 1] / option_1
+        chromo_shorter_updated = insert_new_bendpoint_and_update_old(listlength_longer_norm, listlength_shorter,
+                                                                     option_1_added_lengths,
+                                                                     point_of_differenz - 1,
+                                                                     chromo_shorter)
 
-                # Insert the new bendingpoint:
-                startchromo3D.insert((point_of_differenz - 1) * 3 + 3,
-                                     startchromo3D[(point_of_differenz - 1) * 3 + 2])  # old alpha
-                startchromo3D.insert((point_of_differenz - 1) * 3 + 3,
-                                     startchromo3D[(point_of_differenz - 1) * 3 + 1])  # old beta
-                startchromo3D.insert((point_of_differenz - 1) * 3 + 3, int(
-                    listlength3D[point_of_differenz - 1] * (1 - division) / l_factor))  # (1-division) * length
+    else:  # option_2/listlength3D_norm[point_of_differenz]>0.85:
 
-                # Update old/previous bendingpoint with 0° angels:
-                startchromo3D[(point_of_differenz - 1) * 3] = int(listlength3D[point_of_differenz - 1] * division / l_factor) # (division) * length
-                startchromo3D[(point_of_differenz - 1) * 3 + 1] = chromo_resolution / 2  # 0° angel
-                startchromo3D[(point_of_differenz - 1) * 3 + 2] = chromo_resolution / 2  # 0° angel
+        chromo_shorter_updated = insert_new_bendpoint_and_update_old(listlength_longer_norm, listlength_shorter,
+                                                                     option_2_added_lengths,
+                                                                     point_of_differenz,
+                                                                     chromo_shorter)
+    return chromo_shorter_updated
+def calc_points_of_differenz(listlength_longer_norm, listlength_shorter, listlength_shorter_norm):
+    compare_2D_3D = list(np.zeros(len(listlength_shorter)))
+    point_of_differenz = 0
+    for i in range(len(listlength_shorter)):
+        compare_2D_3D[i] = listlength_longer_norm[i] / listlength_shorter_norm[i]
+        # compare_end_2D_3D[-i-1] = listlength3D_norm[-i-1]/listlength2D_norm[-i-1]
+        if compare_2D_3D[i] < 0.80:  # mehr als 25% Abweichung
+            point_of_differenz = i
+            break
+    return point_of_differenz
+def insert_new_bendpoint_and_update_old(listlength_longer_norm, listlength_shorter, option_added_lengths,
+                                        point_of_insertion, chromo_shorter):
+    division = listlength_longer_norm[point_of_insertion] / option_added_lengths
+    # Insert the new bendingpoint:
+    chromo_shorter.insert((point_of_insertion) * 3 + 3,
+                          chromo_shorter[(point_of_insertion) * 3 + 2])  # old alpha
+    chromo_shorter.insert((point_of_insertion) * 3 + 3,
+                          chromo_shorter[(point_of_insertion) * 3 + 1])  # old beta
+    chromo_shorter.insert((point_of_insertion) * 3 + 3, int(
+        listlength_shorter[point_of_insertion] * (1 - division) / l_factor))  # (1-division) * length
+    # Update old/previous bendingpoint with 0° angels:
+    chromo_shorter[(point_of_insertion) * 3] = int(
+        listlength_shorter[point_of_insertion] * division / l_factor)  # (division) * length
+    chromo_shorter[(point_of_insertion) * 3 + 1] = chromo_resolution / 2  # 0° angel
+    chromo_shorter[(point_of_insertion) * 3 + 2] = chromo_resolution / 2  # 0° angel
 
+    return chromo_shorter
 
-            else:  # option_2/listlength3D_norm[point_of_differenz]>0.95:
-                division = listlength2D_norm[point_of_differenz] / option_2
+def remove_bendingpoint(chromo,bend_nr):
+    array_bendingpoints = ListOfPoints(chromo)[-1] # bendpoints/midpoints, from start-endpoint
+    direction_vectors = ListOfPoints(chromo)[-3] # directions at each bendpoint, start and endpoint dont have a direction!
+    normal_vectors = ListOfPoints(chromo)[-2] # normal at each bendpoint, start and endpoint dont have a direction!
 
-                # Insert the new bendingpoint::
-                startchromo3D.insert((point_of_differenz) * 3 + 3,
-                                     startchromo3D[(point_of_differenz) * 3 + 2])  # old alpha
-                startchromo3D.insert((point_of_differenz) * 3 + 3,
-                                     startchromo3D[(point_of_differenz) * 3 + 1])  # new beta
-                startchromo3D.insert((point_of_differenz) * 3 + 3, int(
-                    listlength3D[point_of_differenz] * (1 - division) / l_factor))  # (1-division) * length
+    new_direction_vector = array_bendingpoints[bend_nr + 1] - array_bendingpoints[bend_nr - 1]
+    new_length = np.linalg.norm(new_direction_vector)
+    new_direction_vector = stlprep3_6.norm_vector(new_direction_vector)
 
-                # Update old/previous bendingpoint with 0° angels:
-                startchromo3D[(point_of_differenz) * 3] = int(listlength3D[point_of_differenz] * division / l_factor) # (division) * length
-                startchromo3D[(point_of_differenz) * 3 + 1] = chromo_resolution / 2  # 0° angel
-                startchromo3D[(point_of_differenz) * 3 + 2] = chromo_resolution / 2  # 0° angel
+    if bend_nr < len(direction_vectors)-1:
+        # Old Vectors, they dont change
+        direction_before = direction_vectors[bend_nr - 2]
+        normal_before = normal_vectors[bend_nr - 2]
+        side_direction_before = np.cross(direction_before, normal_before)
+        trendline_patch_before = np.stack([direction_before, side_direction_before, normal_before])
 
-        else:
-            compare_2D_3D = list(np.zeros(len(listlength2D)))
-            point_of_differenz = 0
-
-            for i in range(len(listlength2D)):
-                compare_2D_3D[i] = listlength3D_norm[i] / listlength2D_norm[i]
-                # compare_end_2D_3D[-i-1] = listlength3D_norm[-i-1]/listlength2D_norm[-i-1]
-                if compare_2D_3D[i] < 0.75:  # mehr als 25% Abweichung
-                    point_of_differenz = i
-                    break
-            # Two possibilities
-            option_1 = listlength3D_norm[point_of_differenz] + listlength3D_norm[point_of_differenz - 1]
-            option_2 = listlength3D_norm[point_of_differenz] + listlength3D_norm[point_of_differenz + 1]
-
-            if option_1 / listlength2D_norm[point_of_differenz - 1] > 0.90 and option_1 / listlength2D_norm[
-                point_of_differenz - 1] < 1.10:
-                division = listlength3D_norm[point_of_differenz - 1] / option_1
-
-                # Insert the new bendingpoint:
-                startchromo2D.insert((point_of_differenz - 1) * 3 + 3,
-                                     startchromo2D[(point_of_differenz - 1) * 3 + 2])  # old alpha
-                startchromo2D.insert((point_of_differenz - 1) * 3 + 3,
-                                     startchromo2D[(point_of_differenz - 1) * 3 + 1])  # old beta
-                startchromo2D.insert((point_of_differenz - 1) * 3 + 3, int(
-                    listlength3D[point_of_differenz - 1] * (1 - division) / l_factor))  # (1-division) * length
-
-                # Update old/previous bendingpoint with 0° angels:
-                startchromo2D[(point_of_differenz - 1) * 3] = int(
-                    listlength3D[point_of_differenz - 1] * division / l_factor) # (division) * length
-                startchromo2D[(point_of_differenz - 1) * 3 + 1] = chromo_resolution / 2  # 0° angel
-                startchromo2D[(point_of_differenz - 1) * 3 + 2] = chromo_resolution / 2  # 0° angel
+        direction_after = direction_vectors[bend_nr + 1]
+        normal_after = normal_vectors[bend_nr + 1]
+        side_direction_after = np.cross(direction_after, normal_after)
 
 
-            else:  # option_2/listlength3D_norm[point_of_differenz]>0.95:
-                division = listlength3D_norm[point_of_differenz] / option_2
 
-                # Insert the new bendingpoint:
-                startchromo2D.insert((point_of_differenz) * 3 + 3,
-                                     startchromo2D[(point_of_differenz) * 3 + 2])  # old alpha
-                startchromo2D.insert((point_of_differenz) * 3 + 3,
-                                     startchromo2D[(point_of_differenz) * 3 + 1])  # old beta
-                startchromo2D.insert((point_of_differenz) * 3 + 3, int(
-                    listlength3D[point_of_differenz] * (1 - division) / l_factor))  # (1-division) * length
+        # Projection of new
+        projected_new_direction_point = stlprep3_6.project_pointtoplane(array_bendingpoints[bend_nr + 1], normal_before, array_bendingpoints[bend_nr - 2])
+        projected_new_direction_vector = stlprep3_6.norm_vector(projected_new_direction_point-array_bendingpoints[bend_nr - 1])
 
-                # Update old/previous bendingpoint with 0° angels:
-                startchromo2D[(point_of_differenz) * 3] = int(listlength2D[
-                                                                  point_of_differenz] * division / l_factor)  # (division) * length
-                startchromo2D[(point_of_differenz) * 3 + 1] = chromo_resolution / 2  # 0° angel
-                startchromo2D[(point_of_differenz) * 3 + 2] = chromo_resolution / 2  # 0° angel
+        # Calc new beta before
+        new_beta_bend_before = math.acos(np.dot(new_direction_vector, projected_new_direction_vector))
+        # Calc new alpha before
+        try:
+            new_alpha_bend_before= -math.acos(np.dot(direction_before, projected_new_direction_vector))
+        except:
+            new_alpha_bend_before = 0
 
+
+        # new direction vector in patch_KOS
+        direction_vector_before_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(np.asarray([new_direction_vector, direction_before]),
+                                                                                             trendline_patch_before,
+                                                                                             np.asarray([0, 0, 0]))
+        # sign beta
+        if direction_vector_before_patch_KOS[0,2] < -0.001:
+            new_beta_bend_before = -new_beta_bend_before
+        # sign alpha
+        if direction_vector_before_patch_KOS[0,1] < -0.001:
+            new_alpha_bend_before = -new_alpha_bend_before
+
+
+        # Vectors
+        new_normal_vector_beta = Quaternion(axis=side_direction_before , angle=-new_beta_bend_before).rotate(normal_before)
+        new_normal_vector_alpha_beta = Quaternion(axis=normal_before, angle=new_alpha_bend_before).rotate(new_normal_vector_beta)
+        new_side_direction = np.cross(new_normal_vector_alpha_beta, new_direction_vector)
+        trendline_patch_new = np.stack([new_direction_vector, new_side_direction, new_normal_vector_alpha_beta])
+        # For chromosom translation
+        if new_alpha_bend_before<0: new_alpha_bend_before = math.pi + new_alpha_bend_before
+
+
+        # Calc new beta after
+        new_beta_bend_after = -math.acos(np.dot(normal_after, new_normal_vector_alpha_beta))
+
+        # Calc new alpha after
+        try:
+            new_alpha_bend_after= -math.acos(np.dot(side_direction_after, new_side_direction))
+        except:
+            new_alpha_bend_after = 0
+
+        # new direction vector in patch_KOS
+        new_direction_vector_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(np.asarray([direction_after, new_direction_vector]),
+                                                                                             trendline_patch_new,
+                                                                                             np.asarray([0, 0, 0]))
+        # sign beta
+        if new_direction_vector_patch_KOS[0,2] < -0.001:
+            new_beta_bend_after = -new_beta_bend_after
+        # sign alpha
+        if new_direction_vector_patch_KOS[0,1] < -0.001:
+            new_alpha_bend_after = math.pi - new_alpha_bend_after
+
+
+
+
+        # Updating Chromosom
+        chromo = updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length)
+
+        chromo = updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_after)
+
+        # Delete the bendpoint in between
+
+        chromo.pop(3 * (bend_nr)-2)
+        chromo.pop(3 * (bend_nr)-2)
+        chromo.pop(3 * (bend_nr)-2)
+
+    else: # delete the last bendpoint before the end
+
+        # Old Vectors, they dont change
+        direction_before = direction_vectors[bend_nr - 2]
+        normal_before = normal_vectors[bend_nr - 2]
+        side_direction_before = np.cross(direction_before, normal_before)
+        trendline_patch_before = np.stack([direction_before, side_direction_before, normal_before])
+
+        # Projection of new
+        projected_new_direction_point = stlprep3_6.project_pointtoplane(array_bendingpoints[bend_nr + 1], normal_before,
+                                                                        array_bendingpoints[bend_nr - 2])
+        projected_new_direction_vector = stlprep3_6.norm_vector(
+            projected_new_direction_point - array_bendingpoints[bend_nr - 1])
+
+        # Calc new beta before
+        new_beta_bend_before = math.acos(np.dot(new_direction_vector, projected_new_direction_vector))
+        # Calc new alpha before
+        try:
+            new_alpha_bend_before = -math.acos(np.dot(direction_before, projected_new_direction_vector))
+        except:
+            new_alpha_bend_before = 0
+
+        # new direction vector in patch_KOS
+        direction_vector_before_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
+            np.asarray([new_direction_vector, direction_before]),
+            trendline_patch_before,
+            np.asarray([0, 0, 0]))
+
+        # sign beta
+        if direction_vector_before_patch_KOS[0, 2] < -0.001:
+            new_beta_bend_before = -new_beta_bend_before
+        # sign alpha
+        if direction_vector_before_patch_KOS[0, 1] < -0.001:
+            new_alpha_bend_before = -new_alpha_bend_before
+
+        # Vectors
+        new_normal_vector_beta = Quaternion(axis=side_direction_before, angle=-new_beta_bend_before).rotate(normal_before)
+        new_normal_vector_alpha_beta = Quaternion(axis=normal_before, angle=new_alpha_bend_before).rotate(
+            new_normal_vector_beta)
+        new_side_direction = np.cross(new_normal_vector_alpha_beta, new_direction_vector)
+
+        # For chromosom translation
+        if new_alpha_bend_before < 0: new_alpha_bend_before = math.pi + new_alpha_bend_before
+
+        # Updating Chromosom
+        chromo = updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length)
+
+        # Delete the bendpoint in between
+
+        chromo.pop(3 * (bend_nr) - 2)
+        chromo.pop(3 * (bend_nr) - 2)
+        chromo.pop(3 * (bend_nr) - 2)
+
+    return chromo
+
+
+
+
+def updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length):
+    # new length before
+    chromo[3 * (bend_nr - 1)] = int(round(new_length / l_factor))
+    # new alpha before
+    if new_alpha_bend_before > math.pi / 2:
+        chromo[3 * (bend_nr - 2) + 1] = (
+            int(round((new_alpha_bend_before - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2))))
+    else:
+        chromo[3 * (bend_nr - 2) + 1] = (
+            int(round((chromo_resolution / 2) + new_alpha_bend_before / (math.pi / 4) * (chromo_resolution / 2))))
+    # new beta before    (chromo_resolution/2)+ (start_alphas[start_2D_or_3D][i]/(math.pi/4)) * (chromo_resolution / 2)
+    chromo[3 * (bend_nr - 2) + 2] = int(round((new_beta_bend_before / (math.pi) + 1 / 2) * chromo_resolution))
+    return chromo
+def updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_after):
+    # new_alpha_bend_after
+    if new_alpha_bend_after > math.pi / 2:
+        chromo[3 * (bend_nr) + 1] = (
+            int(round((new_alpha_bend_after - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2))))
+    else:
+        chromo[3 * (bend_nr) + 1] = (
+            int(round((chromo_resolution / 2) + new_alpha_bend_after / (math.pi / 4) * (chromo_resolution / 2))))
+    # new beta after
+    chromo[3 * (bend_nr) + 2] = int(round((new_beta_bend_after / (math.pi) + 1 / 2) * chromo_resolution))
+
+    return chromo
+
+####################Evolutionärer Algorithmus####################
+
+startchromo3D = create_start_chromo(0) # 0, for 3D. 1, for 2D start solution
+startchromo2D = create_start_chromo(1) #
+
+#stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
+#startchromo2D = remove_bendingpoint(startchromo2D,2)
+#stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
+#startchromo2D = remove_bendingpoint(startchromo2D,2)
+
+stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
+startchromo2D = remove_bendingpoint(startchromo2D,2)
+stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
 
 if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]): # Lenght lists
     print("2D and 3D Solution dont have same amout of bending points. ")
-    repair_start_chromo() # Insert additional bending points
-
+    startchromo3D,startchromo2D = repair_start_chromo(startchromo3D,startchromo2D) # Insert additional bending points
 
 p = initialize_Population_with_global_Settings()
 
@@ -1051,7 +1192,6 @@ length_fit_list = np.array([])
 border_fit_start_list = np.array([])
 border_fit_end_list = np.array([])
 mutation_rate_list = np.array([])
-
 
 ## Initialisierung
 time_start = timer()  # Comment_DB: start timer
