@@ -671,7 +671,7 @@ def calc_tilted_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x
                                                               rotated_x_direction_around_edge_current_direction,
                                                               x_direction_list_current_direction)
 
-    return len(bend_pts_xz_local)
+    return len(bend_pts_xyz_global_left)
 def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolution_int, max_distance,
                                     trendline_new_direction_current_KOS, width_for_edge_detection, x_0_grid_point_index,
                                     x_slope, x_values, xdata, y_0_grid_point_index, ydata, z_grid_values_linear):
@@ -907,11 +907,11 @@ def calc_trim_index_at_second_bendpoint(bend_pts_xz_local, bend_pts_xz_local_lef
     except:
         end_index_pts_global_right = -1
     return end_index_pts_global, end_index_pts_global_left, end_index_pts_global_right
-def calc_bend_pts(max_distance, x_z_surface_point, y_smooth):
+def calc_bend_pts(max_distance, x_z_surface_point):
 
     bend_pts_xz = []
-    bend_pts_xz.append([x_z_surface_point[0][0], y_smooth[0]])  # Comment_DB: start point 2D (x coord, y coord)
-    bend_pts_xz.append([x_z_surface_point[-1][0], y_smooth[-1]])  # Comment_DB: end point 2D (x coord, y coord)
+    bend_pts_xz.append([x_z_surface_point[0][0], x_z_surface_point[0][1]])  # Comment_DB: start point 2D (x coord, y coord)
+    bend_pts_xz.append([x_z_surface_point[-1][0],x_z_surface_point[-1][1]])  # Comment_DB: end point 2D (x coord, y coord)
     bend_pts_xz = np.asarray(bend_pts_xz)
 
     # Inserting bendpoints if max distance to surface to bigg:
@@ -924,7 +924,7 @@ def calc_bend_pts(max_distance, x_z_surface_point, y_smooth):
                                                                                              points_on_line_between_bends_filled_up, x_z_surface_point)
 
         max_divergence = calc_point_of_max_divergence_between_smooth_and_lin_curve(
-            points_on_line_between_bends_filled_up, x_z_surface_point, y_smooth)
+            points_on_line_between_bends_filled_up, x_z_surface_point)
 
         # Comment_DB: We know at which x-coord of points_on_line_between_bends_filled_up the max_divergence happens --> counter i
 
@@ -936,19 +936,19 @@ def calc_bend_pts(max_distance, x_z_surface_point, y_smooth):
 
         bend_pts_xz = np.insert(bend_pts_xz, -1,
                             np.array([points_on_line_between_bends_filled_up[max_divergence[1]][0],
-                                      y_smooth[max_divergence[1]]]),
+                                      x_z_surface_point[max_divergence[1]][1]]),
                             axis=0)  # Comment_DB: insert a corner at x coord (counter i) and y coord (counter i) of max divergence
         bend_pts_xz = bend_pts_xz[bend_pts_xz[:, 0].argsort()]  # Comment_DB: Bend points sorted in an array
 
 
     return bend_pts_xz
-def calc_point_of_max_divergence_between_smooth_and_lin_curve(points_on_line_between_bends_filled_up, x_y_points_filled_up, y_smooth):
+def calc_point_of_max_divergence_between_smooth_and_lin_curve(points_on_line_between_bends_filled_up, x_y_points_filled_up):
     # Comment_DB: curve_divergence in terms of y-distance # Größte Abweichung von geglätteter Kurve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
     curve_divergence_y = []
     for i in range(len(points_on_line_between_bends_filled_up)):
         curve_divergence_y.append([points_on_line_between_bends_filled_up[i][0], (
                 (points_on_line_between_bends_filled_up[i][0] - x_y_points_filled_up[i][0]) ** 2 + (
-                points_on_line_between_bends_filled_up[i][1] - y_smooth[i]) ** 2) ** 0.5])  # Comment_DB: (x-coord vs. change in y-coord) take the x coord and y-distance between linear curve and sav-gol curve and append
+                points_on_line_between_bends_filled_up[i][1] - x_y_points_filled_up[i][1]) ** 2) ** 0.5])  # Comment_DB: (x-coord vs. change in y-coord) take the x coord and y-distance between linear curve and sav-gol curve and append
     curve_divergence_y = np.asarray(curve_divergence_y)
     max_divergence = max([(v, i) for i, v in enumerate(curve_divergence_y[:, 1])])  # Comment_DB: returns distance, counter (Uses new curve_divergence)
     return max_divergence
@@ -986,10 +986,11 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
         # We get the normal of the plane defined by the right and left bendpoint of the bend and the middlepoint on the next/previous bend.
         normal_at_bendpoint_0_tape = -calc_tape_normal(bend_pts_xyz_global[i-1], bend_pts_xyz_global_left[i],
                                                       bend_pts_xyz_global_right[i])
-        normal_at_bendpoint_1_tape = calc_tape_normal(bend_pts_xyz_global[i+1], bend_pts_xyz_global_left[i],
+        try: normal_at_bendpoint_1_tape = calc_tape_normal(bend_pts_xyz_global[i+1], bend_pts_xyz_global_left[i],
                                                       bend_pts_xyz_global_right[i])
-
-
+        except:
+            print("Not same amount of bending points") # Not all points have to match. Just the
+            break
         y_direction_tape = np.cross(normal_at_bendpoint_0_tape, x_direction_before_bend)
 
         trendline_patch = np.stack([x_direction_before_bend, y_direction_tape, normal_at_bendpoint_0_tape])
@@ -1063,8 +1064,9 @@ def calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right):
     global counter_failed_matches_of_edges
 
     while len(bend_pts_xyz_global_right) != len(bend_pts_xyz_global_left):  # Comment_DKu_Wenzel: Just looking for the first Bend would optimize stability and would be faster
-        if len(bend_pts_xyz_global_right) < len(bend_pts_xyz_global_left): bend_pts_xyz_global_left = np.delete(bend_pts_xyz_global_left,-1,axis=0)
+        if len(bend_pts_xyz_global_right) < len(bend_pts_xyz_global_left): np.delete(bend_pts_xyz_global_left,-1,axis=0)
         else:  bend_pts_xyz_global_right = np.delete(bend_pts_xyz_global_right,-1,axis=0) # right < left
+
         print("left and right not same amount of bendingpoints")
         counter_failed_matches_of_edges += 1
         if counter_failed_matches_of_edges > 25:
@@ -1147,8 +1149,7 @@ def calc_local_and_global_bendpoints(max_distance, new_bending_direction_points_
 
     x_z_points = np.stack([new_bending_direction_points_tilted_KOS[:, 0],new_bending_direction_points_tilted_KOS[:, 2]],axis=1)
     #y_smooth_left = smooth_savgol(x_z_points_filled_up, poly_order, savgol_window_quotient)
-    bend_pts_xz_local = calc_bend_pts(max_distance, x_z_points,
-                                           x_z_points[:,1])
+    bend_pts_xz_local = calc_bend_pts(max_distance, x_z_points)
     # in tilted KOS y=0. Insert this to bendpoints to get (x,y,z)
     bend_pts_xyz = np.insert(bend_pts_xz_local, 1, np.zeros(len(bend_pts_xz_local)), axis=1)
     bend_pts_xyz_trendline, bend_pts_xyz_global = new_bending_points_tilted_to_global(y_intercept, bend_pts_xyz,

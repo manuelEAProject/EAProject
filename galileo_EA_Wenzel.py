@@ -31,6 +31,7 @@ import copy
 from functools import total_ordering
 from random import Random
 from random import gauss
+import concurrent.futures
 
 @total_ordering
 class Chromosome:
@@ -89,7 +90,7 @@ class Chromosome:
         """
 
 
-        minlen = len(self.geneMinValues)
+        minlen = len(self.geneMinValues)-1
 
         if intValues == 1:
             randFunc = generator.randint
@@ -331,21 +332,32 @@ class Population:
         self.minFitness = self.currentGeneration[0].getFitness()
         self.bestFitIndividual = self.currentGeneration[0]
 
+        #if __name__ == '__main__':
+
+        #    with concurrent.futures.ProcessPoolExecutor() as executor:  #f = list(executor.map(self.calc_fitness_of_chromo, self.currentGeneration))
+
         for chromo in self.currentGeneration:
-            chromo.fitness = None #Comment_DB: make sure getFitness() returns c.evaluate()
-            f = chromo.getFitness()
-            #print('f (chromo.getfitness())',f)
+            f = self.calc_fitness_of_chromo(chromo)
+
+
+
+
             self.sumFitness = self.sumFitness + f
             if f > self.maxFitness:
                 self.maxFitness = f
                 self.bestFitIndividual = chromo
-                #print("after if statem", self.bestFitIndividual)
+
             elif f < self.minFitness:
                 self.minFitness = f
-                #print("elif used", self.minFitness)
-        #print("self.currentGeneration[0] after for loop",self.currentGeneration[0])
-        #print("self.bestFitIndividual", self.bestFitIndividual)
+
+
         self.avgFitness = self.sumFitness / len(self.currentGeneration) #Comment_DB: can be used if needed
+
+    def calc_fitness_of_chromo(self, chromo):
+        chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
+        f = chromo.getFitness()
+        return f
+
     def mutate(self):
         """At probability mutationRate, mutates each gene of each chromosome. That
         is, each gene has a mutationRate chance of being randomly re-initialized.
@@ -626,4 +638,3 @@ class Population:
         """
         self.currentGeneration = self.nextGeneration[:]
         self.nextGeneration = []
-

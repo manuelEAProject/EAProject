@@ -505,11 +505,12 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end):
     axes.scatter(patch_end[0],patch_end[1],patch_end[2],c='black')
 
     # von PCC gemittelter Normalenvektor
+    """
     x3, y3, z3 = [center_point_of_cloud_weighted[0], center_point_of_cloud_weighted[0] + 500 * avg_tri_normal_weighted[0]], [center_point_of_cloud_weighted[1],
                                                                                                                              center_point_of_cloud_weighted[1] + 500 * avg_tri_normal_weighted[1]], [
                      center_point_of_cloud_weighted[2], center_point_of_cloud_weighted[2] + 500 * avg_tri_normal_weighted[2]]
     plt.plot(x3,y3,z3,marker='o',c='green')
-
+"""
     for i in range(len(bestPatch_patternpoints) - 2):
         verts = [list(
             zip([bestPatch_patternpoints[i][0], bestPatch_patternpoints[i + 1][0], bestPatch_patternpoints[i + 2][0]], \
