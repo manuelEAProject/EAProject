@@ -2,13 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/population.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/startparameter.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Test_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/Test_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/rtree/index.py" beforeDir="false" afterPath="$PROJECT_DIR$/Virtual Environment/Lib/site-packages/rtree/index.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/galileo_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/galileo_EA_Wenzel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel_Refactoring.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel_Refactoring.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -222,13 +223,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1559132309230</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Minor delets">
-      <created>1588955470953</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1588955470953</updated>
     </task>
     <task id="LOCAL-00003" summary="Minor delets">
       <created>1588955752146</created>
@@ -566,7 +560,14 @@
       <option name="project" value="LOCAL" />
       <updated>1595229062268</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="Startvektor / Startvariation mit alpha/beta&#10;Remove first bendpoint&#10;galileo: Calc_fitness_function">
+      <created>1595852601206</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1595852601206</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -594,7 +595,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="first principal components in trendline axis geschoben&#10;&#10;liberies gelöscht" />
     <MESSAGE value="pos_or_neg_adjust_xy" />
     <MESSAGE value="Namen&#10;Global" />
     <MESSAGE value="calc_bends" />
@@ -619,50 +619,31 @@
     <MESSAGE value="TapeEA:&#10;GUI, 2D und 3D Lösung, Anzahl Knicke &#10;stl preprocessing:&#10;2D Lösung, Endpunkt" />
     <MESSAGE value="Neues galileo file zur bearbeitung" />
     <MESSAGE value="2D, 3D Startchromo&#10;Repair startchromo&#10;Removing a bendpoint, with special case last one" />
-    <option name="LAST_COMMIT_MESSAGE" value="2D, 3D Startchromo&#10;Repair startchromo&#10;Removing a bendpoint, with special case last one" />
+    <MESSAGE value="Startvektor / Startvariation mit alpha/beta&#10;Remove first bendpoint&#10;galileo: Calc_fitness_function" />
+    <option name="LAST_COMMIT_MESSAGE" value="Startvektor / Startvariation mit alpha/beta&#10;Remove first bendpoint&#10;galileo: Calc_fitness_function" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Test_file.py</url>
-          <line>18</line>
-          <option name="timeStamp" value="256" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/galileo_EA_Wenzel.py</url>
-          <line>92</line>
-          <option name="timeStamp" value="259" />
+          <line>407</line>
+          <option name="timeStamp" value="298" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>1044</line>
-          <option name="timeStamp" value="272" />
+          <line>1431</line>
+          <option name="timeStamp" value="299" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>1058</line>
-          <option name="timeStamp" value="273" />
+          <line>1401</line>
+          <option name="timeStamp" value="303" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>1035</line>
-          <option name="timeStamp" value="274" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>1210</line>
-          <option name="timeStamp" value="275" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stl_preprocessing_Wenzel.py</url>
-          <line>1069</line>
-          <option name="timeStamp" value="279" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>1140</line>
-          <option name="timeStamp" value="280" />
+          <line>1049</line>
+          <option name="timeStamp" value="304" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

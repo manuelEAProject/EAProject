@@ -13,8 +13,8 @@ from matplotlib import pyplot
 import stl_preprocessing_Wenzel as stlprep3_6
 from tkinter import *
 from tkinter import filedialog
-import xlsxwriter
 from timeit import default_timer as timer
+
 
 # GUI-Settings
 def get_Vars_from_GUI():
@@ -453,42 +453,6 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
             print("Bitte settingssheet.txt löschen")
             settingssheet.close()
 
-[step_size, testpatch, tape_type, width,
- pointspersection, equidistant_pts_between_bendpts,
- adap_mutation, chromo_resolution,
- gamma_d, gamma_d2, gamma_d3, gamma_d4,
- gamma_l, gamma_l2, gamma_l3, gamma_l4,
- gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4,
- gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4,
- init_preprocess, input_file, manual_start_end, max_distance,
- num_gen, num_gen_set2, num_gen_set3, num_gen_set4,
- p_crossover, p_mutate_range, p_mutation,
- grid_resolution, pop_size, useInteger, width_for_edge_detection,
- x_end, x_start, y_end, y_start, z_end, z_start] = get_Vars_from_GUI()
-
-# Startparam gibt eine Liste mit den berechneten Startparametern zurück:
-
-[start_lengths,
- L_aim,  # Comment_DB: already in [mm]
- start_betas,
- start_alphas,
-
- patch_start,
- patch_end,
-
- Start_direction_prep_fromstart,
- Start_normal_prep_fromstart] = stlprep3_6.startparam(input_file, max_distance, width_for_edge_detection, grid_resolution)
-
-if len(start_lengths[0])>len(start_lengths[1]): AnzahlKnicke = len(start_lengths[0]) - 1
-else: AnzahlKnicke = len(start_lengths[1]) - 1
-
-if manual_start_end:
-    patch_start = np.asarray([x_start, y_start, z_start])
-    patch_end = np.asarray([x_end, y_end, z_end])
-
-# Faktor für das Längenallel in den Chromosomen -> eine Länge kann maximal L_aim lang werden
-l_factor = 0.75 * float(L_aim) / chromo_resolution  # Comment_DB: already in [mm]
-
 # Kinematische Beschreibung des Patchs   COMMENT_DB: This is the translation of values suitable for the evolutionary algorithm!
 def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo here is a parameter. Function definition.
     # Alpha_beta_length aus Chromosom und Übersetzt
@@ -705,22 +669,21 @@ def translate_alpha_beta_length_from_chromo(chromo):
     return alpha_list, beta_list, l_list  # beta in radians, length in mm
 
 # Berechnung der Fitness eines Chromosoms
-def Fitness(chromo, l_factor_chromo_mm=l_factor, L_aim=L_aim):  # Comment DKu_Wenzel L_aim=L_aim
-
-
+def Fitness(chromo,gen_Num):  # Comment DKu_Wenzel L_aim=L_aim
+ 
     #Beobachtung: L_aim Einfluss auf dist_fit
 
     # Distance_fitness
-    distance_fit, avg_dist = calc_distance_fitness(L_aim, chromo)
+    distance_fit, avg_dist = calc_distance_fitness(chromo, L_aim, testpatch)
 
     # Lenght_fittnes
-    length_fit = calc_length_fitness(L_aim, chromo, l_factor_chromo_mm)
+    length_fit = calc_length_fitness(L_aim, chromo, l_factor)
 
     # Border_fittnes start and end
-    border_fit_end, border_fit_start = calc_border_fitness(chromo)
+    border_fit_end, border_fit_start = calc_border_fitness(chromo, patch_start,patch_end)
 
     # Adaptiv gamma
-    gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat = evalute_adaptiv_gamma_()
+    gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat = evalute_adaptiv_gamma_(gen_Num)
 
     # Calculate Fitness
     fitness = distance_fit * gamma_d_hat + length_fit * gamma_l_hat + border_fit_end * gamma_pe_hat + border_fit_start * gamma_ps_hat
@@ -739,7 +702,7 @@ def patch_length_in_mm(chromo, l_factor_chromo_mm):
         for i in range(0, len(chromo) - 5, 3):
             lengt = lengt + chromo[i]
     return lengt * l_factor_chromo_mm
-def calc_border_fitness(chromo):
+def calc_border_fitness(chromo, patch_start,patch_end ):
     LoP = ListOfPoints(chromo)
     ###PARABOLIC###
     k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
@@ -766,14 +729,18 @@ def calc_length_fitness(L_aim, chromo, l_factor_chromo_mm):
     # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
     return length_fit
-def calc_avg_dist(chromo):
-    distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, ListOfPoints(chromo)[0])[1] #DKu_Wenzel: signed_distance
+def calc_avg_dist(chromo, testpatch):
+
+    points = ListOfPoints(chromo)[0]
+
+    distances_testpatch_currentpatch = trimesh.proximity.signed_distance(testpatch, points)#[1] #DKu_Wenzel: signed_distance
+    #distances_testpatch_currentpatch = [1, 2]
     # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
     return avg_dist
-def calc_distance_fitness(L_aim, chromo):
+def calc_distance_fitness(chromo, L_aim, testpatch):
     # Berechnung durchschnittlicher Abstand
-    avg_dist = calc_avg_dist(chromo)
+    avg_dist = calc_avg_dist(chromo, testpatch)
     ###PARABOLIC###
     k_d = (100 - 90) / (0.005 ** 2)  # Comment_DB: k_d = 400000
     distance_fit = 100 - k_d * (avg_dist / L_aim) ** 2  # Comment_DB: max distance fitness is 100 (avg_dist = 0)
@@ -784,30 +751,30 @@ def calc_distance_fitness(L_aim, chromo):
     # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
     # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
     return distance_fit, avg_dist
-def evalute_adaptiv_gamma_():
-    if not 'p' in globals():
-        pass
-    else:
-        if num_gen_set2 <= p.generationNumber + 1 < num_gen_set3:
-            gamma_d_hat = gamma_d2
-            gamma_l_hat = gamma_l2
-            gamma_ps_hat = gamma_ps2
-            gamma_pe_hat = gamma_pe2
-        elif num_gen_set3 <= p.generationNumber + 1 < num_gen_set4:
-            gamma_d_hat = gamma_d3
-            gamma_l_hat = gamma_l3
-            gamma_ps_hat = gamma_ps3
-            gamma_pe_hat = gamma_pe3
-        elif num_gen_set4 <= p.generationNumber + 1 <= num_gen:
-            gamma_d_hat = gamma_d4
-            gamma_l_hat = gamma_l4
-            gamma_ps_hat = gamma_ps4
-            gamma_pe_hat = gamma_pe4
-        else:  # Comment_DB: If inputs don't make sense, revert back to original gammas for all sets
-            gamma_d_hat = gamma_d
-            gamma_l_hat = gamma_l
-            gamma_ps_hat = gamma_ps
-            gamma_pe_hat = gamma_pe
+def evalute_adaptiv_gamma_(gen_Num):
+    #if not 'p' in globals():
+    #    pass
+   # else:
+    if num_gen_set2 <= gen_Num + 1 < num_gen_set3:
+        gamma_d_hat = gamma_d2
+        gamma_l_hat = gamma_l2
+        gamma_ps_hat = gamma_ps2
+        gamma_pe_hat = gamma_pe2
+    elif num_gen_set3 <= gen_Num + 1 < num_gen_set4:
+        gamma_d_hat = gamma_d3
+        gamma_l_hat = gamma_l3
+        gamma_ps_hat = gamma_ps3
+        gamma_pe_hat = gamma_pe3
+    elif num_gen_set4 <= gen_Num + 1 <= num_gen:
+        gamma_d_hat = gamma_d4
+        gamma_l_hat = gamma_l4
+        gamma_ps_hat = gamma_ps4
+        gamma_pe_hat = gamma_pe4
+    else:  # Comment_DB: If inputs don't make sense, revert back to original gammas for all sets
+        gamma_d_hat = gamma_d
+        gamma_l_hat = gamma_l
+        gamma_ps_hat = gamma_ps
+        gamma_pe_hat = gamma_pe
     return gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat
 
 # Erstellung Chromosom der Startlösung
@@ -926,8 +893,11 @@ def initialize_Population_with_global_Settings():
     # p.replaceFunc = p.replace_Generational
     p.maxGenerations = num_gen
 
+    p.testpatch = testpatch
+
     return p
 
+#### Repair and delete bendpoints
 def repair_start_chromo(startchromo3D,startchromo2D):
 
     while len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]):
@@ -1001,11 +971,11 @@ def insert_new_bendpoint_and_update_old(listlength_longer_norm, listlength_short
     # Update old/previous bendingpoint with 0° angels:
     chromo_shorter[(point_of_insertion) * 3] = int(
         listlength_shorter[point_of_insertion] * division / l_factor)  # (division) * length
-    chromo_shorter[(point_of_insertion) * 3 + 1] = chromo_resolution / 2  # 0° angel
-    chromo_shorter[(point_of_insertion) * 3 + 2] = chromo_resolution / 2  # 0° angel
+    chromo_shorter[(point_of_insertion) * 3 + 1] = int(chromo_resolution / 2)  # 0° angel
+    chromo_shorter[(point_of_insertion) * 3 + 2] = int(chromo_resolution / 2)  # 0° angel
 
     return chromo_shorter
-
+# Remove
 def remove_bendingpoint(chromo,bend_nr):
     array_bendingpoints = ListOfPoints(chromo)[-1] # bendpoints/midpoints, from start-endpoint
     direction_vectors = ListOfPoints(chromo)[-3] # directions at each bendpoint, start and endpoint dont have a direction!
@@ -1015,83 +985,35 @@ def remove_bendingpoint(chromo,bend_nr):
     new_length = np.linalg.norm(new_direction_vector)
     new_direction_vector = stlprep3_6.norm_vector(new_direction_vector)
 
-    if bend_nr < len(direction_vectors)-1 and bend_nr > 1:
+    if bend_nr > 1:
         # Old Vectors, they dont change
         direction_before = direction_vectors[bend_nr - 2]
         normal_before = normal_vectors[bend_nr - 2]
         side_direction_before = np.cross(direction_before, normal_before)
         trendline_patch_before = np.stack([direction_before, side_direction_before, normal_before])
 
-        direction_after = direction_vectors[bend_nr + 1]
-        normal_after = normal_vectors[bend_nr + 1]
-        side_direction_after = np.cross(direction_after, normal_after)
+        if bend_nr < len(direction_vectors) - 1:
+            direction_after = direction_vectors[bend_nr + 1]
+            normal_after = normal_vectors[bend_nr + 1]
+            side_direction_after = np.cross(direction_after, normal_after)
 
-
-
-        # Projection of new
-        projected_new_direction_point = stlprep3_6.project_pointtoplane(array_bendingpoints[bend_nr + 1], normal_before, array_bendingpoints[bend_nr - 2])
-        projected_new_direction_vector = stlprep3_6.norm_vector(projected_new_direction_point-array_bendingpoints[bend_nr - 1])
-
-        # Calc new beta before
-        new_beta_bend_before = math.acos(np.dot(new_direction_vector, projected_new_direction_vector))
-        # Calc new alpha before
-        try:
-            new_alpha_bend_before= math.acos(np.dot(direction_before, projected_new_direction_vector))
-        except:
-            new_alpha_bend_before = 0
-
-
-        # new direction vector in patch_KOS
-        direction_vector_before_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(np.asarray([new_direction_vector, direction_before]),
-                                                                                             trendline_patch_before,
-                                                                                             np.asarray([0, 0, 0]))
-        # sign beta
-        if direction_vector_before_patch_KOS[0,2] < -0.001:
-            new_beta_bend_before = -new_beta_bend_before
-        # sign alpha
-        if direction_vector_before_patch_KOS[0,1] < -0.001:
-            new_alpha_bend_before = -new_alpha_bend_before
-
-
-        # Vectors
-        new_normal_vector_beta = Quaternion(axis=side_direction_before , angle=-new_beta_bend_before).rotate(normal_before)
-        new_normal_vector_alpha_beta = Quaternion(axis=normal_before, angle=new_alpha_bend_before).rotate(new_normal_vector_beta)
-        new_side_direction = np.cross(new_normal_vector_alpha_beta, new_direction_vector)
-
-        # For chromosom translation
-        if new_alpha_bend_before<0:
-            new_alpha_bend_before = math.pi + new_alpha_bend_before
-
+        new_alpha_bend_before, new_beta_bend_before, new_normal_vector_alpha_beta, new_side_direction = calc_alpha_beta_before(
+            array_bendingpoints, bend_nr, direction_before, new_direction_vector, normal_before, side_direction_before,
+            trendline_patch_before)
 
         trendline_patch_new = np.stack([new_direction_vector, new_side_direction, new_normal_vector_alpha_beta])
 
-        # Calc new beta after
-        new_beta_bend_after = -math.acos(np.dot(normal_after, new_normal_vector_alpha_beta))
-
-        # Calc new alpha after
-        try:
-            new_alpha_bend_after= math.acos(np.dot(side_direction_after, new_side_direction))
-        except:
-            new_alpha_bend_after = 0
-
-        # new direction vector in patch_KOS
-        new_direction_vector_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(np.asarray([direction_after, new_direction_vector]),
-                                                                                             trendline_patch_new,
-                                                                                             np.asarray([0, 0, 0]))
-        # sign beta
-        if new_direction_vector_patch_KOS[0,2] < -0.001:
-            new_beta_bend_after = -new_beta_bend_after
-        # sign alpha
-        if new_direction_vector_patch_KOS[0,1] < -0.001:
-            new_alpha_bend_after = math.pi - new_alpha_bend_after
-
-
-
+        if bend_nr < len(direction_vectors) - 1:
+            new_alpha_bend_after, new_beta_bend_after = calc_alpha_beta_after(direction_after, new_direction_vector,
+                                                                              new_normal_vector_alpha_beta,
+                                                                              new_side_direction, normal_after,
+                                                                              side_direction_after, trendline_patch_new)
 
         # Updating Chromosom
         chromo = updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length)
 
-        chromo = updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_after)
+        if bend_nr < len(direction_vectors)-1:
+            chromo = updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_after)
 
         # Delete the bendpoint in between
 
@@ -1099,10 +1021,8 @@ def remove_bendingpoint(chromo,bend_nr):
         chromo.pop(3 * (bend_nr)-2)
         chromo.pop(3 * (bend_nr)-2)
 
-    elif bend_nr == 1:
+    else: # bend_nr == 1:
         # Old Vectors, they dont change
-
-
         direction_before = Start_direction_prep_fromstart
         normal_before = Start_normal_prep_fromstart
         side_direction_before = np.cross(direction_before, normal_before)
@@ -1113,80 +1033,27 @@ def remove_bendingpoint(chromo,bend_nr):
             normal_after = normal_vectors[bend_nr + 1]
             side_direction_after = np.cross(direction_after,normal_after)
 
-        # Projection of new
+        new_alpha_bend_before, new_beta_bend_before, new_normal_vector_alpha_beta, new_side_direction = calc_alpha_beta_before(
+            array_bendingpoints, bend_nr, direction_before, new_direction_vector, normal_before, side_direction_before,
+            trendline_patch_before)
 
-        projected_new_direction_point = stlprep3_6.project_pointtoplane(array_bendingpoints[bend_nr + 1], normal_before,
-                                                                        array_bendingpoints[bend_nr - 1])
-        projected_new_direction_vector = stlprep3_6.norm_vector(
-            projected_new_direction_point - array_bendingpoints[bend_nr - 1])
-
-        # Calc new beta before
-        new_beta_bend_before = math.acos(np.dot(new_direction_vector, projected_new_direction_vector))
-        # Calc new alpha before
-        try:
-            new_alpha_bend_before = -math.acos(np.dot(direction_before, projected_new_direction_vector))
-        except:
-            new_alpha_bend_before = 0
-
-        # new direction vector in patch_KOS
-        direction_vector_before_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
-            np.asarray([new_direction_vector, direction_before]),
-            trendline_patch_before,
-            np.asarray([0, 0, 0]))
-        # sign beta
-        if direction_vector_before_patch_KOS[0, 2] < -0.001:
-            new_beta_bend_before = -new_beta_bend_before
-        # sign alpha
-        if direction_vector_before_patch_KOS[0, 1] < -0.001:
-            new_alpha_bend_before = -new_alpha_bend_before
-
-        # Vectors
-        new_normal_vector_beta = Quaternion(axis=side_direction_before, angle=-new_beta_bend_before).rotate(
-            normal_before)
-        new_normal_vector_alpha_beta = Quaternion(axis=normal_before, angle=new_alpha_bend_before).rotate(
-            new_normal_vector_beta)
-        new_side_direction = np.cross(new_normal_vector_alpha_beta, new_direction_vector)
         trendline_patch_new = np.stack([new_direction_vector, new_side_direction, new_normal_vector_alpha_beta])
-        # For chromosom translation
-        if new_alpha_bend_before < 0: new_alpha_bend_before = math.pi + new_alpha_bend_before
 
         if len(direction_vectors) > 2:
-            # Calc new beta after
-            new_beta_bend_after = -math.acos(np.dot(normal_after, new_normal_vector_alpha_beta))
+            new_alpha_bend_after, new_beta_bend_after = calc_alpha_beta_after(direction_after, new_direction_vector,
+                                                                              new_normal_vector_alpha_beta,
+                                                                              new_side_direction, normal_after,
+                                                                              side_direction_after, trendline_patch_new)
 
-            # Calc new alpha after
-            try:
-                new_alpha_bend_after = math.acos(np.dot(side_direction_after, new_side_direction))
-            except:
-                new_alpha_bend_after = 0
-
-            # new direction vector in patch_KOS
-            new_direction_vector_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
-                np.asarray([direction_after, new_direction_vector]),
-                trendline_patch_new,
-                np.asarray([0, 0, 0]))
-            # sign beta
-            if new_direction_vector_patch_KOS[0, 2] < -0.001:
-                new_beta_bend_after = -new_beta_bend_after
-            # sign alpha
-            if new_direction_vector_patch_KOS[0, 1] < -0.001:
-                new_alpha_bend_after = math.pi - new_alpha_bend_after
-
-
-
-
-
-        # Updating Chromosom
+      # Updating Chromosom
         # new length before
         chromo[3 * (bend_nr - 1)] = int(round(new_length / l_factor))
-        # new alpha before
+        # new alpha before, changing the start_variation parameters
         if new_alpha_bend_before > math.pi / 2:
-            chromo[-3] = (int(round((new_alpha_bend_before - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2))))
+            chromo[-3] = int(round((new_alpha_bend_before - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2)))
         else:
-            chromo[-3] = (
-                int(round(
-                    (chromo_resolution / 2) + new_alpha_bend_before / (math.pi / 4) * (chromo_resolution / 2))))
-        # new beta before    (chromo_resolution/2)+ (start_alphas[start_2D_or_3D][i]/(math.pi/4)) * (chromo_resolution / 2)
+            chromo[-3] = int(round((chromo_resolution / 2) + new_alpha_bend_before / (math.pi / 4) * (chromo_resolution / 2)))
+        # new beta before, changing the start_variation parameters
         chromo[-2] = int(round((-new_beta_bend_before / (math.pi) + 1 / 2) * chromo_resolution))
 
 
@@ -1199,54 +1066,66 @@ def remove_bendingpoint(chromo,bend_nr):
         chromo.pop(3 * (bend_nr) - 2)
         chromo.pop(3 * (bend_nr) - 2)
 
-    else: # delete the last bendpoint before the end
-
-        # Old Vectors, they dont change
-        direction_before = direction_vectors[bend_nr - 2]
-        normal_before = normal_vectors[bend_nr - 2]
-        side_direction_before = np.cross(direction_before, normal_before)
-        trendline_patch_before = np.stack([direction_before, side_direction_before, normal_before])
-
-        # Projection of new
-        projected_new_direction_point = stlprep3_6.project_pointtoplane(array_bendingpoints[bend_nr + 1], normal_before,
-                                                                        array_bendingpoints[bend_nr - 2])
-        projected_new_direction_vector = stlprep3_6.norm_vector(
-            projected_new_direction_point - array_bendingpoints[bend_nr - 1])
-
-        # Calc new beta before
-        new_beta_bend_before = math.acos(np.dot(new_direction_vector, projected_new_direction_vector))
-        # Calc new alpha before
-        try:
-            new_alpha_bend_before = -math.acos(np.dot(direction_before, projected_new_direction_vector))
-        except:
-            new_alpha_bend_before = 0
-
-        # new direction vector in patch_KOS
-        direction_vector_before_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
-            np.asarray([new_direction_vector, direction_before]),
-            trendline_patch_before,
-            np.asarray([0, 0, 0]))
-
-        # sign beta
-        if direction_vector_before_patch_KOS[0, 2] < -0.001:
-            new_beta_bend_before = -new_beta_bend_before
-        # sign alpha
-        if direction_vector_before_patch_KOS[0, 1] < -0.001:
-            new_alpha_bend_before = -new_alpha_bend_before
-
-
-        # Updating Chromosom
-        chromo = updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length)
-
-        # Delete the bendpoint in between
-
-        chromo.pop(3 * (bend_nr) - 2)
-        chromo.pop(3 * (bend_nr) - 2)
-        chromo.pop(3 * (bend_nr) - 2)
-
     return chromo
 
 
+def calc_alpha_beta_before(array_bendingpoints, bend_nr, direction_before, new_direction_vector, normal_before,
+                           side_direction_before, trendline_patch_before):
+    # Projection of new
+    projected_new_direction_point = stlprep3_6.project_pointtoplane(array_bendingpoints[bend_nr + 1], normal_before,
+                                                                    array_bendingpoints[bend_nr - 1])
+    projected_new_direction_vector = stlprep3_6.norm_vector(
+        projected_new_direction_point - array_bendingpoints[bend_nr - 1])
+    # Calc new beta before
+    new_beta_bend_before = math.acos(np.dot(new_direction_vector, projected_new_direction_vector))
+    # Calc new alpha before
+    try:
+        new_alpha_bend_before = -math.acos(np.dot(direction_before, projected_new_direction_vector))
+    except:
+        new_alpha_bend_before = 0
+    # new direction vector in patch_KOS
+    direction_vector_before_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
+        np.asarray([new_direction_vector, direction_before]),
+        trendline_patch_before,
+        np.asarray([0, 0, 0]))
+    # sign beta
+    if direction_vector_before_patch_KOS[0, 2] < -0.001:
+        new_beta_bend_before = -new_beta_bend_before
+    # sign alpha
+    if direction_vector_before_patch_KOS[0, 1] < -0.001:
+        new_alpha_bend_before = -new_alpha_bend_before
+    # Vectors
+    new_normal_vector_beta = Quaternion(axis=side_direction_before, angle=-new_beta_bend_before).rotate(normal_before)
+    new_normal_vector_alpha_beta = Quaternion(axis=normal_before, angle=new_alpha_bend_before).rotate(
+        new_normal_vector_beta)
+    new_side_direction = np.cross(new_normal_vector_alpha_beta, new_direction_vector)
+    # For chromosom translation
+    if new_alpha_bend_before < 0:
+        new_alpha_bend_before = math.pi + new_alpha_bend_before
+    return new_alpha_bend_before, new_beta_bend_before, new_normal_vector_alpha_beta, new_side_direction
+
+
+def calc_alpha_beta_after(direction_after, new_direction_vector, new_normal_vector_alpha_beta, new_side_direction,
+                          normal_after, side_direction_after, trendline_patch_new):
+    # Calc new beta after
+    new_beta_bend_after = -math.acos(np.dot(normal_after, new_normal_vector_alpha_beta))
+    # Calc new alpha after
+    try:
+        new_alpha_bend_after = math.acos(np.dot(side_direction_after, new_side_direction))
+    except:
+        new_alpha_bend_after = 0
+    # new direction vector in patch_KOS
+    new_direction_vector_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
+        np.asarray([direction_after, new_direction_vector]),
+        trendline_patch_new,
+        np.asarray([0, 0, 0]))
+    # sign beta
+    if new_direction_vector_patch_KOS[0, 2] < -0.001:
+        new_beta_bend_after = -new_beta_bend_after
+    # sign alpha
+    if new_direction_vector_patch_KOS[0, 1] < -0.001:
+        new_alpha_bend_after = math.pi - new_alpha_bend_after
+    return new_alpha_bend_after, new_beta_bend_after
 
 
 def updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length):
@@ -1254,196 +1133,52 @@ def updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_bet
     chromo[3 * (bend_nr - 1)] = int(round(new_length / l_factor))
     # new alpha before
     if new_alpha_bend_before > math.pi / 2:
-        chromo[3 * (bend_nr - 2) + 1] = (
-            int(round((new_alpha_bend_before - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2))))
+        chromo[3 * (bend_nr - 2) + 1] = int(round((new_alpha_bend_before - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2)))
     else:
-        chromo[3 * (bend_nr - 2) + 1] = (
-            int(round((chromo_resolution / 2) + new_alpha_bend_before / (math.pi / 4) * (chromo_resolution / 2))))
+        chromo[3 * (bend_nr - 2) + 1] = int(round((chromo_resolution / 2) + new_alpha_bend_before / (math.pi / 4) * (chromo_resolution / 2)))
     # new beta before    (chromo_resolution/2)+ (start_alphas[start_2D_or_3D][i]/(math.pi/4)) * (chromo_resolution / 2)
     chromo[3 * (bend_nr - 2) + 2] = int(round((new_beta_bend_before / (math.pi) + 1 / 2) * chromo_resolution))
     return chromo
 def updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_after):
     # new_alpha_bend_after
     if new_alpha_bend_after > math.pi / 2:
-        chromo[3 * (bend_nr) + 1] = (
-            int(round((new_alpha_bend_after - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2))))
+        chromo[3 * (bend_nr) + 1] = int(round((new_alpha_bend_after - ((3 / 4) * math.pi)) * (4 / (math.pi)) * (chromo_resolution / 2)))
     else:
-        chromo[3 * (bend_nr) + 1] = (
-            int(round((chromo_resolution / 2) + new_alpha_bend_after / (math.pi / 4) * (chromo_resolution / 2))))
+        chromo[3 * (bend_nr) + 1] = int(round((chromo_resolution / 2) + new_alpha_bend_after / (math.pi / 4) * (chromo_resolution / 2)))
     # new beta after
     chromo[3 * (bend_nr) + 2] = int(round((new_beta_bend_after / (math.pi) + 1 / 2) * chromo_resolution))
 
     return chromo
 
-####################Evolutionärer Algorithmus####################
 
-startchromo3D = create_start_chromo(0) # 0, for 3D. 1, for 2D start solution
-startchromo2D = create_start_chromo(1) #
+######## save and print parameters #########
+def save_startparameter(L_aim, Start_direction_prep_fromstart, Start_normal_prep_fromstart, l_factor, patch_end,
+                        patch_start):
+    file1 = open("startparameter.txt", "w")
+    file1.write('%s\n' % L_aim)
+    file1.write('%s\n' % l_factor)
+    file1.write('%s\n' % patch_start[0])
+    file1.write('%s\n' % patch_start[1])
+    file1.write('%s\n' % patch_start[2])
+    file1.write('%s\n' % patch_end[0])
+    file1.write('%s\n' % patch_end[1])
+    file1.write('%s\n' % patch_end[2])
+    file1.write('%s\n' % Start_normal_prep_fromstart[0])
+    file1.write('%s\n' % Start_normal_prep_fromstart[1])
+    file1.write('%s\n' % Start_normal_prep_fromstart[2])
+    file1.write('%s\n' % Start_direction_prep_fromstart[0])
+    file1.write('%s\n' % Start_direction_prep_fromstart[1])
+    file1.write('%s\n' % Start_direction_prep_fromstart[2])
+    file1.close()
 
-
-
-stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
-startchromo2D = remove_bendingpoint(startchromo2D,1)
-stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
-startchromo2D = remove_bendingpoint(startchromo2D,2)
-stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
-startchromo2D = remove_bendingpoint(startchromo2D,2)
-stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
-startchromo2D = remove_bendingpoint(startchromo2D,1)
-stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
-
-
-stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "3D")
-startchromo3D = remove_bendingpoint(startchromo3D,1)
-stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "3D")
-startchromo3D = remove_bendingpoint(startchromo3D,4)
-stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "3D")
-
-
-
-if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]): # Lenght lists
-    print("2D and 3D Solution dont have same amout of bending points. ")
-    startchromo3D,startchromo2D = repair_start_chromo(startchromo3D,startchromo2D) # Insert additional bending points
-
-p = initialize_Population_with_global_Settings()
-
-# visulize results from preprocessor:
-stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "3D")
-stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
-
-##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
-num_gen_list = np.array([])
-fitness_list = np.array([])
-distance_fit_list = np.array([])
-length_fit_list = np.array([])
-border_fit_start_list = np.array([])
-border_fit_end_list = np.array([])
-mutation_rate_list = np.array([])
-
-## Initialisierung
-time_start = timer()  # Comment_DB: start timer
-p.prepPopulation()
-p.currentGeneration.sort()  # Comment_DB: sort and reverse randomly initialized pop from best fit to worst
-p.currentGeneration.reverse()
-
-if p.preprocessedInit == False:  # Comment_DB: print if random or preprocessor init
-    print("##########Random Gene Initialization for Generation 0##########")
-else:
-    print("##########Preprocessor Gene Initialization for Generation 0##########")
-
-print("##########Generations Sorted from Highest to Lowest Fitness##########")
-
-if adap_mutation == 1:
-    print("##########Adaptive Mutation Selected##########")
-# Comment_DB: EA Loop (Only this for loop determines the number of generations to iterate! This is not determined in galileo!)
-for i in range(num_gen):
-    if adap_mutation == 0:
-        print("\n#####Elite Population Members of Generation", i, "\b#####")
-    else:
-        if not i == 0:
-            print("\n#####Elite Population Members of Generation", i, "\b.", "Mutation Rate:", p.mutationRate,
-                  "\b#####")
-        else:
-            print("\n#####Elite Population Members of Generation", i, "\b#####")
-
-    ###Comment_DB: (variable weighting) sort the chromosomes again at set gens, since the new gammas change the fitnesses###
-    if p.generationNumber == num_gen_set2 - 1 or p.generationNumber == num_gen_set3 - 1 or p.generationNumber == num_gen_set4 - 1:
-        p.currentGeneration.sort(key=p.evaluate())
-        p.currentGeneration.reverse()
-
-    # Comment_DB: print elite population members and their overall fitness, distance fit, and average distance
-    for j in range(p.selectionSize):
-        print("\n\tPopulation Member ", j, " :",
-              p.currentGeneration[j].genes,
-              "\n\t\tMember Fitness:",
-              Fitness(p.currentGeneration[j].genes)[0],
-              "\tMember distance Fit:",
-              Fitness(p.currentGeneration[j].genes)[1],
-              "\tMember Average distance:",
-              Fitness(p.currentGeneration[j].genes)[5]
-              )
-
-    if adap_mutation == 1:
-        if i == 0:
-            mutation_rate_list = np.append(mutation_rate_list, [0])
-        else:
-            mutation_rate_list = np.append(mutation_rate_list, [p.mutationRate])
-
-    # Comment_DB: Begin Evolutionary Algorithm
-    if i != num_gen - 1:
-        # Bewertung
-        p.evaluate()
-
-        if adap_mutation == 1 and p.generationNumber > num_gen / 2:  # Comment_DB: Increase/decrease mutation rate by 0.5 for adaptive mutation for mutationrate less than 0.5. 0.999 for > 0.5
-            if p.avgFitness >= p.bestFitIndividual.fitness - 50 and p.mutationRate == p_mutation:
-                if p_mutation >= 0.5:
-                    p.mutationRate = 0.999
-                else:
-                    p.mutationRate = p.mutationRate + 0.5
-            elif p.avgFitness >= p.bestFitIndividual.fitness - 50 and (
-                    p.mutationRate == p_mutation + 0.5 or p.mutationRate == 0.999):
-                pass
-            else:
-                p.mutationRate = p_mutation
-
-        # Paarungsselektion
-        p.select()
-        # Rekombination
-        p.crossover()
-        # Mutation
-        p.mutate()
-        # Umweltselektion
-        p.replace()
-
-    p.generationNumber = p.generationNumber + 1  # Comment_DB: This is one plus the output (Gen 0 has generationNumber 1)
-
-    # print the best fit individual, and its fitness
-    print("\nBest Fit Member of Generation ", i, " :", p.bestFitIndividual, "\n\tFitness:", p.bestFitIndividual.fitness,
-          "\n\t\tdistance Fit:", Fitness(p.bestFitIndividual.genes)[1],
-          "\n\t\tLength Fit:", Fitness(p.bestFitIndividual.genes)[2], "\n\t\tBorder Fit Start:",
-          Fitness(p.bestFitIndividual.genes)[3],
-          "\n\t\tBorder Fit End:", Fitness(p.bestFitIndividual.genes)[4])
-    print("\t\tAverage distance", Fitness(p.bestFitIndividual.genes)[5])
-
-    print("\n")
-
-    ###Comment_DB: Show iterations for Total Gen 100 or Total Gen 50###
-    if num_gen == 100:
-        if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 50 or p.generationNumber == 90:
-            show_chromo(p.bestFitIndividual.genes)
-    if num_gen == 50:
-        if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 25 or p.generationNumber == 40:
-            show_chromo(p.bestFitIndividual.genes)
-
-    # Comment_DB: append determined values into arrays after each iteration
-    num_gen_list = np.append(num_gen_list, [i])
-
-    fitness_list = np.append(fitness_list, [Fitness(p.bestFitIndividual.genes)[0]])
-    distance_fit_list = np.append(distance_fit_list, [Fitness(p.bestFitIndividual.genes)[1]])
-    length_fit_list = np.append(length_fit_list, [Fitness(p.bestFitIndividual.genes)[2]])
-    border_fit_start_list = np.append(border_fit_start_list, [Fitness(p.bestFitIndividual.genes)[3]])
-    border_fit_end_list = np.append(border_fit_end_list, [Fitness(p.bestFitIndividual.genes)[4]])
-
-time_end = timer()  # Comment_DB: end timer
-
-fitness_list_gen_index = np.stack((num_gen_list, fitness_list))  # Comment_DB: stack gen_list with list of fitnesses
-distance_fit_list_gen_index = np.stack((num_gen_list, distance_fit_list))
-length_fit_list_gen_index = np.stack((num_gen_list, length_fit_list))
-border_fit_start_list_gen_index = np.stack((num_gen_list, border_fit_start_list))
-border_fit_end_list_gen_index = np.stack((num_gen_list, border_fit_end_list))
-
-if adap_mutation == 1:
-    mutation_rate_list_gen_index = np.stack((num_gen_list, mutation_rate_list))
-
-######## Abspeichern und Ausgeben der Parameter #########
 def print_consol_output_end():
     print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
           "L_Aim (From Preprocessor):", L_aim)
     print("End Fitness: ", p.bestFitIndividual.getFitness(),
-          "\n\tEnd distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
-          "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes)[2],
-          "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes)[3],
-          "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes)[4])
+          "\n\tEnd distance Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[1],
+          "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[2],
+          "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[3],
+          "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[4])
     if adap_mutation == 1:
         print("\tEnd Mutation Rate: ", p.mutationRate)
     print("\nSettings Used: ")
@@ -1520,16 +1255,314 @@ def save_patch_file():
     name.close
     end.destroy()
 
-print_consol_output_end()
-show_fitness_and_subfitness_over_generations_end()
-show_chromo(p.bestFitIndividual.genes)
+######## load parameters #########
+def load_settingssheet():
+    global input_file, testpatch, init_preprocess, init_random, width, fix_number_of_pts, pointspersection, equidistant_pts_between_bendpts, step_size, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, num_gen_set2, num_gen_set3, num_gen_set4, pop_size, num_gen, chromo_resolution, p_mutation, adap_mutation, p_mutate_range, p_crossover, grid_resolution, width_for_edge_detection, max_distance
+    settingssheet = open('./settingssheet.txt')
+    input = settingssheet.readline()
+    input_file = input[0:-1]
+    testpatch = trimesh.load(input_file)
+    stlprep3_6.calc_trendline_of_geometry_from_stl_file(input_file)
+    if settingssheet.readline() == 'True':
+        init_preprocess = True
+    else:
+        init_preprocess = False
+    if settingssheet.readline() == 'True':
+        init_random = True
+    else:
+        init_random = False
+    width = float(settingssheet.readline())
+    if settingssheet.readline() == 'True':
+        fix_number_of_pts = True
+    else:
+        fix_number_of_pts = False
+    pointspersection = int(settingssheet.readline())
+    if settingssheet.readline() == 'True':
+        equidistant_pts_between_bendpts = True
+    else:
+        equidistant_pts_between_bendpts = False
+    step_size = float(settingssheet.readline())
+    gamma_d = float(settingssheet.readline())
+    gamma_d2 = float(settingssheet.readline())
+    gamma_d3 = float(settingssheet.readline())
+    gamma_d4 = float(settingssheet.readline())
+    gamma_l = float(settingssheet.readline())
+    gamma_l2 = float(settingssheet.readline())
+    gamma_l3 = float(settingssheet.readline())
+    gamma_l4 = float(settingssheet.readline())
+    gamma_ps = float(settingssheet.readline())
+    gamma_ps2 = float(settingssheet.readline())
+    gamma_ps3 = float(settingssheet.readline())
+    gamma_ps4 = float(settingssheet.readline())
+    gamma_pe = float(settingssheet.readline())
+    gamma_pe2 = float(settingssheet.readline())
+    gamma_pe3 = float(settingssheet.readline())
+    gamma_pe4 = float(settingssheet.readline())
+    num_gen_set2 = float(settingssheet.readline())
+    num_gen_set3 = float(settingssheet.readline())
+    num_gen_set4 = float(settingssheet.readline())
+    pop_size = int(settingssheet.readline())
+    num_gen = int(settingssheet.readline())
+    chromo_resolution = int(settingssheet.readline())
+    p_mutation = float(settingssheet.readline())
+    if settingssheet.readline() == 'True':
+        adap_mutation = True
+    else:
+        adap_mutation = False
+    p_mutate_range = float(settingssheet.readline())
+    p_crossover = float(settingssheet.readline())
+    grid_resolution = int(settingssheet.readline())
+    width_for_edge_detection = float(settingssheet.readline())
+    max_distance = float(settingssheet.readline())
+    settingssheet.close()
+def load_startparameter():
+    global L_aim, l_factor, patch_start, patch_end, Start_normal_prep_fromstart, Start_direction_prep_fromstart
+    file1 = open("startparameter.txt", "r")
+    L_aim = float(file1.readline())
+    l_factor = float(file1.readline())
+    patch_start_x = float(file1.readline())
+    patch_start_y = float(file1.readline())
+    patch_start_z = float(file1.readline())
+    patch_end_x = float(file1.readline())
+    patch_end_y = float(file1.readline())
+    patch_end_z = float(file1.readline())
+    Start_normal_prep_fromstart_x = float(file1.readline())
+    Start_normal_prep_fromstart_y = float(file1.readline())
+    Start_normal_prep_fromstart_z = float(file1.readline())
+    Start_direction_prep_fromstart_x = float(file1.readline())
+    Start_direction_prep_fromstart_y = float(file1.readline())
+    Start_direction_prep_fromstart_z = float(file1.readline())
+    file1.close()
+    patch_start = np.asarray([patch_start_x, patch_start_y, patch_start_z])
+    patch_end = np.asarray([patch_end_x, patch_end_y, patch_end_z])
+    Start_normal_prep_fromstart = np.asarray(
+        [Start_normal_prep_fromstart_x, Start_normal_prep_fromstart_y, Start_normal_prep_fromstart_z])
+    Start_direction_prep_fromstart = np.asarray(
+        [Start_direction_prep_fromstart_x, Start_direction_prep_fromstart_y, Start_direction_prep_fromstart_z])
 
-end = Tk()
-Label(end, text="Sind Sie mit dem Patch zufrieden?").grid(row=10, column=1, )
-Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
-Button(end, text="Abbrechen", command=sys.exit).grid(row=30, column=0, )
-Button(end, text="Patchparameter speichern", command=save_patch_file).grid(row=30, column=2, )
-Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
 
-mainloop()
+def main():
+    global step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, init_preprocess, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size, useInteger, start_lengths, L_aim, start_betas, start_alphas, patch_start, patch_end, Start_direction_prep_fromstart, Start_normal_prep_fromstart, AnzahlKnicke, l_factor, startchromo3D, startchromo2D, p, time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index, end
 
+    [step_size, testpatch, tape_type, width,
+     pointspersection, equidistant_pts_between_bendpts,
+     adap_mutation, chromo_resolution,
+     gamma_d, gamma_d2, gamma_d3, gamma_d4,
+     gamma_l, gamma_l2, gamma_l3, gamma_l4,
+     gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4,
+     gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4,
+     init_preprocess, input_file, manual_start_end, max_distance,
+     num_gen, num_gen_set2, num_gen_set3, num_gen_set4,
+     p_crossover, p_mutate_range, p_mutation,
+     grid_resolution, pop_size, useInteger, width_for_edge_detection,
+     x_end, x_start, y_end, y_start, z_end, z_start] = get_Vars_from_GUI()
+    # Startparam gibt eine Liste mit den berechneten Startparametern zurück:
+    [start_lengths,
+     L_aim,  # Comment_DB: already in [mm]
+     start_betas,
+     start_alphas,
+
+     patch_start,
+     patch_end,
+
+     Start_direction_prep_fromstart,
+     Start_normal_prep_fromstart] = stlprep3_6.startparam(input_file, max_distance, width_for_edge_detection,
+                                                          grid_resolution)
+
+    if len(start_lengths[0]) > len(start_lengths[1]):
+        AnzahlKnicke = len(start_lengths[0]) - 1
+    else:
+        AnzahlKnicke = len(start_lengths[1]) - 1
+
+    if manual_start_end:
+        patch_start = np.asarray([x_start, y_start, z_start])
+        patch_end = np.asarray([x_end, y_end, z_end])
+
+    # Faktor für das Längenallel in den Chromosomen -> eine Länge kann maximal L_aim lang werden
+    l_factor = 0.75 * float(L_aim) / chromo_resolution  # Comment_DB: already in [mm]
+
+    save_startparameter(L_aim, Start_direction_prep_fromstart, Start_normal_prep_fromstart, l_factor, patch_end,
+                        patch_start)
+
+    ####################Evolutionärer Algorithmus####################
+    startchromo3D = create_start_chromo(0)  # 0, for 3D. 1, for 2D start solution
+    startchromo2D = create_start_chromo(1)  #
+
+    #stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
+    #startchromo3D = remove_bendingpoint(startchromo3D,2)
+    #stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "2D")
+   # startchromo3D = remove_bendingpoint(startchromo3D, 2)
+   # stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "2D")
+   # startchromo3D = remove_bendingpoint(startchromo3D, 2)
+   # stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "2D")
+   # startchromo3D = remove_bendingpoint(startchromo3D, 1)
+  #  stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "2D")
+
+    #stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
+    startchromo2D = remove_bendingpoint(startchromo2D, 1)
+
+    # Repair 3D-2D-Startsolution to get same amount of bendpoint
+    if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]):  # Lenght lists
+        print("2D and 3D Solution dont have same amout of bending points. ")
+        startchromo3D, startchromo2D = repair_start_chromo(startchromo3D,
+                                                           startchromo2D)  # Insert additional bending points
+
+    p = initialize_Population_with_global_Settings()
+
+    # visulize results from preprocessor:
+    stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "3D")
+    stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
+
+    ##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
+    num_gen_list = np.array([])
+    fitness_list = np.array([])
+    distance_fit_list = np.array([])
+    length_fit_list = np.array([])
+    border_fit_start_list = np.array([])
+    border_fit_end_list = np.array([])
+    mutation_rate_list = np.array([])
+
+    ## Initialisierung
+    time_start = timer()  # Comment_DB: start timer
+    p.prepPopulation()
+    p.currentGeneration.sort()  # Comment_DB: sort and reverse randomly initialized pop from best fit to worst
+    p.currentGeneration.reverse()
+
+    file2 = open("population.txt", "w")
+    for j in range(pop_size):
+        file2.write('%s\n' % p.currentGeneration[j].genes)
+    file2.close()
+
+    if p.preprocessedInit == False:  # Comment_DB: print if random or preprocessor init
+        print("##########Random Gene Initialization for Generation 0##########")
+    else:
+        print("##########Preprocessor Gene Initialization for Generation 0##########")
+    print("##########Generations Sorted from Highest to Lowest Fitness##########")
+    if adap_mutation == 1:
+        print("##########Adaptive Mutation Selected##########")
+
+    # Comment_DB: EA Loop (Only this for loop determines the number of generations to iterate! This is not determined in galileo!)
+    for i in range(num_gen):
+        if adap_mutation == 0:
+            print("\n#####Elite Population Members of Generation", i, "\b#####")
+        else:
+            if not i == 0:
+                print("\n#####Elite Population Members of Generation", i, "\b.", "Mutation Rate:", p.mutationRate,
+                      "\b#####")
+            else:
+                print("\n#####Elite Population Members of Generation", i, "\b#####")
+
+        ###Comment_DB: (variable weighting) sort the chromosomes again at set gens, since the new gammas change the fitnesses###
+        if p.generationNumber == num_gen_set2 - 1 or p.generationNumber == num_gen_set3 - 1 or p.generationNumber == num_gen_set4 - 1:
+            p.currentGeneration.sort(key=p.evaluate())
+            p.currentGeneration.reverse()
+
+        # Comment_DB: print elite population members and their overall fitness, distance fit, and average distance
+        for j in range(p.selectionSize):
+            print("\n\tPopulation Member ", j, " :",
+                  p.currentGeneration[j].genes,
+                  "\n\t\tMember Fitness:",
+                  Fitness(p.currentGeneration[j].genes,p.generationNumber)[0],
+                  "\tMember distance Fit:",
+                  Fitness(p.currentGeneration[j].genes,p.generationNumber)[1],
+                  "\tMember Average distance:",
+                  Fitness(p.currentGeneration[j].genes,p.generationNumber)[5]
+                  )
+
+        if adap_mutation == 1:
+            if i == 0:
+                mutation_rate_list = np.append(mutation_rate_list, [0])
+            else:
+                mutation_rate_list = np.append(mutation_rate_list, [p.mutationRate])
+
+        # Comment_DB: Begin Evolutionary Algorithm
+        if i != num_gen - 1:
+            # Bewertung
+            p.evaluate()
+
+            if adap_mutation == 1 and p.generationNumber > num_gen / 2:  # Comment_DB: Increase/decrease mutation rate by 0.5 for adaptive mutation for mutationrate less than 0.5. 0.999 for > 0.5
+                if p.avgFitness >= p.bestFitIndividual.fitness - 50 and p.mutationRate == p_mutation:
+                    if p_mutation >= 0.5:
+                        p.mutationRate = 0.999
+                    else:
+                        p.mutationRate = p.mutationRate + 0.5
+                elif p.avgFitness >= p.bestFitIndividual.fitness - 50 and (
+                        p.mutationRate == p_mutation + 0.5 or p.mutationRate == 0.999):
+                    pass
+                else:
+                    p.mutationRate = p_mutation
+
+            # Paarungsselektion
+            p.select()
+            # Rekombination
+            p.crossover()
+            # Mutation
+            p.mutate()
+            # Umweltselektion
+            p.replace()
+
+        p.generationNumber = p.generationNumber + 1  # Comment_DB: This is one plus the output (Gen 0 has generationNumber 1)
+
+        # print the best fit individual, and its fitness
+        print("\nBest Fit Member of Generation ", i, " :", p.bestFitIndividual, "\n\tFitness:",
+              p.bestFitIndividual.fitness,
+              "\n\t\tdistance Fit:", Fitness(p.bestFitIndividual.genes,p.generationNumber)[1],
+              "\n\t\tLength Fit:", Fitness(p.bestFitIndividual.genes,p.generationNumber)[2], "\n\t\tBorder Fit Start:",
+              Fitness(p.bestFitIndividual.genes,p.generationNumber)[3],
+              "\n\t\tBorder Fit End:", Fitness(p.bestFitIndividual.genes,p.generationNumber)[4])
+        print("\t\tAverage distance", Fitness(p.bestFitIndividual.genes,p.generationNumber)[5])
+
+        print("\n")
+
+        ###Comment_DB: Show iterations for Total Gen 100 or Total Gen 50###
+        if num_gen == 100:
+            if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 50 or p.generationNumber == 90:
+                show_chromo(p.bestFitIndividual.genes)
+        if num_gen == 50:
+            if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 25 or p.generationNumber == 40:
+                show_chromo(p.bestFitIndividual.genes)
+
+        # Comment_DB: append determined values into arrays after each iteration
+        num_gen_list = np.append(num_gen_list, [i])
+
+        fitness_list = np.append(fitness_list, [Fitness(p.bestFitIndividual.genes,p.generationNumber)[0]])
+        distance_fit_list = np.append(distance_fit_list, [Fitness(p.bestFitIndividual.genes,p.generationNumber)[1]])
+        length_fit_list = np.append(length_fit_list, [Fitness(p.bestFitIndividual.genes,p.generationNumber)[2]])
+        border_fit_start_list = np.append(border_fit_start_list, [Fitness(p.bestFitIndividual.genes,p.generationNumber)[3]])
+        border_fit_end_list = np.append(border_fit_end_list, [Fitness(p.bestFitIndividual.genes,p.generationNumber)[4]])
+
+    time_end = timer()  # Comment_DB: end timer
+
+    fitness_list_gen_index = np.stack((num_gen_list, fitness_list))  # Comment_DB: stack gen_list with list of fitnesses
+    distance_fit_list_gen_index = np.stack((num_gen_list, distance_fit_list))
+    length_fit_list_gen_index = np.stack((num_gen_list, length_fit_list))
+    border_fit_start_list_gen_index = np.stack((num_gen_list, border_fit_start_list))
+    border_fit_end_list_gen_index = np.stack((num_gen_list, border_fit_end_list))
+
+    if adap_mutation == 1:
+        mutation_rate_list_gen_index = np.stack((num_gen_list, mutation_rate_list))
+
+    # Print and save results
+    print_consol_output_end()
+    show_fitness_and_subfitness_over_generations_end()
+    show_chromo(p.bestFitIndividual.genes)
+
+    end = Tk()
+    Label(end, text="Sind Sie mit dem Patch zufrieden?").grid(row=10, column=1, )
+    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
+    Button(end, text="Abbrechen", command=sys.exit).grid(row=30, column=0, )
+    Button(end, text="Patchparameter speichern", command=save_patch_file).grid(row=30, column=2, )
+    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
+    mainloop()
+
+
+
+
+
+if __name__ == '__main__':
+    main()
+
+else:
+    load_settingssheet()
+
+    load_startparameter()

@@ -31,6 +31,7 @@ import copy
 from functools import total_ordering
 from random import Random
 from random import gauss
+from itertools import repeat
 import concurrent.futures
 
 @total_ordering
@@ -90,7 +91,7 @@ class Chromosome:
         """
 
 
-        minlen = len(self.geneMinValues)-1
+        minlen = len(startchromo)
 
         if intValues == 1:
             randFunc = generator.randint
@@ -122,26 +123,26 @@ class Chromosome:
 
         self.fitness = None
 
-    def evaluate(self):
+    def evaluate(self,gen_Num):
         """Calls evalFunc for this chromosome, and caches the fitness value
         returned. Returns None if evalFunc is not yet defined.
         """
 
         if self.evalFunc != None:
-            self.fitness = self.evalFunc(self.genes)[0] #Comment_DB: Calls Fitness function Fitness(chromo)[0]. Returns first value in Fitness(chromo)
+            self.fitness = self.evalFunc(self.genes,gen_Num)[0] #Comment_DB: Calls Fitness function Fitness(chromo)[0]. Returns first value in Fitness(chromo)
 
             return self.fitness
         else:
             return None
 
-    def getFitness(self):
+    def getFitness(self, gen_Num = 1):
         """Calls evaluate if there is no cached value, otherwise returns the cached
         fitness value.
         """
         if self.fitness != None: #or (self.fitness == self.evaluate()):
             return self.fitness
         else:
-            return self.evaluate()
+            return self.evaluate(gen_Num)
 
     def getGenes(self):
         return self.genes
@@ -328,19 +329,21 @@ class Population:
 
         self.currentGeneration[0].fitness = None #Comment_DB: make sure getFitness() returns c.evaluate()
 
-        self.maxFitness = self.currentGeneration[0].getFitness()
-        self.minFitness = self.currentGeneration[0].getFitness()
+        self.maxFitness = self.currentGeneration[0].getFitness(self.generationNumber)
+        self.minFitness = self.currentGeneration[0].getFitness(self.generationNumber)
         self.bestFitIndividual = self.currentGeneration[0]
 
-        #if __name__ == '__main__':
 
-        #    with concurrent.futures.ProcessPoolExecutor() as executor:  #f = list(executor.map(self.calc_fitness_of_chromo, self.currentGeneration))
+
+        #with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:  f = list(executor.map(self.calc_fitness_of_chromo, self.currentGeneration, repeat(self.generationNumber)))
+        # self.sumFitness = sum(f)
+        # self.maxFitness = max(f)
+        # self.minFitness = min(f)
+
 
         for chromo in self.currentGeneration:
-            f = self.calc_fitness_of_chromo(chromo)
-
-
-
+            chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
+            f = chromo.getFitness()
 
             self.sumFitness = self.sumFitness + f
             if f > self.maxFitness:
@@ -350,12 +353,12 @@ class Population:
             elif f < self.minFitness:
                 self.minFitness = f
 
+        self.avgFitness = self.sumFitness / len(self.currentGeneration)  # Comment_DB: can be used if needed
 
-        self.avgFitness = self.sumFitness / len(self.currentGeneration) #Comment_DB: can be used if needed
 
-    def calc_fitness_of_chromo(self, chromo):
+    def calc_fitness_of_chromo(self, chromo, gen_Num):
         chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
-        f = chromo.getFitness()
+        f = chromo.getFitness(gen_Num)
         return f
 
     def mutate(self):
@@ -365,21 +368,29 @@ class Population:
         """
 
         self.mutationCount = 0
-        for i in range(self.replacementSize):
-            self.nextGeneration[i] = self.mutateFunc(self.nextGeneration[i])
+        with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:  self.nextGeneration = list(executor.map(self.mutateFunc, self.nextGeneration))
+
+        #for i in range(self.replacementSize):
+         #   self.nextGeneration[i] = self.mutateFunc(self.nextGeneration[i])
     def select(self):
         """Selects chromosomes from currentGeneration for placement into
         nextGeneration based on selectFunc.
         """
 
         self.nextGeneration = []
-        for i in range(0, self.replacementSize, 2): #Comment_DB: Each iteration selects chromosome from replacementsize population twice already, thus every 2 indices!
-            s1 = self.selectFunc() #Comment_DB: elite[k-1] chromosome (0th return value in method)
-            s2 = self.selectFunc() #Comment_DB: another elite[k-1] chromosome (0th return value in method)
-            s1.parent = (s1, s1) #Comment_DB: Tuple
-            s2.parent = (s2, s2) #Comment_DB: Tuple
-            self.nextGeneration.append(s1)
-            self.nextGeneration.append(s2) #Comment_DB: append the two elite[k-1] chromosomes into next generation. Do this replacementSize/2 times! (WheelPosition CHANGES! as selectFunc() is called!)
+        #for i in range(0, self.replacementSize, 2): #Comment_DB: Each iteration selects chromosome from replacementsize population twice already, thus every 2 indices!
+        #   self.select_loop()
+        with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor: self.nextGeneration=list(executor.map(self.select_loop,  range(0, self.replacementSize)))
+
+    def select_loop(self,nr):
+        s1 = self.selectFunc()  # Comment_DB: elite[k-1] chromosome (0th return value in method)
+        #s2 = self.selectFunc()  # Comment_DB: another elite[k-1] chromosome (0th return value in method)
+        s1.parent = (s1, s1)  # Comment_DB: Tuple
+        #s2.parent = (s2, s2)  # Comment_DB: Tuple
+        return s1
+        #self.nextGeneration.append(s1)
+        #self.nextGeneration.append(s2)  # Comment_DB: append the two elite[k-1] chromosomes into next generation. Do this replacementSize/2 times! (WheelPosition CHANGES! as selectFunc() is called!)
+
     def crossover(self):
         """Performs crossover on pairs of chromos in nextGeneration with probability
         crossoverRate. Calls crossoverFunc, which must be set; current choices are
@@ -387,9 +398,15 @@ class Population:
         """
 
         self.crossCount = 0
-        for i in range(0, self.replacementSize, 2):
-            (a, b) = self.crossoverFunc(self.nextGeneration[i], self.nextGeneration[i + 1])
-            (self.nextGeneration[i], self.nextGeneration[i + 1]) = (a, b)
+
+        #for i in range(0, self.replacementSize, 2):
+        #    (a, b) = self.crossoverFunc(self.nextGeneration[i], self.nextGeneration[i + 1])
+
+        with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:  result = list(executor.map(self.crossoverFunc, self.nextGeneration[0:-1:2], self.nextGeneration[1:-1:2]))
+
+
+        for i in range(0, self.replacementSize-2, 2):
+            (self.nextGeneration[i], self.nextGeneration[i + 1]) = result[int(i/2)]
     def select_Roulette(self):
         """Perform Roulette (Monte Carlo) selection. Assign this function to
         selectFunc to use.
@@ -405,7 +422,7 @@ class Population:
         wheelPosition = self.generator.uniform(0, self.sumFitness)
         i = 0
         for chromo in self.currentGeneration:
-            partialSum = partialSum + chromo.getFitness()
+            partialSum = partialSum + chromo.getFitness(self.generationNumber)
             if partialSum >= wheelPosition:
                 return chromo
             i = i + 1
@@ -458,7 +475,7 @@ class Population:
                 newchromo1[n] = int((r1 * chromo1.genes[n] + (1 - r1) * chromo2.genes[n]))
                 newchromo2[n] = int((r2 * chromo1.genes[n] + (1 - r2) * chromo2.genes[n]))
             else:
-                newchromo1[n] = (r1 * chromo1.genes[n] + (1 - r1) * chromo2.genes[n])
+                newchromo1[n] = int(r1 * chromo1.genes[n] + (1 - r1) * chromo2.genes[n])
                 newchromo2[n] = int((r2 * chromo1.genes[n] + (1 - r2) * chromo2.genes[n]))
         newchromo1.fitness = None
         newchromo2.fitness = None
@@ -523,8 +540,8 @@ class Population:
                 coin = self.generator.randint(0, 1)
                 if coin == 1:
                     temp = newchromo1.genes[i]
-                    newchromo1.genes[i] = newchromo2.genes[i]
-                    newchromo2.genes[i] = temp
+                    newchromo1.genes[i] = int(newchromo2.genes[i])
+                    newchromo2.genes[i] = int(temp)
             newchromo1.fitness = None
             newchromo2.fitness = None
             return (newchromo1, newchromo2)
@@ -545,7 +562,7 @@ class Population:
                     f = self.generator.randint(self.chromoMinValues[i], self.chromoMaxValues[i])
                 else:
                     f = self.generator.uniform(self.chromoMinValues[i], self.chromoMaxValues[i])
-                chromo.genes[i] = f
+                chromo.genes[i] = int(f)
         return chromo
     def mutate_Uniform(self, chromo):
         """Mutation function that can be assigned to mutateFunc.
@@ -569,7 +586,7 @@ class Population:
                 else:
                     f = self.generator.uniform(
                         self.chromoMinValues[i], self.chromoMaxValues[i])
-                chromo.genes[i] = f
+                chromo.genes[i] = int(f)
         return chromo
     def mutate_Gauss(self, chromo):
         """Mutation function that can be assigned to mutateFunc.
@@ -588,7 +605,7 @@ class Population:
                     f = self.chromoMinValues[i]
                 if f > self.chromoMaxValues[i]:
                     f = self.chromoMaxValues[i]
-                chromo.genes[i] = f
+                chromo.genes[i] = int(f)
         return chromo
     def replace(self):
 

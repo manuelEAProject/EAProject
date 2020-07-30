@@ -1,7 +1,7 @@
-C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T100.stl
+C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Testgeometrien/EntlangLinieExtrudiert_red500tri.stl
+True
 False
-False
-10.0
+15.0
 True
 7
 0.0
@@ -25,13 +25,13 @@ True
 5.0
 15.0
 30.0
-12
-80
+50
+20
 1000
 0.1
 0.0
 0.05
 0.7
 1500
-10.0
 0.5
+2.0
