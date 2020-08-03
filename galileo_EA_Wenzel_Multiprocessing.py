@@ -230,7 +230,6 @@ class Population:
         self.chromoMinValues = []
         self.startchromo3D = None
         self.startchromo2D = None
-        self.startchromo2D_edge = None
         self.selectionSize = int(self.numChromosomes/4)
 
 
@@ -268,7 +267,7 @@ class Population:
         self.avgFitnessNextGen = None
         self.sumFitnessNextGen = None
         self.bestFitIndividualNextGen = None
-    def prepPopulation(self, start_2D, start_2D_edge, start_3D): #Comment_DB: For both random and preprocessed initialization
+    def prepPopulation(self): #Comment_DB: For both random and preprocessed initialization
         """Radnomly initializes each chromosome according to the values in
         chromosMinValues and chromosMaxValues.
         """
@@ -278,39 +277,27 @@ class Population:
         self.currentGeneration = []
         # Startchromo zur Startpopulation einmal hinzufügen (if using preprocessor):
         if self.preprocessedInit == True: #Comment_DB: preprocessed initialization
-            if start_3D:
-                c = Chromosome() #Comment_DB: create chromosome object
-                c.geneMinValues = self.chromoMinValues #Comment_DB: input in tape_EA
-                c.geneMaxValues = self.chromoMaxValues #Comment_DB: input in tape_EA
-                for i in range(len(self.startchromo3D)): #Comment_DB: startchromo is the startchromo in tape_EA
-                    c.genes.append(self.startchromo3D[i]) #Comment_DB: append the initial startchromo from tape EA!
-                #print("start_c_",c.genes)
-                c.fitness = None
-                c.evalFunc = self.evalFunc
-                self.currentGeneration.append(c) #Comment_DB: append the startchromo into the current generation
-                c.initrange=self.initrange #Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
-            if start_2D_edge:
-                c = Chromosome() #Comment_DB: create chromosome object
-                c.geneMinValues = self.chromoMinValues #Comment_DB: input in tape_EA
-                c.geneMaxValues = self.chromoMaxValues #Comment_DB: input in tape_EA
-                for i in range(len(self.startchromo3D)): #Comment_DB: startchromo is the startchromo in tape_EA
-                    c.genes.append(self.startchromo3D[i]) #Comment_DB: append the initial startchromo from tape EA!
-                #print("start_c_",c.genes)
-                c.fitness = None
-                c.evalFunc = self.evalFunc
-                self.currentGeneration.append(c) #Comment_DB: append the startchromo into the current generation
-                c.initrange=self.initrange #Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
-            if start_2D:
-                c = Chromosome()  # Comment_DB: create chromosome object
-                c.geneMinValues = self.chromoMinValues  # Comment_DB: input in tape_EA
-                c.geneMaxValues = self.chromoMaxValues  # Comment_DB: input in tape_EA
-                for i in range(len(self.startchromo2D)):  # Comment_DB: startchromo is the startchromo in tape_EA
-                    c.genes.append(self.startchromo2D[i])  # Comment_DB: append the initial startchromo from tape EA!
-                # print("start_c_",c.genes)
-                c.fitness = None
-                c.evalFunc = self.evalFunc
-                self.currentGeneration.append(c)  # Comment_DB: append the startchromo into the current generation
-                c.initrange = self.initrange  # Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
+            c = Chromosome() #Comment_DB: create chromosome object
+            c.geneMinValues = self.chromoMinValues #Comment_DB: input in tape_EA
+            c.geneMaxValues = self.chromoMaxValues #Comment_DB: input in tape_EA
+            for i in range(len(self.startchromo3D)): #Comment_DB: startchromo is the startchromo in tape_EA
+                c.genes.append(self.startchromo3D[i]) #Comment_DB: append the initial startchromo from tape EA!
+            #print("start_c_",c.genes)
+            c.fitness = None
+            c.evalFunc = self.evalFunc
+            self.currentGeneration.append(c) #Comment_DB: append the startchromo into the current generation
+            c.initrange=self.initrange #Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
+
+            c = Chromosome()  # Comment_DB: create chromosome object
+            c.geneMinValues = self.chromoMinValues  # Comment_DB: input in tape_EA
+            c.geneMaxValues = self.chromoMaxValues  # Comment_DB: input in tape_EA
+            for i in range(len(self.startchromo2D)):  # Comment_DB: startchromo is the startchromo in tape_EA
+                c.genes.append(self.startchromo2D[i])  # Comment_DB: append the initial startchromo from tape EA!
+            # print("start_c_",c.genes)
+            c.fitness = None
+            c.evalFunc = self.evalFunc
+            self.currentGeneration.append(c)  # Comment_DB: append the startchromo into the current generation
+            c.initrange = self.initrange  # Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
 
         # Erstellen der Startpopulation, falls PreprocessedInit = True wird Population um Startchromo herum erstellt
         for i in range(self.numChromosomes): #Comment_DB: numChromosomes is the # of chromosomes (population) in each generation
@@ -322,27 +309,7 @@ class Population:
             c.p_prepInit = self.p_prepInit
             # Using the preprocessed parameters (#Comment_DB: to generate the start population?)
             if self.preprocessedInit == True:
-
-                if start_2D & start_3D & start_2D_edge:
-                    if i<(self.numChromosomes/3):c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
-                    elif i < (2*self.numChromosomes / 3):
-                        c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
-                    else:c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
-
-                elif start_2D & start_3D:
-                    if i<(self.numChromosomes/2):c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
-                    else:c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
-                elif start_2D & start_2D_edge:
-                    if i<(self.numChromosomes/2):c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
-                    else:c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
-                elif start_3D & start_2D_edge:
-                    if i<(self.numChromosomes/2):c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
-                    else:c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
-
-                elif start_2D: c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
-                elif start_2D_edge: c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
-                elif start_3D: c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
-
+                c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
             else:
                 c.randomInit(self.generator, self.useInteger)
             c.evalFunc = self.evalFunc
@@ -401,7 +368,8 @@ class Population:
         """
 
         self.mutationCount = 0
-
+        #with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:  self.nextGeneration = list(executor.map(self.mutateFunc, self.nextGeneration))
+        #self.nextGeneration = list(map(self.mutateFunc, self.nextGeneration))
         for i in range(self.replacementSize):
             self.nextGeneration[i] = self.mutateFunc(self.nextGeneration[i])
     def select(self):
@@ -418,6 +386,8 @@ class Population:
             self.nextGeneration.append(s1)
             self.nextGeneration.append(s2)  # Comment_DB: append the two elite[k-1] chromosomes into next generation. Do this replacementSize/2 times! (WheelPosition CHANGES! as selectFunc() is called!)
 
+    #with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor: self.nextGeneration=list(executor.map(self.select_loop,  range(0, self.replacementSize)))
+        #self.nextGeneration=list(map(self.select_loop,  range(0, self.replacementSize)))
 
     def select_loop(self):
         s1 = self.selectFunc()  # Comment_DB: elite[k-1] chromosome (0th return value in method)
@@ -438,7 +408,11 @@ class Population:
         for i in range(0, self.replacementSize, 2):
             (a, b) = self.crossoverFunc(self.nextGeneration[i], self.nextGeneration[i + 1])
             (self.nextGeneration[i], self.nextGeneration[i + 1]) = (a, b)
+        #with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:  result = list(executor.map(self.crossoverFunc, self.nextGeneration[0:-1:2], self.nextGeneration[1:-1:2]))
+        #result = list(map(self.crossoverFunc, self.nextGeneration[0:-1:2], self.nextGeneration[1:-1:2]))
 
+        #for i in range(0, self.replacementSize-3, 2):
+        #   (self.nextGeneration[i], self.nextGeneration[i + 1]) = result[int(i/2)]
     def select_Roulette(self):
         """Perform Roulette (Monte Carlo) selection. Assign this function to
         selectFunc to use.

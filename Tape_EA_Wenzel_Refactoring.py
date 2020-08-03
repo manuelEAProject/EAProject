@@ -469,7 +469,7 @@ def if_settingssheet_exists_fill_values(adap_mutation, chromo_resolution, equidi
  Start_direction_prep_fromstart,
  Start_normal_atstart ] = stlprep3_6.startparam(input_file, poly_order, window_quotient, max_distance)
 
-AnzahlKnicke = len(start_lengths) - 1
+amount_of_bends = len(start_lengths) - 1
 
 if manual_start_end:
     patch_start = np.asarray([x_start, y_start, z_start])
@@ -854,8 +854,8 @@ def initialize_Population_with_global_Settings():
     # Festlegen der Fitnessfunktion
     p.evalFunc = Fitness  # Comment_DB: The FUNCTION Fitness is assigned, not the lowercase equation fitness! Stores the function. p.evalFunc = Fitness() stores the return value
     # Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
-    p.chromoMinValues = [0] * (3 * AnzahlKnicke + 8)
-    p.chromoMaxValues = [chromo_resolution] * (3 * AnzahlKnicke + 8)
+    p.chromoMinValues = [0] * (3 * amount_of_bends + 8)
+    p.chromoMaxValues = [chromo_resolution] * (3 * amount_of_bends + 8)
     # Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
     p.useInteger = useInteger
     # p.useInteger = 0
@@ -1098,7 +1098,7 @@ def save_patch_file():
     name.write("length=" + str(sum(bestPatch_parameter_l)) + "\n")
     name.write("type=" + str(tape_type) + "\n")
     l = 0
-    for i in range(AnzahlKnicke):
+    for i in range(amount_of_bends):
         l = int(l) + int(bestPatch_parameter_l[i])
         l = str(l)
         if bestPatch_parameter_alpha[i] > 90 * 2 * math.pi / (360):

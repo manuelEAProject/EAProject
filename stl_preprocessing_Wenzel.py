@@ -16,10 +16,9 @@ max_points_in_pc = 72000
 
 
 ####MAIN
-def startparam(input_file, max_distance, width_for_edge_detection, grid_resolution):
+def startparam(input_file, max_distance, width_for_edge_detection, grid_resolution,calc_2D_Solution,calc_2D_with_edge_detection,calc_3D_Solution):
     print(
-        "Preprocessing läuft... Bei hochaufgelösten stl-Dateien und großen Flächengrößenunterschieden kann es zu "
-        "längeren Berechnungszeiten kommen")
+        "Preprocessing in progress... With high-resolution stl files and large area size differences it can lead to longer calculation times")
 
     # Read in the file:
     calc_trendline_of_geometry_from_stl_file(input_file) # saved in global var!
@@ -30,9 +29,9 @@ def startparam(input_file, max_distance, width_for_edge_detection, grid_resoluti
          grid_resolution_j)
 
     # Calculation of the bending parameters:
-    calc_bending_parameters(grid_resolution, grid_x, max_distance, width_for_edge_detection, max_x, max_y, min_x, min_y, z_grid_values_linear) # saved in global var!
+    calc_bending_parameters(grid_resolution, grid_x, max_distance, width_for_edge_detection, max_x, max_y, min_x, min_y, z_grid_values_linear,calc_2D_with_edge_detection,calc_3D_Solution) # saved in global var!
 
-    ###### Startparameter extrahieren #####
+    ##### Extract start parameters ####
     startpoint_on_surface = bend_pts_xyz_global_2D[0][:]
     endpoint_on_surface = bend_pts_xyz_global_2D[-1][:]
 
@@ -44,13 +43,16 @@ def startparam(input_file, max_distance, width_for_edge_detection, grid_resoluti
     Start_n_3d_atstart = norm_vector(normal_patch_global_KOS[0])
 
     # l-list for Chromo
-    l_list = [np.asarray(length_list_3D),lenght_list_2D]
-    # Beta_liste aus Interpolator
-    beta_list = [np.asarray(beta_angle_between_planes_list_3D),beta_angle_list_2D]
-    # Alpha_liste aus Interpolator
-    alpha_list = [np.asarray(alpha_angle_list_3D),alpha_angle_list_2D]
-    # L_aim: Nimmt Kurve von Interpolierter Fläche. 3D_Lösung
-    L_aim = calc_L_aim(new_bending_direction_points_tilted_KOS_stacked) # summed up distances between 3D bending points
+    l_list = [np.asarray(length_list_3D),lenght_list_2D, length_list_2D_with_edge_detection]
+
+    # Beta_liste from calc_bending_parameters
+    beta_list = [np.asarray(beta_angle_between_planes_list_3D),beta_angle_list_2D,beta_angle_between_planes_list_2D_with_edge_detection]
+    # Alpha_liste from calc_bending_parameters
+    alpha_list = [np.asarray(alpha_angle_list_3D),alpha_angle_list_2D,alpha_angle_list_2D_with_edge_detection]
+
+    # L_aim: Takes curve of interpolated surface. 2D_solution
+
+    L_aim = calc_L_aim(surfacepoints_between_Start_and_End) # summed up distances between 3D bending points
 
     start_parameter = [l_list, L_aim, beta_list, alpha_list, startpoint_on_surface,
                        endpoint_on_surface, Start_r_3d_atstart, Start_n_3d_atstart]
@@ -58,6 +60,7 @@ def startparam(input_file, max_distance, width_for_edge_detection, grid_resoluti
 
 #######################################################################################################################
 # Load stl file and analyse the geometry. Calc centerpoint and trendline of the geometry
+
 def calc_trendline_of_geometry_from_stl_file(input_file):
     patch_vectors_of_stl_input = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh
 
@@ -68,7 +71,6 @@ def calc_trendline_of_geometry_from_stl_file(input_file):
 
     # Calc areas of triangel for compare/weight
     tri_areas = calc_tri_areas(triangle_vectors_of_stl)
-
 
     global center_point_of_cloud_weighted, trendline_global_KOS, avg_tri_normal_weighted
     avg_tri_normal_weighted = calc_avg_tri_norm_weighted_by_area(tri_areas, patch_vectors_of_stl_input)
@@ -84,8 +86,8 @@ def calc_trendline_of_geometry_from_stl_file(input_file):
 def calc_trendline_global(center_point_of_cloud_weighted, point_cloud_tri_centerpoints_weighted):
     trendline_x_axis, trendline_y_axis, trendline_z_axis = calc_trendline_axis_with_svd(
         point_cloud_tri_centerpoints_weighted, center_point_of_cloud_weighted)
-    # Wenn trendline x-Achse in negative x-Richtung definiert wurde von svd
-    if trendline_x_axis[0] < 0:  # Rotation von 180° um y-Achse
+    # If trendline x axis was defined in negative x direction by svd
+    if trendline_x_axis[0] < 0:  # Rotation of 180° around y-Axis
         trendline_x_axis = -(trendline_x_axis)
         trendline_z_axis = -(trendline_z_axis)
     trendline_global_KOS = np.vstack((trendline_x_axis, trendline_y_axis, trendline_z_axis))
@@ -107,7 +109,7 @@ def calc_tri_normals_from_stl(stl_normals,triangle_vectors_of_stl):
     normals=np.asarray(normals)
 
 
-    # Normalenvektoren werden immer in positive z-Richtung ausgerichtet
+    # Normal vectors are always aligned in positive z direction
 
     # the following average stl_normal always point at the outside of the object:
     avg_stl_normal = sum(stl_normals) / num_of_triangles
@@ -118,7 +120,7 @@ def calc_tri_normals_from_stl(stl_normals,triangle_vectors_of_stl):
     true_when_stl_and_tri_normal_not_same_direction = avg_sorted_normal[0] * avg_stl_normal[0] < 0
     true_when_z_from_tri_normal_neg = avg_sorted_normal[2] < 0
 
-    # Comment_DKu_Wenzel: Die if Bedingung ist seltsam
+
     if true_when_stl_and_tri_normal_not_same_direction or true_when_z_from_tri_normal_neg:
         normals=np.negative(normals)
 
@@ -138,12 +140,12 @@ def calc_tri_corner_points(triangle_vectors_of_stl):
         for j in range(3):
             tri_corner_points.append(triangle[j])
 
-    # Doppelte Ecken löschen
+    # Delete double corners
     tri_corner_points = np.unique(tri_corner_points, axis=0)
 
     return tri_corner_points
 def calc_tri_areas(triangle_vectors_of_stl):
-    #Berechnung der Dreiecksflächen und Speichern in einer Liste
+    #Calculation of triangle areas and saving in a list
     tri_surface_area = []
     for i in range(num_of_triangles):
         tri_surface_area.append(0.5 * (
@@ -161,10 +163,9 @@ def calc_avg_tri_norm_weighted_by_area(tri_areas,patch_vectors_of_stl_input):
 
     return avg_tri_normal_weighted
 def calc_patch_pointcloud_weighted_by_area(tri_areas, tri_centerpoints):
-    #
     centerpoints_weights_area_tri = calc_weights_for_center_points_by_percentil_area(tri_areas)
 
-    # für jedes Dreieck werden die Mittelpunkte so oft gewertet (in die Punktwolke getan) wie es in centerpoints_weights_area_tri steht
+    # for each triangle the midpoints are evaluated (put into the point cloud) as often as it is written in centerpoints_weights_area_tri
     pointcloud_weighted=[]
 
     for i in range(num_of_triangles):
@@ -175,25 +176,26 @@ def calc_patch_pointcloud_weighted_by_area(tri_areas, tri_centerpoints):
 
     return pointcloud_weighted
 def calc_weights_for_center_points_by_percentil_area(tri_areas):
-    # In dieser Funktion wird eine Punktwolke aus den Dreiecksmittelpunkten der stl Datei generiert. Da mit dieser
-    # Punktwolke später die Hauptwertzerlegung erfolgt, müssen große Dreiecke gegenüber kleinen Dreiecken stärker
-    # gewichtet werden. Dies geschieht indem das Verhältnis der Dreiecksflächen zueinander berechnet wird und die
-    # Mittelpunkte großer Dreiecke öfter zur Punktwolke hinzugefügt werden als die Mittelpunkte kleiner Dreiecke.
+    # This function generates a point cloud from the triangle centers of the stl file. Since with this
+    # point cloud later the main value decomposition takes place, large triangles must be stronger than small triangles
+    # be weighted # This is done by calculating the ratio of the triangular areas to each other and the
+    # centers of large triangles are added to the point cloud more often than the centers of small triangles
 
-    ###Gewichtung großer Dreiecke
-    # 1) Berechnung der Dreiecksflächen und Speichern in einer Liste
+
+    ###Weighting large triangles
+    # 1) Calculation of the triangle areas and saving in a list
     area_whole_patch = sum(tri_areas)
-    # 2) Die Dreiecksflächen werden miteinander verglichen, um später große Dreiecke gegenüber kleinen stärker zu
-    # gewichten. Als "kleinste" Referenzfläche wird das 10-er Quantil der Flächen genommen (90% aller anderen Dreiecke
-    # sind größer). In centerpoints_weights_area_tri wird für jedes Dreieck berechnet, um welchen Faktor es größer als das
-    # Referenzdreicek ist (der Faktor wird aufgerundet). Zur Pointcloud wird von jedem Dreieck der Mittelpunkt so oft
-    # hinzugefügt wie hoch der Flächenfaktor aus der centerpoints_weights_area_tri ist (mindestens einmal).
-    # Um zu große Rechenzeiten zu vermeiden wird im Vorhinein abgeschätzt wie viele Punkte die Punktwolke
-    # haben wird und bei Überschreiten eines Grenzwerts( max_points_in_pc) wird das Programm abgebrochen.
+    # 2) The triangle surfaces are compared with each other, in order to later weight large triangles more than small ones
+    # The 10th quantile of the areas is taken as the "smallest" reference area (90% of all other triangles
+    # are bigger). In centerpoints_weights_area_tri, for each triangle the factor by which it is larger than
+    # its reference triangle (the factor is rounded up).The center of each triangle is
+    # added to the centerpoints_weights_area_tri (at least once) "factor"-times
+    # To avoid too much computing time, the number of points in the point cloud is estimated in advance
+    # and if a limit value( max_points_in_pc) is exceeded, the program is aborted.
     lower_percentil_area = np.percentile(tri_areas, percentile_pc)
     estimated_number_points_in_pc = math.ceil(area_whole_patch / lower_percentil_area)
 
-    # Abbruchbedingung: in der Pointcloud sollen maximal "max_points_in_pc" berechnet werden.
+    # Termination condition: maximum "max_points_in_pc" should be calculated in the point cloud.
     if max_points_in_pc < estimated_number_points_in_pc:
         print("ERROR: Please use a .stl-object with reduced resolution ")
         print("Number of triangles: ", num_of_triangles)
@@ -201,8 +203,8 @@ def calc_weights_for_center_points_by_percentil_area(tri_areas):
         print("Allowed number of points in pointcloud:", max_points_in_pc)
         exit(1)
 
-    # Im Folgenden wird jedes Dreieck mit dem kleinsten Dreieck verglichen und in centerpoints_weights_area_tri festgehalten, wie
-    # oft das kleinste Dreieck in das jeweilige Dreieck hineinpasst.
+    # In the following, each triangle is compared with the smallest triangle and recorded in centerpoints_weights_area_tri, as
+    # often the smallest triangle fits into the respective triangle
     centerpoints_weights_area_tri = []
     for i in range(num_of_triangles):
         centerpoints_weights_area_tri.append(math.ceil(tri_areas[i] / lower_percentil_area))
@@ -212,21 +214,21 @@ def calc_trendline_axis_with_svd(patch_pc_weighted, center_point_of_cloud_weight
     # Do Principal Component Analysis(PCA) on the mean-centered data. AKA SVD
     # The first principal component contains [uu, dd, vv] , where vv[0] is the direction
     first_principal_components_pc_weighted = scipy.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted) # scipy lib is faster then numpy
-    # Definition der Hauptachsen
+    # Definition of the trendline axes
     trendline_x_axis = first_principal_components_pc_weighted[2][0] # first_principal_components_pc_weighted[2][0]: is direction of trendline
     trendline_x_axis = norm_vector(trendline_x_axis)
-    # avg_tri_norm ist nicht senkrecht zur x-Achse
-    # von pcc + avg_tri_norm und zurück auf x-Achse projizieren
+    # avg_tri_norm is not perpendicular to the x-axis
+    # project from pcc + avg_tri_norm and back to x-axis
     trendline_avg_norm_point = center_point_of_cloud_weighted + np.dot(avg_tri_normal_weighted,
                                                                        trendline_x_axis) / np.dot(trendline_x_axis,
                                                                                                   trendline_x_axis) * trendline_x_axis
-    # y-Achse ist verbindung von pcc+avg_tri_norm mit dem projizierten Punkt
+    # y-axis is connection of pcc+avg_tri_norm with the projected point
     trendline_z_axis = (center_point_of_cloud_weighted + avg_tri_normal_weighted) - trendline_avg_norm_point
     trendline_z_axis = norm_vector(trendline_z_axis)
     trendline_y_axis = np.cross(trendline_z_axis, trendline_x_axis)
     return trendline_x_axis, trendline_y_axis, trendline_z_axis
 def find_nearest(array, value):
-# find the index of the closest value in an array to a given value
+    # find the index of the closest value in an array to a given value
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
@@ -441,26 +443,33 @@ def translate_points_to_new_zero(new_zero_point_in_old_KOS_rotated, points_in_tr
 #######################################################################################################################
 # Calculation of the bending parameters
 def calc_bending_parameters(grid_ressolution_int, grid_x, max_distance, width_for_edge_detection, max_x, max_y, min_x, min_y,
-                            z_grid_values_linear):
+                            z_grid_values_linear,calc_2D_with_edge_detection,calc_3D_Solution):
 
     y_0_grid_point_index = np.asarray(np.round(max_y / (max_y - min_y) * grid_ressolution_int), dtype=np.int32)
     x_0_grid_point_index = np.asarray(np.round(max_x / (max_x - min_x) * grid_ressolution_int), dtype=np.int32)
 
 
-    initialize_global_lists_of_bending_and_plot_parameter()
+    initialize_global_lists_of_3D_bending_and_plot_parameter()
 
-    # Start calculating bendingpoints
-    calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list_3D, grid_ressolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
-                                                   max_y, min_x, min_y, x_0_grid_point_index, x_values_trim_stacked,
-                                                   xdata_list, y_0_grid_point_index, y_values_trim_stacked, ydata_list,
-                                                   z_grid_values_linear)
-    # Show results
-    show_results_2D_Plots_and_Colormap(max_x, max_y, min_x, min_y, new_bending_direction_points_tilted_KOS_left_stacked,
-                                       new_bending_direction_points_tilted_KOS_right_stacked,
-                                       new_bending_direction_points_tilted_KOS_stacked, x_values_trim_stacked,
-                                       y_values_trim_stacked, z_grid_values_linear)
+
+    # Calc 2D-Bendpoints
+    calc_bending_points( grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
+        z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance,
+        width_for_edge_detection, 0, 0, True, calc_2D_with_edge_detection, calc_3D_Solution)
+
+    if calc_3D_Solution:
+        # Start calculating bendingpoints
+        calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list_3D, grid_ressolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
+                                                       max_y, min_x, min_y, x_0_grid_point_index, x_values_trim_stacked,
+                                                       xdata_list, y_0_grid_point_index, y_values_trim_stacked, ydata_list,
+                                                       z_grid_values_linear)
+        # Show results
+        show_results_2D_Plots_and_Colormap(max_x, max_y, min_x, min_y, new_bending_direction_points_tilted_KOS_left_stacked,
+                                           new_bending_direction_points_tilted_KOS_right_stacked,
+                                           new_bending_direction_points_tilted_KOS_stacked, x_values_trim_stacked,
+                                           y_values_trim_stacked, z_grid_values_linear)
 # Functions in calc_bending_parameters
-def initialize_global_lists_of_bending_and_plot_parameter():
+def initialize_global_lists_of_3D_bending_and_plot_parameter():
     #  Startpoint and one additional Point for the direction (Endpoint). First values are drawn into the colormap.
     global xdata_list, ydata_list
     xdata_list = xdata
@@ -470,9 +479,12 @@ def initialize_global_lists_of_bending_and_plot_parameter():
     global x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, beta_angle_between_planes_list_3D, alpha_angle_list_3D, length_list_3D, edge_line_global, bend_pts_xyz_global_3D
     x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, beta_angle_between_planes_list_3D, alpha_angle_list_3D, edge_line_global, length_list_3D, bend_pts_xyz_global_3D = [], [], [], [], [], [], [], []
 
+    global length_list_2D_with_edge_detection, beta_angle_between_planes_list_2D_with_edge_detection, alpha_angle_list_2D_with_edge_detection
+    length_list_2D_with_edge_detection, beta_angle_between_planes_list_2D_with_edge_detection, alpha_angle_list_2D_with_edge_detection = [],[],[]
+
     # Blue Points for 3D-global Plot
-    global new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked
-    new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked = [], [], []
+    global surfacepoints_between_Start_and_End, new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked
+    surfacepoints_between_Start_and_End, new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked = [], [], [], []
 
     # 2D Plot tildet local KOS
     global new_bending_direction_points_tilted_KOS_stacked, new_bending_direction_points_tilted_KOS_left_stacked, new_bending_direction_points_tilted_KOS_right_stacked, \
@@ -496,10 +508,10 @@ def calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list, grid_ressol
                                                    xdata_list, y_0_grid_point_index, y_values_trim_stacked, ydata_list,
                                                    z_grid_values_linear):
     # calc_tilted_bending_points has no return value except num_bendpoints. All the bending parameters are saved in the global lists
-    num_bendpoints = calc_tilted_bending_points(
+    num_bendpoints = calc_bending_points(
         grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
         z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance, width_for_edge_detection,
-        0, 0,True)
+        0, 0)
 
     # Show calculated direction in colormap
     pyplot.figure()
@@ -509,7 +521,7 @@ def calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list, grid_ressol
     pyplot.pause(0.3) #Give system time to print the plot
 
     while num_bendpoints > 2:
-        num_bendpoints = calc_tilted_bending_points(
+        num_bendpoints = calc_bending_points(
             grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
             z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance, width_for_edge_detection,
             alpha_angle_list[-1], alpha_end=0)
@@ -619,9 +631,9 @@ def calc_2D_lengths(bend_pts_xz_local):
 
 #######################################################################################################################
 # For every iteration in calc_bending_parameters new bendpoints and parameters have to be calculated.
-def calc_tilted_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index,
-                               x_0_grid_point_index, z_grid_values_linear, xdata, ydata, max_distance, width_for_edge_detection, alpha_start=0 ,alpha_end=0, calc_tape_para_2D=False):
-    ###### Schräge Gerade mit y(x)
+def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index,
+                        x_0_grid_point_index, z_grid_values_linear, xdata, ydata, max_distance, width_for_edge_detection, alpha_start=0, alpha_end=0, calc_tape_para_2D=False,calc_2D_with_edge_detection=False, calc_3D_Solution=True):
+    ##### Oblique linear line y(x)
     # 2 lines needed:   • mathematical decription with coordinates for Plot.
     #                   • with Indizies for extraction from grid
 
@@ -660,16 +672,17 @@ def calc_tilted_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x
     normal_patch_current_direction, \
     rotated_x_direction_around_edge_current_direction, \
     beta_angle_between_planes_list_current_direction,\
-    alpha_angle_list_current_direction = calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, edge_directions,x_direction_start,normal_at_start)
+    alpha_angle_list_current_direction,\
+    lengths_between_planes_list= calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, edge_directions,x_direction_start,normal_at_start,bend_pts_xz_local,lenght_between_first_two_bends)
 
     # Add Bend/Tapeparameters from second bendpoint to global list(first bendpoint = startpoint)
     append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
                                                               bend_pts_xyz_trendline,
                                                               beta_angle_between_planes_list_current_direction,
-                                                              edge_directions, lenght_between_first_two_bends,
+                                                              edge_directions, lengths_between_planes_list,
                                                               normal_patch_current_direction,
                                                               rotated_x_direction_around_edge_current_direction,
-                                                              x_direction_list_current_direction)
+                                                              x_direction_list_current_direction,calc_2D_with_edge_detection,calc_3D_Solution)
 
     return len(bend_pts_xyz_global_left)
 def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolution_int, max_distance,
@@ -769,6 +782,73 @@ def calc_points_on_surface_and_extract_bendline(dy, grid_ressolution_int, max_di
                                                                                                       trendline_new_direction_current_KOS,
                                                                                                       y_intercept)
     return bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, new_bending_direction_points_on_surface_global_KOS, new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim
+def append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
+                                                              bend_pts_xyz_trendline,
+                                                              beta_angle_between_planes_list_current_direction,
+                                                              edge_directions, lengths_between_planes_list,
+                                                              normal_patch_current_direction,
+                                                              rotated_x_direction_around_edge_current_direction,
+                                                              x_direction_list_current_direction,calc_2D_with_edge_detection,calc_3D_Solution):
+
+    global x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, \
+        length_list_3D,beta_angle_between_planes_list_3D, alpha_angle_list_3D,  \
+        length_list_2D_with_edge_detection, beta_angle_between_planes_list_2D_with_edge_detection, alpha_angle_list_2D_with_edge_detection, \
+        edge_line_global, xdata_list, ydata_list, bend_pts_xyz_global_3D
+
+    # Tape parameter for EA
+    if calc_2D_with_edge_detection:
+        length_list_2D_with_edge_detection = np.asarray(lengths_between_planes_list)
+        beta_angle_between_planes_list_2D_with_edge_detection = np.asarray(
+            beta_angle_between_planes_list_current_direction)
+        alpha_angle_list_2D_with_edge_detection = np.asarray(alpha_angle_list_current_direction)
+
+        if calc_3D_Solution == False: # If no 3D Solution is calculated, we need to save the first x_direction and normal: start_d/start_n Parameter
+            x_direction_list_global_KOS.append(x_direction_list_current_direction[0])
+            x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction[0])
+            normal_patch_global_KOS.append(normal_patch_current_direction[0])
+
+    else:
+        length_list_3D.append(lengths_between_planes_list[0])
+
+        # Bendpoint and edge
+        bend_pts_xyz_global_3D.append(bend_pts_xyz_global[0])
+
+        edge_line_global_current_direction = [
+            (bend_pts_xyz_global[:][:2] + np.multiply(edge_directions[:][:2], 50)),
+            (bend_pts_xyz_global[:][:2] - np.multiply(edge_directions[:][:2], 50))]
+        edge_line_global.append([edge_line_global_current_direction[0][1], edge_line_global_current_direction[1][1]])
+
+        if len(edge_directions) == 2:  # Last part
+            bend_pts_xyz_global_3D.append(bend_pts_xyz_global[1])
+        if len(edge_directions) > 2:
+            # xdata,ydata gives startpoint and direction of next bending direction.
+            xdata_list.append(bend_pts_xyz_trendline[1][0])
+            ydata_list.append(bend_pts_xyz_trendline[1][1])
+
+            # New Direction and Endpoint in trendline KOS(same then interpolation)
+            rotated_x_direction_point_in_trendline_KOS = np.asarray(
+                [bend_pts_xyz_global[1] + np.multiply(rotated_x_direction_around_edge_current_direction[0], 5),
+                 bend_pts_xyz_global[1]])
+            rotated_x_direction_around_edge_trendline_KOS_current_direction = translate_and_rotate_points_from_OLD_to_trendline_KOS(
+                rotated_x_direction_point_in_trendline_KOS, trendline_global_KOS, center_point_of_cloud_weighted)
+
+            x_intersect, y_intersect = calc_new_endpoint(bend_pts_xyz_trendline,
+                                                         rotated_x_direction_around_edge_trendline_KOS_current_direction,
+                                                         xdata_list, ydata_list)
+
+            xdata_list.append(x_intersect)
+            ydata_list.append(y_intersect)
+
+            # Tape parameter for EA
+            beta_angle_between_planes_list_3D.append(beta_angle_between_planes_list_current_direction[0])
+            alpha_angle_list_3D.append(alpha_angle_list_current_direction[0])
+
+
+            # Directions
+            x_direction_list_global_KOS.append(x_direction_list_current_direction[0])
+            x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction[0])
+            normal_patch_global_KOS.append(normal_patch_current_direction[0])
+
 def calc_new_endpoint(bend_pts_xyz_trendline, rotated_x_direction_around_edge_trendline_KOS_current_direction,
                       xdata_list, ydata_list):
     # new endpoint is the intersection between the line representing the the new direction and the end line
@@ -783,8 +863,9 @@ def calc_new_endpoint(bend_pts_xyz_trendline, rotated_x_direction_around_edge_tr
 
     # new startpoint
     new_startpoint = np.asarray([bend_pts_xyz_trendline[1][0], bend_pts_xyz_trendline[1][1]])
-    other_point_in_new_direction = np.asarray([rotated_x_direction_around_edge_trendline_KOS_current_direction[0][0],
-                                             rotated_x_direction_around_edge_trendline_KOS_current_direction[0][1]])
+    other_point_in_new_direction = np.asarray(
+        [rotated_x_direction_around_edge_trendline_KOS_current_direction[0][0],
+         rotated_x_direction_around_edge_trendline_KOS_current_direction[0][1]])
 
     # Stack the 4 points, s for stacked
     s = np.vstack([new_startpoint, other_point_in_new_direction, drawn_endpoint,
@@ -797,57 +878,6 @@ def calc_new_endpoint(bend_pts_xyz_trendline, rotated_x_direction_around_edge_tr
     x_intersect = x / z
     y_intersect = y / z
     return x_intersect, y_intersect
-def append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
-                                                              bend_pts_xyz_trendline,
-                                                              beta_angle_between_planes_list_current_direction,
-                                                              edge_directions, lenght_between_first_two_bends,
-                                                              normal_patch_current_direction,
-                                                              rotated_x_direction_around_edge_current_direction,
-                                                              x_direction_list_current_direction):
-
-    global x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, beta_angle_between_planes_list_3D, alpha_angle_list_3D, length_list_3D, edge_line_global, xdata_list, ydata_list, bend_pts_xyz_global_3D
-
-    # Tape parameter for EA
-    length_list_3D.append(lenght_between_first_two_bends)
-
-    # Bendpoint and edge
-    bend_pts_xyz_global_3D.append(bend_pts_xyz_global[0])
-
-    edge_line_global_current_direction = [
-        (bend_pts_xyz_global[:][:2] + np.multiply(edge_directions[:][:2], 50)),
-        (bend_pts_xyz_global[:][:2] - np.multiply(edge_directions[:][:2], 50))]
-    edge_line_global.append([edge_line_global_current_direction[0][1], edge_line_global_current_direction[1][1]])
-
-    if len(edge_directions) == 2:  # Last part
-        bend_pts_xyz_global_3D.append(bend_pts_xyz_global[1])
-    if len(edge_directions) > 2:
-        # xdata,ydata gibt Startpunkt und Richtung der nächsten Biegerichtung an
-        rotated_x_direction_point_in_trendline_KOS = np.asarray(
-            [bend_pts_xyz_global[1] + np.multiply(rotated_x_direction_around_edge_current_direction[0], 5),
-             bend_pts_xyz_global[1]])
-        rotated_x_direction_around_edge_trendline_KOS_current_direction = translate_and_rotate_points_from_OLD_to_trendline_KOS(
-            rotated_x_direction_point_in_trendline_KOS, trendline_global_KOS, center_point_of_cloud_weighted)
-
-        # Startpoint
-        xdata_list.append(bend_pts_xyz_trendline[1][0])
-        ydata_list.append(bend_pts_xyz_trendline[1][1])
-
-        # Direction/Endpoint
-        x_intersect, y_intersect = calc_new_endpoint(bend_pts_xyz_trendline,
-                                                     rotated_x_direction_around_edge_trendline_KOS_current_direction,
-                                                     xdata_list, ydata_list)
-
-        xdata_list.append(x_intersect)
-        ydata_list.append(y_intersect)
-
-        # Tape parameter for EA
-        beta_angle_between_planes_list_3D.append(beta_angle_between_planes_list_current_direction[0])
-        alpha_angle_list_3D.append(alpha_angle_list_current_direction[0])
-
-        # Directions
-        x_direction_list_global_KOS.append(x_direction_list_current_direction[0])
-        x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction[0])
-        normal_patch_global_KOS.append(normal_patch_current_direction[0])
 def append_plot_points_till_second_bendpoint_to_global_list(bend_pts_xz_local, bend_pts_xz_local_left,
                                                             bend_pts_xz_local_right,
                                                             new_bending_direction_points_on_surface_global_KOS,
@@ -862,6 +892,9 @@ def append_plot_points_till_second_bendpoint_to_global_list(bend_pts_xz_local, b
         bend_pts_xz_local, bend_pts_xz_local_left, bend_pts_xz_local_right, new_bending_direction_points_tilted_KOS,
         new_bending_direction_points_tilted_KOS_left, new_bending_direction_points_tilted_KOS_right)
 
+    global surfacepoints_between_Start_and_End
+
+    if surfacepoints_between_Start_and_End == []: surfacepoints_between_Start_and_End = bend_pts_xz_local
 
     # Global 3D-Plot
     global new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked
@@ -943,7 +976,7 @@ def calc_bend_pts(max_distance, x_z_surface_point):
 
     return bend_pts_xz
 def calc_point_of_max_divergence_between_smooth_and_lin_curve(points_on_line_between_bends_filled_up, x_y_points_filled_up):
-    # Comment_DB: curve_divergence in terms of y-distance # Größte Abweichung von geglätteter Kurve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
+    # Comment_DB: curve_divergence in terms of y-distance # Largest deviation from smoothed curve: (COMMENT_DB: By now all the points in the above (linear) line have been appended)
     curve_divergence_y = []
     for i in range(len(points_on_line_between_bends_filled_up)):
         curve_divergence_y.append([points_on_line_between_bends_filled_up[i][0], (
@@ -965,7 +998,7 @@ def calc_points_on_line_between_bends_filled_up(bend_pts_xy, bend_pts_xy_curve, 
     bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)  # Comment_DB: This is now one linear curve from start to end point. Everything here is dependent on xy_patch_curve. Below will take divergence into consideration
     return bend_pts_xy_curve
 def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right,bend_pts_xyz_trendline,
-                                            edge_directions,x_direction_start,normal_at_start):
+                                            edge_directions,x_direction_start,normal_at_start,bend_pts_xz_local,lenght_between_first_two_bends):
 
     x_direction_list = [x_direction_start]
 
@@ -974,12 +1007,15 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
 
     normal_patch = [normal_at_start]
 
+    lengths_between_planes_list = [lenght_between_first_two_bends]
     beta_angle_between_planes_list = []
     alpha_angle_between_planes_list = []
 
 
 
     for i in range(1, (len(edge_directions) - 1)):
+        length_current_direction = np.linalg.norm(bend_pts_xz_local[i+1] - bend_pts_xz_local[i])
+
         # Calc x_y_and_normal direction of the Tape at each bending point
         x_direction_before_bend = norm_vector(bend_pts_xyz_global[i] - bend_pts_xyz_global[i - 1])
 
@@ -1030,7 +1066,7 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
         if side_directions_rotated[1][1] < 0:
             side_directions_rotated[1][:] = -side_directions_rotated[1][:]
 
-        # Edge_direction auf y_direction tape projezieren, sollte eigentlich direkt drauf sein. Punkte rechts links können minimal abweichen.
+        # Edge_direction projected to current tape orientation
         edge_direction_on_tapeplane = project_pointtoplane(edge_directions[i],normal_at_bendpoint_0_tape,np.asarray([0,0,0]))
         edge_direction_on_tapeplane = norm_vector(edge_direction_on_tapeplane)
         y_direction_tape = norm_vector(y_direction_tape)
@@ -1046,6 +1082,7 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
         alpha_angle_between_planes_list.append(alpha_angle)
         beta_angle_between_planes_list.append(beta_angle_between_planes)
         normal_patch.append(normal_at_bendpoint_0_tape)
+        lengths_between_planes_list.append(length_current_direction)
 
     # Rotate new Tape-Orientation to Trendline KOS as referenz for the next bending direction
     if len(edge_directions)>2:
@@ -1059,7 +1096,7 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
     x_direction_list = np.asarray(x_direction_list)
 
 
-    return x_direction_list, normal_patch, rotated_x_direction_around_edge,beta_angle_between_planes_list,alpha_angle_between_planes_list
+    return x_direction_list, normal_patch, rotated_x_direction_around_edge,beta_angle_between_planes_list,alpha_angle_between_planes_list,lengths_between_planes_list
 def calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right):
     global counter_failed_matches_of_edges
 
@@ -1296,25 +1333,31 @@ def new_bending_points_tilted_to_global(y_intercept,
     return new_bending_direction_points_trendline_KOS, new_bending_direction_points_global_KOS
 
 #######################################################################################################################
-def calc_L_aim(new_bending_direction_points_tilted_KOS_stacked):
+def calc_L_aim(x_y_points_filled_up):
     L_aim = 0
+    for i in range(1, len(x_y_points_filled_up)):
+
+        L_aim =L_aim + np.linalg.norm(x_y_points_filled_up[i]-x_y_points_filled_up[i - 1])
+
+    """L_aim = 0
     for i in range(len(new_bending_direction_points_tilted_KOS_stacked)):
         for j in range(1, len(new_bending_direction_points_tilted_KOS_stacked[i])):
             distance = calc_distance_between_two_points(new_bending_direction_points_tilted_KOS_stacked[i][j - 1],
                                                         new_bending_direction_points_tilted_KOS_stacked[i][j])
 
             L_aim = L_aim + distance
+    """
     return L_aim
 #######################################################################################################################
 def show_startstrip(bestPatch_patternpoints,patch_start,patch_end,dimension):
     ###############3D-PLOTTING################
     figure = pyplot.figure() #Comment_DB: 3D plot of objective shape
     axes = mplot3d.Axes3D(figure)
-    plt.title('Startlösung '+ dimension)
+    plt.title('Start chromosome '+ dimension)
 
-    patch_visual = mplot3d.art3d.Poly3DCollection(triangle_vectors_of_stl, linewidths=1, alpha=0.5, edgecolor=[1, 1, 1], label ='Geometriebereich') #Comment_DB: added edgecolor to make the edges visible
+    patch_visual = mplot3d.art3d.Poly3DCollection(triangle_vectors_of_stl, linewidths=1, alpha=0.5, edgecolor=[1, 1, 1], label ='Geometry') #Comment_DB: added edgecolor to make the edges visible
 
-    axes.scatter([999999990],[9999999900],[9999999900],linewidths=0.0001, alpha = 0.5, label = "Geometriebereich") #Comment_DB: label in legend
+    axes.scatter([999999990],[9999999900],[9999999900],linewidths=0.0001, alpha = 0.5, label = "Geometry") #Comment_DB: label in legend
     """
     # Trendline KOS
     # x-Achse

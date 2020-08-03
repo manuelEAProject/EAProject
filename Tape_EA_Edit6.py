@@ -527,7 +527,7 @@ Start_p_id = start_parameter[6]  # Comment_DB: The I.D. of the next bending poin
 L_aim = start_parameter[4]  # Comment_DB: already in [mm]
 patch_start = start_parameter[7]
 patch_end = start_parameter[8]
-AnzahlKnicke = len(start_parameter[3]) - 1
+amount_of_bends = len(start_parameter[3]) - 1
 
 # COMMENT_DB: New parameters
 Start_r_prep_fromstart = start_parameter[10]
@@ -593,17 +593,17 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     # Variabler Startpunkt
     var_range = 0.8
     var_start_pt_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[
-        3 * AnzahlKnicke + 1]  # Comment_DB: chromo[i] is the "c" variable! Do not have to change this w.r.t new order of starting chromosome
-    var_start_pt_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 2]
-    var_start_pt_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 3]
+        3 * amount_of_bends + 1]  # Comment_DB: chromo[i] is the "c" variable! Do not have to change this w.r.t new order of starting chromosome
+    var_start_pt_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 2]
+    var_start_pt_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 3]
 
-    var_start_r_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 4]
-    var_start_r_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 5]
-    var_start_r_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 6]
+    var_start_r_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 4]
+    var_start_r_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 5]
+    var_start_r_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 6]
 
     gamma_max = 10  # [Grad] Maximaler Kippwinkel für Start_n
     gamma_max_rad = gamma_max * (2 * math.pi / 360)
-    var_start_n_gamma = -gamma_max_rad + gamma_max_rad / (chromo_resolution / 2) * chromo[3 * AnzahlKnicke + 7]
+    var_start_n_gamma = -gamma_max_rad + gamma_max_rad / (chromo_resolution / 2) * chromo[3 * amount_of_bends + 7]
 
     Start_p = np.concatenate(np.array(
         [[patch_start[0] * var_start_pt_x], [patch_start[1] * var_start_pt_y],
@@ -1082,8 +1082,8 @@ p.p_prepInit = 70
 # Festlegen der Fitnessfunktion
 p.evalFunc = Fitness  # Comment_DB: The FUNCTION Fitness is assigned, not the lowercase equation fitness! Stores the function. p.evalFunc = Fitness() stores the return value
 ## Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
-p.chromoMinValues = [0] * (3 * AnzahlKnicke + 8)
-p.chromoMaxValues = [chromo_resolution] * (3 * AnzahlKnicke + 8)
+p.chromoMinValues = [0] * (3 * amount_of_bends + 8)
+p.chromoMaxValues = [chromo_resolution] * (3 * amount_of_bends + 8)
 # print("p.chromoMaxValues", p.chromoMaxValues) #Comment_DB: [100, 100, 100, 100...] 3*AnzahlKnicke+8 times
 
 ## Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
@@ -1342,7 +1342,7 @@ chart1.add_series({
 
 """
 
-print("\n\nEnd Patch length: ", PatchLength(p.bestFitIndividual.genes, AnzahlKnicke, l_factor),
+print("\n\nEnd Patch length: ", PatchLength(p.bestFitIndividual.genes, amount_of_bends, l_factor),
       "L_Aim (From Preprocessor):", L_aim)
 print("End Fitness: ", p.bestFitIndividual.getFitness(),
       "\n\tEnd distance Fit:", Fitness(p.bestFitIndividual.genes)[1],
@@ -1494,7 +1494,7 @@ def save_patch_file():
     name.write("length=" + str(sum(bestPatch_parameter_l)) + "\n")
     name.write("type=" + str(tape_type) + "\n")
     l = 0
-    for i in range(AnzahlKnicke):
+    for i in range(amount_of_bends):
         l = int(l) + int(bestPatch_parameter_l[i])
         l = str(l)
         # l = str(int(bestPatch_parameter_l[i]))

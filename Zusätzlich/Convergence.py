@@ -279,7 +279,7 @@ Start_p_id = start_parameter[6]
 L_aim = start_parameter[4]
 patch_start = start_parameter[7]
 patch_end = start_parameter[8]
-AnzahlKnicke = len(start_parameter[3])-1
+amount_of_bends = len(start_parameter[3]) - 1
 # Faktor für das Längenallel in den Chromosomen -> eine Länge kann maximal L_aim lang werden
 l_factor = 0.5*L_aim/chromo_resolution
 
@@ -309,13 +309,13 @@ def ListOfPoints(chromo):
     l_list = []
     alpha_list = []
     beta_list = []
-    for i in range(0, AnzahlKnicke + 1):
+    for i in range(0, amount_of_bends + 1):
         if chromo[i] == 0:
             l_list.append(1)
         else:
             l_list.append(chromo[i] * l_factor)
 
-    for i in range(AnzahlKnicke + 1, 2 * AnzahlKnicke + 1):
+    for i in range(amount_of_bends + 1, 2 * amount_of_bends + 1):
         alpha = 0
         if chromo[i] < chromo_resolution / 2:
             alpha = (135 + (chromo[i] * 45 / (chromo_resolution / 2))) * 2 * math.pi / 360
@@ -326,23 +326,23 @@ def ListOfPoints(chromo):
                     chromo_resolution / 2)) * 2 * math.pi / 360  # Quadratische Vert. von 135°-180°
         alpha_list.append(alpha)
 
-    for i in range(2 * AnzahlKnicke + 1, 3 * AnzahlKnicke + 1):
+    for i in range(2 * amount_of_bends + 1, 3 * amount_of_bends + 1):
         beta = (chromo[i] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
         beta_list.append(beta)
 
     # Variabler Startpunkt
     var_range = 0.8
-    var_start_pt_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 1]
-    var_start_pt_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 2]
-    var_start_pt_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 3]
+    var_start_pt_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 1]
+    var_start_pt_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 2]
+    var_start_pt_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 3]
 
-    var_start_r_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 4]
-    var_start_r_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 5]
-    var_start_r_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * AnzahlKnicke + 6]
+    var_start_r_x = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 4]
+    var_start_r_y = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 5]
+    var_start_r_z = 1 - var_range + (var_range / (chromo_resolution / 2)) * chromo[3 * amount_of_bends + 6]
 
     gamma_max = 10  # [Grad] Maximaler Kippwinkel für Start_n
     gamma_max_rad = gamma_max * (2 * math.pi / 360)
-    var_start_n_gamma = -gamma_max_rad +  gamma_max_rad / (chromo_resolution / 2) * chromo[3 * AnzahlKnicke + 7]
+    var_start_n_gamma = -gamma_max_rad +  gamma_max_rad / (chromo_resolution / 2) * chromo[3 * amount_of_bends + 7]
 
     Start_p = np.concatenate(np.array(
         [[Start_p_prep[0] * var_start_pt_x], [Start_p_prep[1] * var_start_pt_y], [Start_p_prep[2] * var_start_pt_z]]))
@@ -793,7 +793,7 @@ def Fitness(chromo):
     A = trimesh.proximity.closest_point(testpatch, LoP[0])
 
     L = 0
-    for i in range(AnzahlKnicke + 1):
+    for i in range(amount_of_bends + 1):
         L = L + genes[i] * l_factor
 
     A_norm = []
@@ -839,10 +839,10 @@ startchromo = preprocessed_chromo(start_parameter,chromo_resolution)
 
 #Ausgabe der Ergebnisse aus Vorverarbeitung der Geometriedaten
 
-print("Anzahl Biegestellen:", AnzahlKnicke)
+print("Anzahl Biegestellen:", amount_of_bends)
 print("L_aim",L_aim)
 print("startchromo",startchromo)
-print("startlength",PatchLength(startchromo,AnzahlKnicke,l_factor))
+print("startlength", PatchLength(startchromo, amount_of_bends, l_factor))
 print("startfitness", Fitness(startchromo))
 # Ergebnisse aus Vorverarbeitung visualisieren:
 #stl_preprocessing.show_startstrip(input_file,ListOfPoints(startchromo)[0],poly_order,window_quotient,max_distance,ListOfPoints(startchromo)[3])
@@ -863,8 +863,8 @@ p.p_prepInit = 70
 # Festlegen der Fitnessfunktion
 p.evalFunc = Fitness
 ## Festlegen der Minimal - & Maximalwerte und der Länge eines Chromosoms in Abh. der Knickanzahl
-p.chromoMinValues = [0]*(3*AnzahlKnicke+8)
-p.chromoMaxValues = [chromo_resolution]*(3*AnzahlKnicke+8)
+p.chromoMinValues = [0]*(3 * amount_of_bends + 8)
+p.chromoMaxValues = [chromo_resolution]*(3 * amount_of_bends + 8)
 ## Ganzzahlige Allele -> useInteger = 1, Floatwerte -> useInteger = 0
 p.useInteger = useInteger
 #p.useInteger = 0

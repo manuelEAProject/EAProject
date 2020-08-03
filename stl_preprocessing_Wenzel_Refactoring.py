@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from stl import mesh
+import scipy
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
@@ -10,7 +11,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 equidistant_step_size = 3
 percentile_pc = 5
-max_points_in_pc = 10000
+max_points_in_pc = 13000
 
 #Berechnet den Abstand von 2 Punkten
 def calc_distance_between_two_points(p1, p2):
@@ -314,7 +315,7 @@ def project_tri_centerpoints_to_trendline(tri_centerpoints):
 def calc_trendline_axis_with_svd(patch_pc_weighted, center_point_of_cloud_weighted):
     # Do Principal Component Analysis(PCA) on the mean-centered data. AKA SVD
     # The first principal component contains [uu, dd, vv] , where vv[0] is the direction
-    first_principal_components_pc_weighted = np.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
+    first_principal_components_pc_weighted = scipy.linalg.svd(patch_pc_weighted - center_point_of_cloud_weighted)
     # Definition der Hauptachsen
     trendline_x_axis = first_principal_components_pc_weighted[2][0] # first_principal_components_pc_weighted[2][0]: is direction of trendline
     trendline_x_axis = (1 / np.linalg.norm(trendline_x_axis)) * trendline_x_axis
