@@ -50,12 +50,17 @@ def startparam(input_file, max_distance, width_for_edge_detection, grid_resoluti
     # Alpha_liste from calc_bending_parameters
     alpha_list = [np.asarray(alpha_angle_list_3D),alpha_angle_list_2D,alpha_angle_list_2D_with_edge_detection]
 
-    # L_aim: Takes curve of interpolated surface. 2D_solution
+    # L_aim:  Curve of interpolated surface. 2D_solution
+    L_aim = calc_L_aim(surfacepoints_between_Start_and_End) # summed up distances
 
-    L_aim = calc_L_aim(surfacepoints_between_Start_and_End) # summed up distances between 3D bending points
+    if len(l_list[0]) > len(l_list[1]):
+        amount_of_bends = len(l_list[0]) - 1
+    else:
+        amount_of_bends = len(l_list[1]) - 1
+
 
     start_parameter = [l_list, L_aim, beta_list, alpha_list, startpoint_on_surface,
-                       endpoint_on_surface, Start_r_3d_atstart, Start_n_3d_atstart]
+                       endpoint_on_surface, Start_r_3d_atstart, Start_n_3d_atstart,amount_of_bends]
     return start_parameter
 
 #######################################################################################################################
@@ -653,7 +658,7 @@ def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x
     bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local = calc_bend_pts_in_new_directions(
         alpha_end, alpha_start, dx, dy, grid_ressolution_int, max_distance, trendline_new_direction_current_KOS,
         width_for_edge_detection, x_0_grid_point_index, x_slope, x_values, xdata, y_0_grid_point_index, ydata,
-        z_grid_values_linear)
+        z_grid_values_linear,calc_2D_with_edge_detection)
 
     # Start Direction and Start Normal, returned as start parameter!
     x_direction_start = norm_vector(bend_pts_xyz_global[1] - bend_pts_xyz_global[0])  # Start_direction
@@ -663,6 +668,10 @@ def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x
     # Calc Tapeparameters 2D
     if calc_tape_para_2D:
         calc_tape_parameter_for_2D_solution(bend_pts_xyz_global,bend_pts_xz_local)
+
+    global surfacepoints_between_Start_and_End
+    if surfacepoints_between_Start_and_End == []: # Just once at the start
+        surfacepoints_between_Start_and_End = bend_pts_xz_local
 
     # Calc Tapeparameters 3D
     edge_directions = calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right)
@@ -687,7 +696,7 @@ def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x
     return len(bend_pts_xyz_global_left)
 def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolution_int, max_distance,
                                     trendline_new_direction_current_KOS, width_for_edge_detection, x_0_grid_point_index,
-                                    x_slope, x_values, xdata, y_0_grid_point_index, ydata, z_grid_values_linear):
+                                    x_slope, x_values, xdata, y_0_grid_point_index, ydata, z_grid_values_linear,calc_2D_with_edge_detection):
 
     # Start and endpoint for tape section
     end_point_xyz_trendline_data, \
@@ -751,7 +760,8 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolu
 
 
     # Trim plot points to second bendpoint and add to global list
-    append_plot_points_till_second_bendpoint_to_global_list(bend_pts_xz_local, bend_pts_xz_local_left,
+    if not calc_2D_with_edge_detection:
+        append_plot_points_till_second_bendpoint_to_global_list(bend_pts_xz_local, bend_pts_xz_local_left,
                                                             bend_pts_xz_local_right,
                                                             new_bending_direction_points_on_surface_global_KOS,
                                                             new_bending_direction_points_on_surface_global_KOS_left,
@@ -760,6 +770,7 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolu
                                                             new_bending_direction_points_tilted_KOS_left,
                                                             new_bending_direction_points_tilted_KOS_right,
                                                             x_values_trim, y_values_trim)
+
     return bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local
 def calc_points_on_surface_and_extract_bendline(dy, grid_ressolution_int, max_distance,
                                                 start_point_xyz_trendline_data, trendline_new_direction_current_KOS,
@@ -892,9 +903,7 @@ def append_plot_points_till_second_bendpoint_to_global_list(bend_pts_xz_local, b
         bend_pts_xz_local, bend_pts_xz_local_left, bend_pts_xz_local_right, new_bending_direction_points_tilted_KOS,
         new_bending_direction_points_tilted_KOS_left, new_bending_direction_points_tilted_KOS_right)
 
-    global surfacepoints_between_Start_and_End
 
-    if surfacepoints_between_Start_and_End == []: surfacepoints_between_Start_and_End = bend_pts_xz_local
 
     # Global 3D-Plot
     global new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked
@@ -1353,7 +1362,7 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end,dimension):
     ###############3D-PLOTTING################
     figure = pyplot.figure() #Comment_DB: 3D plot of objective shape
     axes = mplot3d.Axes3D(figure)
-    plt.title('Start chromosome '+ dimension)
+    plt.title('Start solution preprocessor '+ dimension)
 
     patch_visual = mplot3d.art3d.Poly3DCollection(triangle_vectors_of_stl, linewidths=1, alpha=0.5, edgecolor=[1, 1, 1], label ='Geometry') #Comment_DB: added edgecolor to make the edges visible
 

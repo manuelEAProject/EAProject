@@ -2,20 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Visualisation_Tool.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/galileo_EA_Wenzel_Multiprocessing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/population2_EA.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/population2_Start.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/population2_edge_EA.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/population2_edge_Start.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/population3_EA.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/population3_Start.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/population_all.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/settingssheet_EA.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Edit6.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Edit6.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Zusätzlich/Convergence.py" beforeDir="false" afterPath="$PROJECT_DIR$/Zusätzlich/Convergence.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Visualisation_Tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/Visualisation_Tool.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/galileo_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/galileo_EA_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/population.txt" beforeDir="false" afterPath="$PROJECT_DIR$/population.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/population.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/startparameter.txt" beforeDir="false" afterPath="$PROJECT_DIR$/startparameter.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel_Refactoring.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel_Refactoring.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -252,13 +254,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1559132309230</updated>
-    </task>
-    <task id="LOCAL-00004" summary="Wenzel 1 schon zu sehr verändert. Tests liefen falsch. &#10;&#10;Neues Startfile kreirt. Tape_EA_Wenzel">
-      <created>1589192067680</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1589192067680</updated>
     </task>
     <task id="LOCAL-00005" summary="Tape_EA_Wenzel:&#10;• Vieles Auskommentierte gelöscht&#10;• Settinglist direkt übergeben">
       <created>1589203842317</created>
@@ -596,7 +591,14 @@
       <option name="project" value="LOCAL" />
       <updated>1596114017423</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="deutsch - english&#10;2D, 2D_with_Edge, 3D selection">
+      <created>1596462759742</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1596462759742</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -656,8 +658,43 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Visualisation_Tool.py</url>
-          <line>52</line>
+          <line>57</line>
           <option name="timeStamp" value="307" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/galileo_EA_Wenzel.py</url>
+          <line>389</line>
+          <option name="timeStamp" value="330" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Visualisation_Tool.py</url>
+          <line>16</line>
+          <option name="timeStamp" value="338" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
+          <line>1446</line>
+          <option name="timeStamp" value="359" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Visualisation_Tool.py</url>
+          <line>3</line>
+          <option name="timeStamp" value="360" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
+          <line>1693</line>
+          <option name="timeStamp" value="365" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
+          <line>1624</line>
+          <option name="timeStamp" value="366" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
+          <line>1540</line>
+          <option name="timeStamp" value="367" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

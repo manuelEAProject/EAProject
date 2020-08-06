@@ -1,15 +1,20 @@
 from Tape_EA_Wenzel import *
 
-def read_in_population(file="population.txt"):
-    generation = []
-    file2 = open(file, "r")
-    for j in range(pop_size):
-        chromo_read = file2.readline()[1:-2]
-        chromo_read = chromo_read.split(",")
-        chromo_read = list(map(int, chromo_read))
-        generation.append(chromo_read)
-    file2.close()
-    return generation
+# Loaded populations
+try: pop_2D = read_in_population(pop_size,"population2_EA.txt")
+except: pop_2D =[[]]
+try: pop_2DE = read_in_population(pop_size, "population2_edge_EA.txt")
+except: pop_2DE =[[]]
+try: pop_3D = read_in_population(pop_size, "population3_EA.txt")
+except: pop_3D =[[]]
+
+amount_of_bends  = int((len(pop_2D[0])-7)/3)
+
+p_loaded = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, pop_2D[0], # pop_2D[0] is the best solution of that generation
+                                               pop_2DE[0], pop_3D[0])
+#p_loaded.prepPopulation_read_in_population(calc_2D_Solution,calc_2D_with_edge_detection, calc_3D_Solution,pop_2D,pop_2DE,pop_3D)
+p_loaded.prepPopulation(calc_2D_Solution,calc_2D_with_edge_detection, calc_3D_Solution)
+EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_loaded, p_mutation)
 
 def create_chromo(lengths, alphas, betas):
 
@@ -34,7 +39,7 @@ def create_chromo(lengths, alphas, betas):
         chromo.append(int(chromo_resolution / 2))
     return chromo
 
-individuals = read_in_population()
+individuals = read_in_population(pop_size,"population3_EA.txt")
 
 
 show_chromo(individuals[0])
