@@ -14,13 +14,16 @@ import stl_preprocessing_Wenzel as stlprep3_6
 from tkinter import *
 from tkinter import filedialog
 from timeit import default_timer as timer
+import datetime
+import time
+import shutil
 
 
 # GUI-Settings
 def get_Preprocessor_Vars_from_GUI():
     master = Tk()
     master.protocol("WM_DELETE_WINDOW", sys.exit)
-    Label(master, text="Settings for Tape - Algorithmus").grid(row=10, sticky=W)
+    Label(master, text="Settings for Preprocessor").grid(row=10, sticky=W)
     Label(master, justify=LEFT, text=" ").grid(row=11, sticky=W)
 
     input_file = Entry(master)
@@ -105,12 +108,23 @@ def get_Preprocessor_Vars_from_GUI():
     step_size.grid(row=70, column=2, sticky=W)
 
     Button(master, text='Abort', command=sys.exit).grid(row=1000, column=0, pady=4)
-    Button(master, text='Start', command=master.quit).grid(row=1000, column=1, pady=4)
+    Button(master, text='Start', command=master.quit).grid(row=1000, column=2, pady=4)
+
+    use_last_setting = BooleanVar()
+    use_last_setting_cb = Checkbutton(master, text="continue with last preprocessor results",
+                                       variable=use_last_setting)
+    use_last_setting_cb.grid(row=1000, column=1, pady=4)
+    use_last_setting.set(False)
+
+
 
     if_settingssheet_exists_fill_values(input_file, max_distance, grid_resolution, width, width_for_edge_detection, calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,fix_number_of_pts,
                    pointspersection, equidistant_pts_between_bendpts, step_size)
 
     mainloop()  # Executes GUI
+
+    use_last_setting = bool(use_last_setting.get())
+
 
     input_file = input_file.get()
     testpatch = trimesh.load(input_file)  # Comment_DKu_Wenzel: Eventuell wo anders? Gehört nicht in die GUI!
@@ -136,20 +150,19 @@ def get_Preprocessor_Vars_from_GUI():
     # Number of points between the bending points
     pointspersection = int(pointspersection.get())
 
-
-
-    save_settings([input_file, width,
+    if not use_last_setting:
+        save_settings([input_file, width,
                     grid_resolution,
                    width_for_edge_detection, max_distance, calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, fix_number_of_pts,
                    pointspersection, equidistant_pts_between_bendpts, step_size])  # Saves the selected settings
 
     master.destroy()  # closing of settings window
-    return testpatch, tape_type, width, input_file, max_distance, grid_resolution, width_for_edge_detection, \
+    return use_last_setting, testpatch, tape_type, width, input_file, max_distance, grid_resolution, width_for_edge_detection, \
            calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, pointspersection, equidistant_pts_between_bendpts, step_size
 def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_detection):
     master = Tk()
     master.protocol("WM_DELETE_WINDOW", sys.exit)
-    Label(master, text="Settings for Tape - Algorithmus").grid(row=10, sticky=W)
+    Label(master, text="Settings for EA").grid(row=10, sticky=W)
     Label(master, justify=LEFT, text=" ").grid(row=11, sticky=W)
 
     use_2D_Solution = BooleanVar()
@@ -253,7 +266,7 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
     num_gen_set4.insert(0, 30)
     num_gen_set4.grid(row=78, column=4)
     Label(master, justify=LEFT, text=" ").grid(row=79, sticky=W)
-    Label(master, text="Settings for the Evolutionary Algorithm").grid(row=80, sticky=W)
+
     Label(master, text="Resolution of bending/allel parameter:").grid(row=85, column=0, sticky=W)
     chromo_resolution = Entry(master)
     chromo_resolution.insert(0, 1000)
@@ -344,7 +357,8 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
     # Factor for translation length to gen/length allel  -> one section can be maximum x*L_aim.
     l_factor = 0.75 * float(L_aim) / chromo_resolution  # Comment_DB: already in [mm]
 
-    save_settings([l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization,gamma_d, gamma_d2, gamma_d3, gamma_d4,
+    if not use_last_setting:
+        save_settings([l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization,gamma_d, gamma_d2, gamma_d3, gamma_d4,
                    gamma_l, gamma_l2, gamma_l3, gamma_l4,
                    gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4,
                    gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4,
@@ -354,6 +368,8 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
 
     master.destroy()  # closing of settings window
     return l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization,adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size
+
+
 # Functions in GUI-Settings
 def select_stl_file(input_file):
     if os.path.isfile('./settingssheet.txt'):
@@ -1219,7 +1235,7 @@ def updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_af
 
 # Save and print parameters
 def save_startparameter(L_aim, Start_direction_prep_fromstart, Start_normal_prep_fromstart, patch_end,
-                        patch_start):
+                        patch_start,amount_of_bends):
     file1 = open("startparameter.txt", "w")
     file1.write('%s\n' % L_aim)
     file1.write('%s\n' % patch_start[0])
@@ -1234,16 +1250,8 @@ def save_startparameter(L_aim, Start_direction_prep_fromstart, Start_normal_prep
     file1.write('%s\n' % Start_direction_prep_fromstart[0])
     file1.write('%s\n' % Start_direction_prep_fromstart[1])
     file1.write('%s\n' % Start_direction_prep_fromstart[2])
+    file1.write('%s\n' % amount_of_bends)
     file1.close()
-
-
-def save_current_population(p,nr):
-    file2 = open("population"+nr+".txt", "w")
-    for j in range(p.numChromosomes):
-        file2.write('%s\n' % p.currentGeneration[j].genes)
-    file2.close()
-
-
 def print_consol_output_end():
     print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
           "L_Aim (From Preprocessor):", L_aim)
@@ -1307,6 +1315,20 @@ def show_fitness_and_subfitness_over_generations_end():
         plt.ylabel('Mutation Rate')
         plt.title('Mutation Rate')
     plt.show()
+def GUI_End_Save_Patch():
+    global end
+    end = Tk()
+    Label(end, text="Do you want to save the result?").grid(row=10, column=1, )
+    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
+    Button(end, text="End", command=sys.exit).grid(row=30, column=0, )
+    Button(end, text="Save used settings", command=save_used_settings).grid(row=30, column=1, )
+    Button(end, text="Save patch parameters", command=save_patch_file).grid(row=30, column=2, )
+
+    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
+
+
+
+    mainloop()
 def save_patch_file():
     name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
     bestPatch_parameter_l = ListOfPoints(p.bestFitIndividual.genes)[4]
@@ -1327,13 +1349,68 @@ def save_patch_file():
         name.write(l + ";" + alpha + ";" + beta + "\n")
     name.close
     end.destroy()
+def save_used_settings():
+    """
+    Save settingssheet, startpara and settinssheet_EA to separate folder
+
+    Also save used populations into that folder.
+
+    Populations just make sense with their settingssheets!!
+    """
+
+    # get the current script path and go to subdir where the results are getting saved
+    here = os.path.dirname(os.path.realpath(__file__))
+    subdir = "settings_population"
+    subdir_path = os.path.join(here, subdir)
+
+    if not os.path.isdir("./settings_population"):
+        os.mkdir(os.path.join(here, subdir))
+
+    # Name of the new folder. Date at the begin and time at the end for uniqunes.
+    use2D, use2DE, use3D = "", "", ""
+    if use_2D_with_edge_detection: use2DE = "_2DE"
+    if use_2D_Solution: use2D = "_2D"
+    if use_3D_Solution: use3D = "_3D"
+    current_pop_settings = str(datetime.date.today()) + "_settings_gen" + str(num_gen) + "_pop" + str(
+        pop_size) + use2D + use2DE + use3D + time.strftime("_%H_%M", time.localtime())
+    # Creat the new folder
+    os.mkdir(os.path.join(subdir_path, current_pop_settings))
+    # Patch to new folder
+    path_to_settings = os.path.join(subdir_path, current_pop_settings)
+
+    # copy settings in new folder
+    shutil.copy('settingssheet.txt', path_to_settings)
+    shutil.copy('settingssheet_EA.txt', path_to_settings)
+    shutil.copy('startparameter.txt', path_to_settings)
+
+    use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization,
+    if use_2D_Solution:
+        shutil.copy('population2_Start.txt', path_to_settings)
+        if individual_optimization: shutil.copy('population2_EA.txt', path_to_settings)
+    if use_2D_with_edge_detection:
+        shutil.copy('population2_edge_Start.txt', path_to_settings)
+        if individual_optimization: shutil.copy('population2_edge_EA.txt', path_to_settings)
+    if use_3D_Solution:
+        shutil.copy('population3_Start.txt', path_to_settings)
+        if individual_optimization: shutil.copy('population2_EA.txt', path_to_settings)
+
+
+
+    shutil.copy('population_all_Start.txt', path_to_settings)
+    shutil.copy('population_all_EA.txt', path_to_settings)
+
 
 # Load parameters
-def load_settingssheet():
+def load_settings(sub_dir):
+    load_settingssheet(sub_dir)
+    load_startparameter(sub_dir)
+    load_EA_settings(sub_dir)
+# load_settings reads in sheets below
+def load_settingssheet(sub_dir):
     global fix_number_of_pts, pointspersection, equidistant_pts_between_bendpts, step_size,\
         input_file, testpatch, width, grid_resolution, width_for_edge_detection, max_distance,calc_2D_Solution,calc_3D_Solution,calc_2D_with_edge_detection
 
-    settingssheet = open('./settingssheet.txt')
+    settingssheet = open(sub_dir+'settingssheet.txt')
     input = settingssheet.readline()
     input_file = input[0:-1]
     testpatch = trimesh.load(input_file)
@@ -1368,9 +1445,9 @@ def load_settingssheet():
         equidistant_pts_between_bendpts = False
     step_size = float(settingssheet.readline())
     settingssheet.close()
-def load_startparameter():
-    global L_aim, patch_start, patch_end, Start_normal_prep_fromstart, Start_direction_prep_fromstart
-    file1 = open("startparameter.txt", "r")
+def load_startparameter(sub_dir):
+    global L_aim, patch_start, patch_end, Start_normal_prep_fromstart, Start_direction_prep_fromstart,amount_of_bends
+    file1 = open(sub_dir+"startparameter.txt", "r")
     L_aim = float(file1.readline())
     patch_start_x = float(file1.readline())
     patch_start_y = float(file1.readline())
@@ -1384,6 +1461,7 @@ def load_startparameter():
     Start_direction_prep_fromstart_x = float(file1.readline())
     Start_direction_prep_fromstart_y = float(file1.readline())
     Start_direction_prep_fromstart_z = float(file1.readline())
+    amount_of_bends = int(file1.readline())
     file1.close()
     patch_start = np.asarray([patch_start_x, patch_start_y, patch_start_z])
     patch_end = np.asarray([patch_end_x, patch_end_y, patch_end_z])
@@ -1391,8 +1469,8 @@ def load_startparameter():
         [Start_normal_prep_fromstart_x, Start_normal_prep_fromstart_y, Start_normal_prep_fromstart_z])
     Start_direction_prep_fromstart = np.asarray(
         [Start_direction_prep_fromstart_x, Start_direction_prep_fromstart_y, Start_direction_prep_fromstart_z])
-def load_EA_settings():
-    settingssheet = open("settingssheet_EA.txt", "r")
+def load_EA_settings(sub_dir):
+    settingssheet = open(sub_dir+"settingssheet_EA.txt", "r")
     global use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, l_factor, individual_optimization, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, \
         gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, num_gen_set2, num_gen_set3, num_gen_set4, pop_size, num_gen, \
         chromo_resolution, p_mutation, adap_mutation, p_mutate_range, p_crossover
@@ -1408,9 +1486,9 @@ def load_EA_settings():
     else:
         use_2D_Solution = False
     if settingssheet.readline() == "True" + '\n':
-        use_2D_Solution = True
+        use_3D_Solution = True
     else:
-        use_2D_Solution = False
+        use_3D_Solution = False
 
     if settingssheet.readline() == "True" + '\n':
         individual_optimization = True
@@ -1449,18 +1527,38 @@ def load_EA_settings():
 
     settingssheet.close()
 
+
+# Save and load Populations:
+def save_current_population(p, string_name_ending):
+    file2 = open("population" + string_name_ending + ".txt", "w")
+    for j in range(p.numChromosomes):
+        file2.write('%s\n' % p.currentGeneration[j].genes)
+    file2.close()
+def read_in_population(pop_size,file):
+    generation = []
+    file2 = open(file, "r")
+    for j in range(pop_size):
+        chromo_read = file2.readline()[1:-2]
+        chromo_read = chromo_read.split(",")
+        chromo_read = list(map(int, chromo_read))
+        generation.append(chromo_read)
+    file2.close()
+    return generation
+
+#Main function
 def main():
-    global step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size, useInteger, start_lengths, L_aim, start_betas, start_alphas, patch_start, patch_end, Start_direction_prep_fromstart, Start_normal_prep_fromstart, amount_of_bends, startchromo3D, startchromo2D, startchromo2D_edge, p, time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index, end , calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization
+    global use_last_setting, step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size, useInteger, start_lengths, L_aim, start_betas, start_alphas, patch_start, patch_end, Start_direction_prep_fromstart, Start_normal_prep_fromstart, amount_of_bends, startchromo3D, startchromo2D, startchromo2D_edge, p, time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index, end , calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization
 
+    #################### Preprocessor ####################
 
-    [testpatch, tape_type, width, input_file, max_distance, grid_resolution, width_for_edge_detection, \
+    # GUI Preprocessor Settings
+    [use_last_setting, testpatch, tape_type, width, input_file, max_distance, grid_resolution, width_for_edge_detection, \
     calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,pointspersection, equidistant_pts_between_bendpts, step_size]=get_Preprocessor_Vars_from_GUI()
 
-    # Calculation of start-parameter wih preprocessor : todo Use_Last_Setting: pop_read?
-    use_last_setting = False
     if use_last_setting:
-        load_startparameter()
+        load_settings("./")
     else:
+        # Calculation of start-parameter wih preprocessor :
         [start_lengths,
          L_aim,  # Comment_DB: already in [mm]
          start_betas,
@@ -1474,90 +1572,59 @@ def main():
 
          amount_of_bends] = stlprep3_6.startparam(input_file, max_distance, width_for_edge_detection,
                                                               grid_resolution,calc_2D_Solution,calc_2D_with_edge_detection,calc_3D_Solution)
-    save_startparameter(L_aim,Start_direction_prep_fromstart,
-                        Start_normal_prep_fromstart,patch_end,patch_start)
+        save_startparameter(L_aim,Start_direction_prep_fromstart,
+                            Start_normal_prep_fromstart,patch_end,patch_start,amount_of_bends)
 
-    chromo_resolution = 1000 # Default value for displaying the results of the preprocessor.
-    l_factor = 0.75 * float(L_aim) / chromo_resolution # Default value for displaying the results of the preprocessor.
+        chromo_resolution = 1000 # Default value for displaying the results of the preprocessor.
+        l_factor = 0.75 * float(L_aim) / chromo_resolution # Default value for displaying the results of the preprocessor.
 
-    if calc_3D_Solution: stlprep3_6.show_startstrip(ListOfPoints(create_start_chromo(0))[3], patch_start, patch_end, "3D")
-    if calc_2D_Solution: stlprep3_6.show_startstrip(ListOfPoints(create_start_chromo(1))[3], patch_start,patch_end, "2D")
-    if calc_2D_with_edge_detection: stlprep3_6.show_startstrip(ListOfPoints(create_start_chromo(2))[3], patch_start,patch_end, "2D with Edge detection")
-
-
-
-    [l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation, chromo_resolution, gamma_d, gamma_d2,
-     gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
-     gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,
-     p_mutation, pop_size] = get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_detection)
+        if calc_3D_Solution: stlprep3_6.show_startstrip(ListOfPoints(create_start_chromo(0))[3], patch_start, patch_end, "3D")
+        if calc_2D_Solution: stlprep3_6.show_startstrip(ListOfPoints(create_start_chromo(1))[3], patch_start,patch_end, "2D")
+        if calc_2D_with_edge_detection: stlprep3_6.show_startstrip(ListOfPoints(create_start_chromo(2))[3], patch_start,patch_end, "2D with Edge detection")
 
 
 
-    ####################Evolutionary Algorithm####################
+    #################### Evolutionary Algorithm ####################
     # Initialize
     startchromo3D = []
     startchromo2D = []
     startchromo2D_edge = []
-    if use_3D_Solution:
-        startchromo3D = create_start_chromo(0)  # 0, for 3D.
-    if use_2D_Solution:
-        startchromo2D = create_start_chromo(1)  # 1, for 2D start solution
-    if use_2D_with_edge_detection:
-        startchromo2D_edge = create_start_chromo(2) # 2, for 2D start with edge detection
+
+    if use_last_setting:
+        use_2D_Solution_last, use_2D_with_edge_detection_last, use_3D_Solution_last = read_in_last_start_chromosoms(
+            pop_size, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+
+    # GUI EA Settings
+    [l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation,
+     chromo_resolution, gamma_d, gamma_d2,
+     gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
+     gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,
+     p_mutation, pop_size] = get_EA_Vars_from_GUI(calc_3D_Solution, calc_2D_Solution, calc_2D_with_edge_detection)
+
+    if use_last_setting:
+        check_if_same_things_where_used(use_2D_Solution_last, use_2D_with_edge_detection_last, use_3D_Solution_last) # You can tick less then last time. Not more
+
+    if not use_last_setting:
+        if use_3D_Solution:
+            startchromo3D = create_start_chromo(0)  # 0, for 3D.
+        if use_2D_Solution:
+            startchromo2D = create_start_chromo(1)  # 1, for 2D start solution
+        if use_2D_with_edge_detection:
+            startchromo2D_edge = create_start_chromo(2) # 2, for 2D start with edge detection
 
     # Repair 3D-2D-Startsolution to get same amount of bendpoint
-    if use_3D_Solution & use_2D_Solution:
-        if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]): startchromo3D, startchromo2D = repair_start_chromo(startchromo3D,startchromo2D)
-    if use_2D_with_edge_detection & use_2D_Solution:
-        if len(ListOfPoints(startchromo2D_edge)[4]) != len(ListOfPoints(startchromo2D)[4]): startchromo2D_edge, startchromo2D = repair_start_chromo(startchromo2D_edge,startchromo2D)
-    if use_3D_Solution & use_2D_with_edge_detection:
-        if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D_edge)[4]): startchromo3D, startchromo2D_edge = repair_start_chromo(startchromo3D,startchromo2D_edge)
-
+    repair_start_chromosoms_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
 
     if individual_optimization:
         # Individual optimization
         if use_3D_Solution:
-            stlprep3_6.show_startstrip(ListOfPoints(startchromo3D)[3], patch_start, patch_end, "3D")
-            #Initialize and Prep
-            p_3D = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, None, None, startchromo3D)
-            p_3D.prepPopulation(False, False, calc_3D_Solution)
-            # Save Start_Population
-            save_current_population(p_3D, "3_Start")
-            # EA
-            EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_3D, p_mutation)
-            # Save End_Population
-            save_current_population(p_3D, "3_EA")
-            # Update startchromo
-            startchromo3D = p_3D.currentGeneration[0].genes
+            startchromo3D = individual_optimization_of_start_chromo(False,False,use_3D_Solution,startchromo3D,"3")
         if use_2D_with_edge_detection:
-            stlprep3_6.show_startstrip(ListOfPoints(startchromo2D_edge)[3], patch_start,
-                                       patch_end, "2D with Edge detection")
-            # Initialize and Prep
-            p_2D_edge = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, None, startchromo2D_edge, None)
-            p_2D_edge.prepPopulation(False, calc_2D_with_edge_detection, False)
-            # Save Start_Population
-            save_current_population(p_2D_edge, "2_edge_Start")
-            # EA
-            EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_2D_edge, p_mutation)
-            # Save End_Population
-            save_current_population(p_2D_edge, "2_edge_EA")
-            # Update startchromo
-            startchromo2D_edge = p_2D_edge.currentGeneration[0].genes
+            startchromo2D_edge = individual_optimization_of_start_chromo(False,use_2D_with_edge_detection,False,startchromo2D_edge,"2_edge")
         if use_2D_Solution:
-            stlprep3_6.show_startstrip(ListOfPoints(startchromo2D)[3], patch_start, patch_end, "2D")
-            # Initialize and Prep
-            p_2D = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, startchromo2D, None, None)
-            p_2D.prepPopulation(calc_2D_Solution, False, False)
-            # Save Start_Population
-            save_current_population(p_2D, "2_Start")
-            # EA
-            EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_2D, p_mutation)
-            # Save End_Population
-            save_current_population(p_2D, "2_EA")
-            # Update startchromo
-            startchromo2D = p_2D.currentGeneration[0].genes
+            startchromo2D = individual_optimization_of_start_chromo(use_2D_Solution,False,False,startchromo2D,"2")
 
-
+    """
     # With Loaded populations
     try: pop_2D = read_in_population(pop_size,"population2_EA.txt")
     except: pop_2D =[[]]
@@ -1568,21 +1635,37 @@ def main():
 
 
 
-    #p_loaded = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, pop_2D[0],pop_2DE[0], pop_3D[0])# pop_2D[0] is the best solution of that generation
+    p_loaded = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, pop_2D[0],pop_2DE[0], pop_3D[0])# pop_2D[0] is the best solution of that generation
 
-    #p_loaded.prepPopulation_read_in_population(use_2D_Solution,use_2D_with_edge_detection, use_3D_Solution,pop_2D,pop_2DE,pop_3D)
+    p_loaded.prepPopulation_read_in_population(use_2D_Solution,use_2D_with_edge_detection, use_3D_Solution,pop_2D,pop_2DE,pop_3D)
 
-    #EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_loaded, p_mutation)
+    EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_loaded, p_mutation)
 
 
-
+"""
 
 
     # Optimiziation
     p = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, startchromo2D,
                                                    startchromo2D_edge, startchromo3D)
-    p.prepPopulation(use_2D_Solution,use_2D_with_edge_detection, use_3D_Solution)
+
+    # Use the whole Population to Initialize
+    use_pop = False
+    if use_last_setting:
+        if use_pop:
+            something = 1
+            #p.prepPopulation_read_in_population(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, pop_2D,pop_2DE,pop_3D)
+        else:
+            p.prepPopulation(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+
+    else:
+        p.prepPopulation(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+        save_current_population(p, "_all_Start")# Save Start_Population
+
+
     EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p, p_mutation)
+
+    save_current_population(p, "_all_EA")# Save End_Population
 
     # Print and save results
     print_consol_output_end()
@@ -1591,25 +1674,75 @@ def main():
 
     GUI_End_Save_Patch()
 
-def read_in_population(pop_size,file="population.txt"):
-    generation = []
-    file2 = open(file, "r")
-    for j in range(pop_size):
-        chromo_read = file2.readline()[1:-2]
-        chromo_read = chromo_read.split(",")
-        chromo_read = list(map(int, chromo_read))
-        generation.append(chromo_read)
-    file2.close()
-    return generation
-def GUI_End_Save_Patch():
-    global end
-    end = Tk()
-    Label(end, text="Do you want to save the result?").grid(row=10, column=1, )
-    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
-    Button(end, text="Abort", command=sys.exit).grid(row=30, column=0, )
-    Button(end, text="Save patch parameters", command=save_patch_file).grid(row=30, column=2, )
-    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
-    mainloop()
+# Functions in main
+def repair_start_chromosoms_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution):
+    global startchromo3D, startchromo2D, startchromo2D_edge
+    if use_3D_Solution & use_2D_Solution:
+        if len(ListOfPoints(startchromo3D)[4]) != len(
+            ListOfPoints(startchromo2D)[4]): startchromo3D, startchromo2D = repair_start_chromo(startchromo3D,
+                                                                                                startchromo2D)
+    if use_2D_with_edge_detection & use_2D_Solution:
+        if len(ListOfPoints(startchromo2D_edge)[4]) != len(
+            ListOfPoints(startchromo2D)[4]): startchromo2D_edge, startchromo2D = repair_start_chromo(startchromo2D_edge,
+                                                                                                     startchromo2D)
+    if use_3D_Solution & use_2D_with_edge_detection:
+        if len(ListOfPoints(startchromo3D)[4]) != len(
+            ListOfPoints(startchromo2D_edge)[4]): startchromo3D, startchromo2D_edge = repair_start_chromo(startchromo3D,
+                                                                                                          startchromo2D_edge)
+def check_if_same_things_where_used(use_2D_Solution_last, use_2D_with_edge_detection_last, use_3D_Solution_last):
+    global use_3D_Solution, use_2D_Solution, use_2D_with_edge_detection
+    if use_3D_Solution_last == False and use_3D_Solution:
+        print("3D solution wasnt used last time. Continue without. You can tick less then last time but not more")
+        use_3D_Solution = False
+    if use_2D_Solution_last == False and use_2D_Solution:
+        print("2D solution wasnt used last time. Continue without. You can tick less then last time but not more")
+        use_2D_Solution = False
+    if use_2D_with_edge_detection_last == False and use_2D_with_edge_detection:
+        print("2D with edge detection solution wasnt used last time. Continue without. You can tick less then last time but not more")
+        use_2D_with_edge_detection = False
+def read_in_last_start_chromosoms(pop_size, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution):
+    global startchromo3D, startchromo2D_edge, startchromo2D
+    individuals_all = read_in_population(pop_size, "population_all_Start.txt")
+    if use_3D_Solution and use_2D_with_edge_detection and use_2D_Solution:
+        startchromo3D = individuals_all[0]  # startchromo ist first in start population
+        startchromo2D_edge = individuals_all[1]
+        startchromo2D = individuals_all[2]
+    elif use_3D_Solution and use_2D_with_edge_detection:
+        startchromo3D = individuals_all[0]  # startchromo ist first in start population
+        startchromo2D_edge = individuals_all[1]
+    elif use_2D_with_edge_detection and use_2D_Solution:
+        startchromo2D_edge = individuals_all[0]  # startchromo ist first in start population
+        startchromo2D = individuals_all[1]
+    elif use_3D_Solution and use_2D_Solution:
+        startchromo3D = individuals_all[0]  # startchromo ist first in start population
+        startchromo2D = individuals_all[1]
+    elif use_3D_Solution:
+        startchromo3D = individuals_all[0]
+    elif use_2D_with_edge_detection:
+        startchromo2D_edge = individuals_all[0]
+    elif use_2D_Solution:
+        startchromo2D = individuals_all[0]
+    use_3D_Solution_last = use_3D_Solution
+    use_2D_Solution_last = use_2D_Solution
+    use_2D_with_edge_detection_last = use_2D_with_edge_detection
+    return use_2D_Solution_last, use_2D_with_edge_detection_last, use_3D_Solution_last
+def individual_optimization_of_start_chromo(use_2D_Solution_last, use_2D_with_edge_detection_last, use_3D_Solution_last,start_chromo,string_dimension):
+    stlprep3_6.show_startstrip(ListOfPoints(start_chromo)[3], patch_start, patch_end, string_dimension)
+    #Initialize and Prep
+    p_3D = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, startchromo2D, startchromo2D_edge, startchromo3D)
+    p_3D.prepPopulation(use_2D_Solution_last, use_2D_with_edge_detection_last, use_3D_Solution_last)
+    # Save Start_Population
+    save_current_population(p_3D, string_dimension+"_Start")
+    # EA
+    EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_3D, p_mutation)
+    # Save End_Population
+    save_current_population(p_3D, string_dimension+"_EA")
+    # Update startchromo
+    start_chromo = p_3D.currentGeneration[0].genes
+
+    return start_chromo
+
+# Main EA loop
 def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p, p_mutation):
     global time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index
     ##Comment_DB: initialize arrays of the fitness values (Saving values in the arrays)
@@ -1624,7 +1757,7 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
     time_start = timer()  # Comment_DB: start timer
     p.currentGeneration.sort()  # Comment_DB: sort and reverse randomly initialized pop from best fit to worst
     p.currentGeneration.reverse()
-    save_current_population(p, "_all")
+
     if p.preprocessedInit == False:  # Comment_DB: print if random or preprocessor init
         print("##########Random Gene Initialization for Generation 0##########")
     else:
@@ -1729,6 +1862,7 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
         border_fit_end_list = np.append(border_fit_end_list,
                                         [Fitness(p.bestFitIndividual.genes, p.generationNumber)[4]])
     time_end = timer()  # Comment_DB: end timer
+
     fitness_list_gen_index = np.stack((num_gen_list, fitness_list))  # Comment_DB: stack gen_list with list of fitnesses
     distance_fit_list_gen_index = np.stack((num_gen_list, distance_fit_list))
     length_fit_list_gen_index = np.stack((num_gen_list, length_fit_list))
@@ -1738,9 +1872,10 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
         mutation_rate_list_gen_index = np.stack((num_gen_list, mutation_rate_list))
 
 
+
+
 if __name__ == '__main__':
     main()
-else:
-    load_settingssheet()
-    load_startparameter()
-    load_EA_settings()
+
+
+

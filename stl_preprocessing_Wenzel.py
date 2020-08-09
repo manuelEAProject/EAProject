@@ -660,7 +660,11 @@ def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x
         width_for_edge_detection, x_0_grid_point_index, x_slope, x_values, xdata, y_0_grid_point_index, ydata,
         z_grid_values_linear,calc_2D_with_edge_detection)
 
-    # Start Direction and Start Normal, returned as start parameter!
+    # L_aim, Start Direction and Start Normal
+    global surfacepoints_between_Start_and_End
+    if surfacepoints_between_Start_and_End == []:  # Start_End_connection for L_aim
+        surfacepoints_between_Start_and_End = bend_pts_xz_local
+
     x_direction_start = norm_vector(bend_pts_xyz_global[1] - bend_pts_xyz_global[0])  # Start_direction
     normal_at_start = calc_tape_normal(bend_pts_xyz_global[1], bend_pts_xyz_global_left[0],
                                         bend_pts_xyz_global_right[0])  # Start_normal
@@ -668,10 +672,6 @@ def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x
     # Calc Tapeparameters 2D
     if calc_tape_para_2D:
         calc_tape_parameter_for_2D_solution(bend_pts_xyz_global,bend_pts_xz_local)
-
-    global surfacepoints_between_Start_and_End
-    if surfacepoints_between_Start_and_End == []: # Just once at the start
-        surfacepoints_between_Start_and_End = bend_pts_xz_local
 
     # Calc Tapeparameters 3D
     edge_directions = calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right)
