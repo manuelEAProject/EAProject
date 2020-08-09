@@ -1,3 +1,7 @@
+"""
+For now we are reading in just Startchromosoms of saved population setings.
+"""
+
 from tkinter import *
 from tkinter import filedialog
 def GUI_Population():
