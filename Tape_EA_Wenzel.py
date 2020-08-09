@@ -1592,7 +1592,7 @@ def main():
 
     if use_last_setting:
         use_2D_Solution_last, use_2D_with_edge_detection_last, use_3D_Solution_last = read_in_last_start_chromosoms(
-            pop_size, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+            pop_size, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,"./")
 
     # GUI EA Settings
     [l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation,
@@ -1700,9 +1700,9 @@ def check_if_same_things_where_used(use_2D_Solution_last, use_2D_with_edge_detec
     if use_2D_with_edge_detection_last == False and use_2D_with_edge_detection:
         print("2D with edge detection solution wasnt used last time. Continue without. You can tick less then last time but not more")
         use_2D_with_edge_detection = False
-def read_in_last_start_chromosoms(pop_size, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution):
+def read_in_last_start_chromosoms(pop_size, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,subdir):
     global startchromo3D, startchromo2D_edge, startchromo2D
-    individuals_all = read_in_population(pop_size, "population_all_Start.txt")
+    individuals_all = read_in_population(pop_size, subdir+"population_all_Start.txt")
     if use_3D_Solution and use_2D_with_edge_detection and use_2D_Solution:
         startchromo3D = individuals_all[0]  # startchromo ist first in start population
         startchromo2D_edge = individuals_all[1]
