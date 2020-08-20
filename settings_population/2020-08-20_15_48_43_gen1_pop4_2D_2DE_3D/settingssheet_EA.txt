@@ -1,6 +1,6 @@
-False
 True
-False
+True
+True
 False
 0.0
 5.8

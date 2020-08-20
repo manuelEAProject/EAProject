@@ -536,7 +536,6 @@ def calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list, grid_ressol
             plt.plot(x_values_trim_stacked[i][:], y_values_trim_stacked[i][:], 'bo', linewidth=1.0, label='Schnitt')
         plt.draw()
         pyplot.pause(0.01)
-
 def show_results_2D_Plots_and_Colormap(max_x, max_y, min_x, min_y, new_bending_direction_points_tilted_KOS_left_stacked,
                                        new_bending_direction_points_tilted_KOS_right_stacked,
                                        new_bending_direction_points_tilted_KOS_stacked, x_values_trim_stacked,
@@ -615,7 +614,8 @@ def calc_2D_betas(bend_pts_xz_local):
     for i in range(1, len(bend_pts_xz_local) - 1):
         r0 = bend_pts_xz_local[i] - bend_pts_xz_local[i - 1]
         r1 = bend_pts_xz_local[i + 1] - bend_pts_xz_local[i]
-        angle = math.acos(np.dot(r0, r1) / (np.linalg.norm(r0) * np.linalg.norm(r1)))
+        try: angle = math.acos(np.dot(r0, r1) / (np.linalg.norm(r0) * np.linalg.norm(r1)))
+        except: angle = 0
         steepness_r0 = r0[1] / r0[0]
         steepness_r1 = r1[1] / r1[0]
         if steepness_r1 < steepness_r0:
@@ -1110,7 +1110,7 @@ def calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right):
     global counter_failed_matches_of_edges
 
     while len(bend_pts_xyz_global_right) != len(bend_pts_xyz_global_left):  # Comment_DKu_Wenzel: Just looking for the first Bend would optimize stability and would be faster
-        if len(bend_pts_xyz_global_right) < len(bend_pts_xyz_global_left): np.delete(bend_pts_xyz_global_left,-1,axis=0)
+        if len(bend_pts_xyz_global_right) < len(bend_pts_xyz_global_left): bend_pts_xyz_global_left = np.delete(bend_pts_xyz_global_left,-1,axis=0)
         else:  bend_pts_xyz_global_right = np.delete(bend_pts_xyz_global_right,-1,axis=0) # right < left
 
         print("left and right not same amount of bendingpoints")

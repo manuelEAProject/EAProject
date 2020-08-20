@@ -6,10 +6,11 @@ from tkinter import *
 from tkinter import filedialog
 import shutil
 
-def GUI_load_Population():
+def GUI_Population():
     global folder_directory
     master = Tk()
     master.protocol("WM_DELETE_WINDOW", sys.exit)
+    Label(master, text="Settings for Preprocessor").grid(row=10, sticky=W)
     Label(master, justify=LEFT, text=" ").grid(row=11, sticky=W)
     folder_directory = Entry(master)
 
@@ -17,8 +18,7 @@ def GUI_load_Population():
     folder_directory.grid(row=20, columnspan=3, sticky=W + E + N + S)
     Button(text='Browse..', command=lambda: select_folder(folder_directory)).grid(row=20, column=3, sticky=W)
     Button(master, text='Abort', command=sys.exit).grid(row=1000, column=0, pady=4)
-    Label(master, justify=LEFT, text="                                                                      ").grid(row=1000, column=1,sticky=W)
-    Button(master, text='Start', command=master.quit).grid(row=1000, column=3, pady=4)
+    Button(master, text='Start', command=master.quit).grid(row=1000, column=2, pady=4)
     mainloop()  # Executes GUI
 
     folder_directory = str(folder_directory.get()+"/")
@@ -32,54 +32,6 @@ def select_folder(folder_directory):
     folder_directory.insert(0, name_of_folder)
     if len(folder_directory.get()) < 1:
         folder_directory.insert(0, "Select stl-file...")
-def copy_loaded_settings_to_main_folder(sub_dir):
-    shutil.copy(sub_dir + 'settingssheet.txt', "./")
-    shutil.copy(sub_dir + 'settingssheet_EA.txt', "./")
-    shutil.copy(sub_dir + 'startparameter.txt', "./")
-    try:
-        shutil.copy(sub_dir + 'start_chromo_2D.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'start_chromo_3D.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'start_chromo_2DE.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_main_after_EA.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_2D_after_EA.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_3D_after_EA.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_2DE_after_EA.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_main_Start.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_2D_Start.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_3D_Start.txt', "./")
-    except:
-        pass
-    try:
-        shutil.copy(sub_dir + 'population_2DE_Start.txt', "./")
-    except:
-        pass
 def create_chromo(lengths, alphas, betas):
 
     chromo = []
@@ -108,22 +60,34 @@ sub_dir = GUI_Population()
 from Tape_EA_Wenzel import load_settings, delete_old_population_and_start_chromo
 delete_old_population_and_start_chromo()
 load_settings(sub_dir)
-# import loaded settings
-from Tape_EA_Wenzel import load_preprocessor_start_chromosoms, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution
+from Tape_EA_Wenzel import load_preprocessor_start_chromosoms, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution # import loaded settings
+
+
+# Copy the loaded settingssheet and startparameter into the current folder, in case the result should be saved
+shutil.copy(sub_dir+'settingssheet.txt', "./")
+shutil.copy(sub_dir+'startparameter.txt', "./")
+try: shutil.copy(sub_dir+'start_chromo_2D.txt', "./")
+except: pass
+try: shutil.copy(sub_dir + 'start_chromo_3D.txt', "./")
+except: pass
+try: shutil.copy(sub_dir + 'start_chromo_2DE.txt', "./")
+except: pass
+
 # Read in Startchromosoms from sub_dir
 load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,sub_dir)
-from Tape_EA_Wenzel import *
-# Copy the loaded settingssheet and startparameter into the current folder, in case the result should be saved or population should be loaded
-copy_loaded_settings_to_main_folder(sub_dir)
+
+
 
 ##################################### Read in all Tape_EA Values ####################################################################################
 # Import all variables from TapeEA (read_in_last_start_chromosoms creats startchromos in Tape_EA, have to be exportet afterwards)
+from Tape_EA_Wenzel import *
 
+"""
 [use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation,
-     gamma_d, gamma_d2,
-     gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
-     gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,
-     p_mutation, pop_size,pointspersection, equidistant_pts_between_bendpts, step_size, input_pop1, input_pop2, input_pop3] = get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_detection)
+ gamma_d, gamma_d2,
+ gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
+ gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,
+ p_mutation, pop_size, pointspersection, equidistant_pts_between_bendpts, step_size] = get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_detection)
 
 
 
@@ -142,7 +106,7 @@ main_EA(adap_mutation, amount_of_bends, num_gen, num_gen_set2, num_gen_set3, num
 
 GUI_End_Save_Patch()
 
-"""
+
 p_loaded = initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bends, startchromo2D, startchromo2D_edge, startchromo3D)
                                                                     # pop_2D[0] sind die start_chromosome!!!
 #p_loaded.prepPopulation_read_in_population(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, pop_2D,pop_2DE,pop_3D)
@@ -177,11 +141,7 @@ EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_load
 
 """
 
-
-
-
-"""
-individuals = read_in_population(pop_size,"population3_EA.txt")
+individuals = load_population(pop_size,sub_dir+"population_main_after_EA.txt")
 
 
 show_chromo(individuals[0])
@@ -207,4 +167,3 @@ show_chromo(chromo)
 
 print(Fitness(individuals[1], 1))
 
-"""
