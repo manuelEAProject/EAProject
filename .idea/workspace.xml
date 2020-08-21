@@ -2,91 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2675eca7-684a-4545-8249-32fda44daa88" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Test_of_Fitness_function.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/Tape_EA.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/Tape_EA_Edit6.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/Tape_EA_Wenzel_Refactoring.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/galileo.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/galileo_EA_Edit6.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/galileo_EA_Wenzel_Multiprocessing.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/stl_preprocessing.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/stl_preprocessing_Edit3_Tape_EA_Edit6.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/old_versions/stl_preprocessing_Wenzel_Refactoring.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/population_main_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/population_main_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_08_52_35_gen1_pop4_2D_3D/population_main_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_08_52_35_gen1_pop4_2D_3D/population_main_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_08_52_35_gen1_pop4_2D_3D/settingssheet.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_08_52_35_gen1_pop4_2D_3D/settingssheet_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_08_52_35_gen1_pop4_2D_3D/start_chromo_2D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_08_52_35_gen1_pop4_2D_3D/start_chromo_3D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_08_52_35_gen1_pop4_2D_3D/startparameter.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/population_main_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/population_main_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/settingssheet.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/settingssheet_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/start_chromo_2D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/start_chromo_2DE.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/start_chromo_3D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_48_43_gen1_pop4_2D_2DE_3D/startparameter.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_2DE_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_2DE_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_2D_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_2D_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_3D_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_3D_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_main_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/population_main_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/settingssheet.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/settingssheet_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/start_chromo_2D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/start_chromo_2DE.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/start_chromo_3D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_15_53_42_gen1_pop4_indOpt_2D_2DE_3D/startparameter.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/population_main_Start.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/population_main_after_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/settingssheet.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/settingssheet_EA.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/start_chromo_2D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/start_chromo_2DE.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/start_chromo_3D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings_population/2020-08-20_16_19_43_gen1_pop30_2D_2DE_3D/startparameter.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/start_chromo_2D.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/start_chromo_2DE.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/start_chromo_3D.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Read_and_run_saved_settings_Tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/Read_and_run_saved_settings_Tool.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Edit6.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tape_EA_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tape_EA_Wenzel_Refactoring.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/galileo.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/galileo_EA_Edit6.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/galileo_EA_Wenzel_Multiprocessing.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population2_EA.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population2_Start.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population2_edge_EA.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population2_edge_Start.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population3_EA.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population3_Start.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population_all.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population_all_EA.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population_all_Start.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population_loaded.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/population_loaded_2D.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings_population/2020-08-09_settings_gen1_pop15_2D_10_28/population2_Start.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings_population/2020-08-09_settings_gen1_pop15_2D_10_28/population_all_EA.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings_population/2020-08-09_settings_gen1_pop15_2D_10_28/population_all_Start.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings_population/2020-08-09_settings_gen1_pop15_2D_10_28/settingssheet.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings_population/2020-08-09_settings_gen1_pop15_2D_10_28/settingssheet_EA.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings_population/2020-08-09_settings_gen1_pop15_2D_10_28/startparameter.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settingssheet.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/population_main_Start.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/population_main_after_EA.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/settingssheet_EA.txt" beforeDir="false" afterPath="$PROJECT_DIR$/settingssheet_EA.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/start_chromo_2D.txt" beforeDir="false" afterPath="$PROJECT_DIR$/start_chromo_2D.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/start_chromo_2DE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/start_chromo_2DE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/start_chromo_3D.txt" beforeDir="false" afterPath="$PROJECT_DIR$/start_chromo_3D.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/startparameter.txt" beforeDir="false" afterPath="$PROJECT_DIR$/startparameter.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Edit3_Tape_EA_Edit6.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" beforeDir="false" afterPath="$PROJECT_DIR$/stl_preprocessing_Wenzel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stl_preprocessing_Wenzel_Refactoring.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -117,7 +41,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="TODO_SCOPE" value="All Places" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -326,13 +250,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1559132309230</updated>
-    </task>
-    <task id="LOCAL-00009" summary="alpha beta lenght function in ListofPoints()">
-      <created>1589288177874</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1589288177874</updated>
     </task>
     <task id="LOCAL-00010" summary="calc_start_varriation_from_chromo&#10;&#10;change parameternames&#10;Start_point&#10;Start_direction&#10;Start_quer_zu_direction&#10;...">
       <created>1589295856230</created>
@@ -670,7 +587,14 @@
       <option name="project" value="LOCAL" />
       <updated>1596963572830</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary="Read and run saved settings from Tape EA&#10;Chromosome resolution fix to 10000&#10;Find and remove unnecessary bendingpoints">
+      <created>1597935342177</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1597935342178</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -698,7 +622,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Zwischenergebnis des Refactoring in neue Datei gespeichert" />
     <MESSAGE value="x_list&#10;y_list&#10;tri_corner_points" />
     <MESSAGE value="x_list,y_list von Interpolated surface" />
     <MESSAGE value="Beliebiges Seitenprofil" />
@@ -723,7 +646,8 @@
     <MESSAGE value="GUI in 2 geteilt&#10;englisch&#10;&#10;&#10;&#10;angefangen mit read in population" />
     <MESSAGE value="use last settings" />
     <MESSAGE value="Read and run saved settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="Read and run saved settings" />
+    <MESSAGE value="Read and run saved settings from Tape EA&#10;Chromosome resolution fix to 10000&#10;Find and remove unnecessary bendingpoints" />
+    <option name="LAST_COMMIT_MESSAGE" value="Read and run saved settings from Tape EA&#10;Chromosome resolution fix to 10000&#10;Find and remove unnecessary bendingpoints" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -755,13 +679,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>1842</line>
-          <option name="timeStamp" value="428" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Tape_EA_Wenzel.py</url>
-          <line>131</line>
-          <option name="timeStamp" value="430" />
+          <line>1926</line>
+          <option name="timeStamp" value="432" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
