@@ -52,6 +52,7 @@ class Chromosome:
         self.initrange = None
         self.p_randInit = None
         self.p_prepInit = None
+        self.current_generation_nr = 0 # For evaluating the fitness function, we have to know the current generation
 
     def __str__(self):
         return self.genes.__str__()
@@ -100,13 +101,14 @@ class Chromosome:
         self.genes = []
         for i in range(minlen):
             randIntprob = generator.randint(0,100)
-            randVar = generator.random()*self.initrange-self.initrange
+            #randVar = generator.random()*self.initrange-self.initrange
+            randVar = generator.random() *2* self.initrange - self.initrange # DKu_Wenzel: Now randVar goes from +initrange to -initrange
 
             if randIntprob <= self.p_randInit:
                 self.genes.append(randFunc(self.geneMinValues[i], self.geneMaxValues[i]))
                 continue
 
-            if randIntprob >self.p_prepInit:
+            elif randIntprob > self.p_prepInit:
                 self.genes.append(startchromo[i])
 
             else:
@@ -123,26 +125,26 @@ class Chromosome:
 
         self.fitness = None
 
-    def evaluate(self,gen_Num):
+    def evaluate(self):
         """Calls evalFunc for this chromosome, and caches the fitness value
         returned. Returns None if evalFunc is not yet defined.
         """
 
         if self.evalFunc != None:
-            self.fitness = self.evalFunc(self.genes,gen_Num)[0] #Comment_DB: Calls Fitness function Fitness(chromo)[0]. Returns first value in Fitness(chromo)
+            self.fitness = self.evalFunc(self.genes, self.current_generation_nr)[0] #Comment_DB: Calls Fitness function Fitness(chromo)[0]. Returns first value in Fitness(chromo)
 
             return self.fitness
         else:
             return None
 
-    def getFitness(self, gen_Num = 1):
+    def getFitness(self):
         """Calls evaluate if there is no cached value, otherwise returns the cached
         fitness value.
         """
         if self.fitness != None: #or (self.fitness == self.evaluate()):
             return self.fitness
         else:
-            return self.evaluate(gen_Num)
+            return self.evaluate()
 
     def getGenes(self):
         return self.genes
@@ -437,14 +439,25 @@ class Population:
         self.sumFitness = 0.0
         self.avgFitness = 0.0
 
-        self.currentGeneration[0].fitness = None #Comment_DB: make sure getFitness() returns c.evaluate()
+        for chromo in self.currentGeneration:
+            chromo.current_generation = self.generationNumber
 
-        self.maxFitness = self.currentGeneration[0].getFitness(self.generationNumber)
-        self.minFitness = self.currentGeneration[0].getFitness(self.generationNumber)
+        #self.currentGeneration[0].fitness = None #Comment_DB: make sure getFitness() returns c.evaluate()     # todo : Don´t set back fitness value! explain why, should have already fitness value
+
+        self.maxFitness = self.currentGeneration[0].getFitness()
+        self.minFitness = self.currentGeneration[0].getFitness()
         self.bestFitIndividual = self.currentGeneration[0]
 
+        from Tape_EA_Wenzel import num_gen_set2, num_gen_set3, num_gen_set4
         for chromo in self.currentGeneration:
-            chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
+            #chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
+
+            ###Comment_DB: (variable weighting) sort the chromosomes again at set gens, since the new gammas change the fitnesses###
+
+            if self.generationNumber == num_gen_set2 - 1 or self.generationNumber == num_gen_set3 - 1 or self.generationNumber == num_gen_set4 - 1:
+                self.currentGeneration.sort(key=self.evaluate())
+                self.currentGeneration.reverse()
+
             f = chromo.getFitness()
 
             self.sumFitness = self.sumFitness + f
@@ -458,9 +471,9 @@ class Population:
         self.avgFitness = self.sumFitness / len(self.currentGeneration)  # Comment_DB: can be used if needed
 
 
-    def calc_fitness_of_chromo(self, chromo, gen_Num):
+    def calc_fitness_of_chromo(self, chromo):
         chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
-        f = chromo.getFitness(gen_Num)
+        f = chromo.getFitness()
         return f
 
     def mutate(self):
@@ -484,6 +497,10 @@ class Population:
             s2 = self.selectFunc()  # Comment_DB: another elite[k-1] chromosome (0th return value in method)
             s1.parent = (s1, s1)  # Comment_DB: Tuple
             s2.parent = (s2, s2)  # Comment_DB: Tuple
+
+            s1.current_generation = self.generationNumber
+            s2.current_generation = self.generationNumber
+
             self.nextGeneration.append(s1)
             self.nextGeneration.append(s2)  # Comment_DB: append the two elite[k-1] chromosomes into next generation. Do this replacementSize/2 times! (WheelPosition CHANGES! as selectFunc() is called!)
 
@@ -522,7 +539,7 @@ class Population:
         wheelPosition = self.generator.uniform(0, self.sumFitness)
         i = 0
         for chromo in self.currentGeneration:
-            partialSum = partialSum + chromo.getFitness(self.generationNumber)
+            partialSum = partialSum + chromo.getFitness()
             if partialSum >= wheelPosition:
                 return chromo
             i = i + 1
@@ -678,7 +695,7 @@ class Population:
                 lowstop = max(self.chromoMinValues[i], chromo.genes[i] - self.mutationRange * chromorange)
                 highstop = min(self.chromoMaxValues[i], chromo.genes[i] + self.mutationRange * chromorange)
 
-                if lowstop > 100: lowstop = 100 # Comment_DKu_Wenzel: Fehler: lowstop > highstop. Highstop min() ist max 100. Lowstop max() kann höher sein. Problem?
+                if lowstop > self.chromoMaxValues[i]: lowstop = self.chromoMaxValues[i] # Comment_DKu_Wenzel: Fehler: lowstop > highstop. Highstop min() ist max chromomax. Lowstop max() kann höher sein. Problem?
                 if highstop < 0: highstop = 0
 
                 if self.useInteger == 1:

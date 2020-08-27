@@ -1062,7 +1062,7 @@ for i in range(num_gen):
 
 
 print("Patchlength: ", PatchLength(p.bestFitIndividual.genes, amount_of_bends, l_factor), "L Aim:", L_aim)
-print("Endfitness: ",p.bestFitIndividual.getFitness(),"startfitness", Fitness(startchromo))
+print("Endfitness: ", p.bestFitIndividual.getFitness(), "startfitness", Fitness(startchromo))
 #bestPatch = ListOfPoints(p.bestFitChromo.genes)[0]
 bestPatch = ListOfPoints(p.bestFitIndividual.genes)[0]
 #bestPatch_patternpoints=PatchPatternPoints(p.bestFitChromo.genes)

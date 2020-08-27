@@ -16,7 +16,8 @@ max_points_in_pc = 72000
 
 
 ####MAIN
-def startparam(input_file, max_distance, width_for_edge_detection, grid_resolution,calc_2D_Solution,calc_2D_with_edge_detection,calc_3D_Solution):
+def startparam(input_file, max_distance, width_for_edge_detection, grid_resolution, calc_2D_with_edge_detection,
+               calc_3D_Solution):
     print(
         "Preprocessing in progress... With high-resolution stl files and large area size differences it can lead to longer calculation times")
 
@@ -60,8 +61,12 @@ def startparam(input_file, max_distance, width_for_edge_detection, grid_resoluti
 
 
     start_parameter = [l_list, L_aim, beta_list, alpha_list, startpoint_on_surface,
-                       endpoint_on_surface, Start_r_3d_atstart, Start_n_3d_atstart,amount_of_bends]
+                       endpoint_on_surface, Start_r_3d_atstart, Start_n_3d_atstart,amount_of_bends,z_grid_values_linear]
     return start_parameter
+
+
+
+
 
 #######################################################################################################################
 # Load stl file and analyse the geometry. Calc centerpoint and trendline of the geometry
@@ -344,7 +349,15 @@ def show_interpolation_and_draw_start_end_points(max_x, max_y, min_x, min_y, z_g
     while continue_bool is False:
         pyplot.pause(2)
 
+# Not used in stl_preprocessing, but needed if we load settings (see load settingssheet)
+def calc_trendline_and_interpolate(grid_resolution, input_file):
+    # Read in the file:
+    calc_trendline_of_geometry_from_stl_file(input_file)  # saved in global var!
+    # Interpolation:
+    grid_resolution_j = grid_resolution * 1j
+    grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear = interpolate_geometrie(grid_resolution_j)
 
+    return grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear
 #######################################################################################################################
 # Translation and rotation from Points to new trendline_axis_KOS
 def translate_and_rotate_points_from_OLD_to_trendline_KOS(points_in_old_KOS, new_trendline_axis_in_old_KOS,
@@ -1023,7 +1036,10 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
 
 
     for i in range(1, (len(edge_directions) - 1)):
-        length_current_direction = np.linalg.norm(bend_pts_xz_local[i+1] - bend_pts_xz_local[i])
+        try:
+            length_current_direction = np.linalg.norm(bend_pts_xz_local[i+1] - bend_pts_xz_local[i])
+        except:
+            break
 
         # Calc x_y_and_normal direction of the Tape at each bending point
         x_direction_before_bend = norm_vector(bend_pts_xyz_global[i] - bend_pts_xyz_global[i - 1])
@@ -1034,7 +1050,7 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
         try: normal_at_bendpoint_1_tape = calc_tape_normal(bend_pts_xyz_global[i+1], bend_pts_xyz_global_left[i],
                                                       bend_pts_xyz_global_right[i])
         except:
-            print("Not same amount of bending points") # Not all points have to match. Just the
+            print("Not same amount of bending points")
             break
         y_direction_tape = np.cross(normal_at_bendpoint_0_tape, x_direction_before_bend)
 

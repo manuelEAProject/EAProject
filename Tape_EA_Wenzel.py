@@ -143,7 +143,7 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
     master.protocol("WM_DELETE_WINDOW", sys.exit)
     Label(master, text="Settings for EA").grid(row=10, sticky=W)
     Label(master, text="").grid(row=11, sticky=W)
-    Label(master, justify=LEFT, text="Use start chromosoms: ").grid(row=12, sticky=W)
+    Label(master, justify=LEFT, text="Use start chromosoms: ").grid(row=12)
 
     use_2D_Solution = BooleanVar()
     use_2D_Solution.set(calc_2D_Solution)
@@ -169,8 +169,8 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
 
     # Loading Option for whole population
     if os.path.isfile('./population_main_Start.txt'):
-        Label(master, text="OR").grid(row=12, column=1, sticky=W)
-        Label(master, text="Use Population:").grid(row=12, column=2, sticky=W)
+        Label(master, text="OR").grid(row=12, column=1)
+        Label(master, text="Use Population:").grid(row=12, column=2)
         Label(master, justify=LEFT, text=" ").grid(row=12, column=2, sticky=W)
 
         Label(master, text="Population 1:").grid(row=14, column=2, sticky=W)
@@ -191,8 +191,8 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
         input_pop3.grid(row=18, column=3, sticky=W + E + N + S)
         Button(text='Browse..', command=lambda: select_populaton_file(input_pop3)).grid(row=18, column=4, sticky=W)
 
-    Button(text='Show Solutions', command=lambda: show_startchromos_results()).grid(row=20, column=0,  pady=4,sticky=W)
-    #show_chromo(start_chromo, "Start solution " + string_dimension)
+    Button(text='Show Solutions', command=lambda: show_startchromos_results()).grid(row=20, column=0,  pady=1)
+
 
     Label(master, justify=LEFT, text=" ").grid(row=20, sticky=W)
 
@@ -696,7 +696,8 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     # Lengths of left and right side from tape,
     [delta_length_start_bend,
      length_left_list,
-     length_right_list] = calc_delta_length_start_and_side_lengths(alpha_list, length_list)
+     length_right_list,
+     delta_length_at_bendpoint] = calc_delta_length_start_and_side_lengths(alpha_list, length_list)
 
     # Eckpunkte
     Start_point_left = Start_point - np.cross(Start_direction,
@@ -712,10 +713,26 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     right_point_list = calc_points_from_start_directions_lengths(Start_point_right, direction_vector_list,
                                                                  length_right_list)
 
+
+
+
     # Fill in points between the bend points on the center line. Either fixed number of points or equidistant
     mid_point_filled_up_list = calc_filled_up_points(direction_vector_list, length_list, mid_point_list)
     left_points_filled_up_list = calc_filled_up_points(direction_vector_list, length_left_list, left_point_list)
     right_points_filled_up_list = calc_filled_up_points(direction_vector_list, length_right_list, right_point_list)
+
+    tape_section_index = []
+    tape_sections = []
+    for j in range(1, len(mid_point_list)):
+        try: index = [i for i, x in enumerate(mid_point_filled_up_list[:, 0]) if x == mid_point_list[j][0]][0]+1
+        except: len(mid_point_list)
+
+        if tape_section_index == []:
+            tape_sections.append(mid_point_filled_up_list[0:index])
+        else:
+            tape_sections.append(mid_point_filled_up_list[tape_section_index[-1]:index])
+
+        tape_section_index.append(index)
 
     all_patch_points_filled_up = np.concatenate(
         (mid_point_filled_up_list, left_points_filled_up_list, right_points_filled_up_list), axis=0)
@@ -732,7 +749,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
 
     patch_visualisation_points = np.stack(patch_visualisation_points, axis=0)
 
-    return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction,direction_vector_list, normal_vector_list, mid_point_list  # Comment_DB: Not dependent on preprocessed_chromo
+    return all_patch_points_filled_up, start, end, patch_visualisation_points, length_list, alpha_list, beta_list, Start_point, Start_direction,direction_vector_list, normal_vector_list, mid_point_list,tape_sections,delta_length_at_bendpoint
 # Functions in ListofPoints
 def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
     delta_length_start_bend = 0
@@ -759,7 +776,7 @@ def calc_delta_length_start_and_side_lengths(alpha_list, length_list):
         delta_length_at_bendpoint.append(delta_length_at_bendpoint_i)
 
         i += 1
-    return delta_length_start_bend, length_left_list, length_right_list
+    return delta_length_start_bend, length_left_list, length_right_list ,delta_length_at_bendpoint
 def calc_filled_up_points(direction_vector_list, length_list, point_list):
     filled_up_list = []
     if equidistant_pts_between_bendpts:
@@ -889,26 +906,44 @@ def translate_alpha_beta_length_from_chromo(chromo):
 
 
 # Calculation of the fitness of a chromosome
-def Fitness(chromo,gen_Num):  # Comment DKu_Wenzel L_aim=L_aim
- 
-    #todo: Beobachtung: L_aim Einfluss auf dist_fit
-
+def Fitness(chromo,gen_Num,test_fitness = False):  # Comment DKu_Wenzel L_aim=L_aim
+    LoP = ListOfPoints(chromo)
     # Distance_fitness
-    distance_fit, avg_dist = calc_distance_fitness(chromo, L_aim, testpatch)
+    distance_fit, avg_dist, min_dist = calc_distance_fitness(L_aim, testpatch,LoP)
 
     # Lenght_fittnes
     length_fit = calc_length_fitness(L_aim, chromo, l_factor)
 
     # Border_fittnes start and end
-    border_fit_end, border_fit_start = calc_border_fitness(chromo, patch_start,patch_end)
+    border_fit_end, border_fit_start = calc_border_fitness(patch_start,patch_end, LoP)
 
     # Adaptiv gamma
-    gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat = evalute_adaptiv_gamma_(gen_Num)
+    if test_fitness:
+        gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat = 1,1,1,1
+    else:
+        gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat = evalute_adaptiv_gamma_(gen_Num)
+
+    # Penalty functions
+    penalty_l_max = calc_length_penalty(LoP)
+
+    penalty_alpha_max = calc_alpha_penalty(LoP)
+
+    penalty_beta_max = calc_beta_penalty(LoP)
+
+    penalty_negativ_position = 1
+    if min_dist < 0: # if negativ
+        if min_dist < -16: penalty_negativ_position = 0.33 # Penalty limitation
+        else: penalty_negativ_position = math.exp((min_dist / 16)) # With a negativ distance
 
     # Calculate Fitness
-    fitness = distance_fit * gamma_d_hat + length_fit * gamma_l_hat + border_fit_end * gamma_pe_hat + border_fit_start * gamma_ps_hat
+    # todo: Turn around +/- normal vector in case stl is set wrong, GUI option? Best check in interpolation
+    #           More accurate: shift start/end + avg. dist + pen_neg_pos
+    # todo: penalty factor just for positiv fitness. Is negativ fitness wanted?
 
-    return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist
+    fitness = penalty_negativ_position * penalty_l_max * penalty_alpha_max* penalty_beta_max*(distance_fit * gamma_d_hat +  length_fit * gamma_l_hat + border_fit_end * gamma_pe_hat + border_fit_start * gamma_ps_hat)
+
+    return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist, penalty_l_max, penalty_alpha_max, penalty_beta_max, penalty_negativ_position
+
 # Functions in Fitness
 def patch_length_in_mm(chromo, l_factor_chromo_mm):
     # Calculates the length of a patch. Can read out chomosomes as class chromosomes or as a simple list.
@@ -922,8 +957,8 @@ def patch_length_in_mm(chromo, l_factor_chromo_mm):
         for i in range(0, len(chromo) - 5, 3):
             lengt = lengt + chromo[i]
     return lengt * l_factor_chromo_mm
-def calc_border_fitness(chromo, patch_start,patch_end ):
-    LoP = ListOfPoints(chromo)
+def calc_border_fitness(patch_start,patch_end, LoP ):
+
     ###PARABOLIC###
     #k_p = (100 - 90) / (5 ** 2)  # Comment_DB: k_p = 0.4
     #border_fit_start = 100 - (stlprep3_6.calc_distance_between_two_points(LoP[1], patch_start) ** 2) * k_p
@@ -949,30 +984,52 @@ def calc_length_fitness(L_aim, chromo, l_factor_chromo_mm):
     # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
     return length_fit
-def calc_avg_dist(chromo, testpatch):
-    points = ListOfPoints(chromo)[0]
+def calc_avg_dist(testpatch,LoP):
 
-    distances_testpatch_currentpatch = trimesh.proximity.signed_distance(testpatch, points) #closest_point(testpatch, points)[1] #DKu_Wenzel: signed_distance
+    points = LoP[0]
+    points_trendline_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(points, stlprep3_6.trendline_global_KOS,
+                                                          stlprep3_6.center_point_of_cloud_weighted)
+
+    distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, points)[1]  # closest_point(testpatch, points)[1] #DKu_Wenzel: signed_distance
+    """
+    for i in range(len(points_trendline_KOS)):
+        if points_trendline_KOS[i][2] < z_grid_values_trendline_KOS[points_trendline_KOS[i][0], points_trendline_KOS[i][1]]:
+            distances_testpatch_currentpatch[i] = - distances_testpatch_currentpatch[i]
+    """
+    # todo: distance per tape section
+    distances_testpatch_sections = []
+    points_sections = LoP[-2]
+
+    for i in range(len(points_sections)):
+        #distances_testpatch_currentpatch = trimesh.proximity.signed_distance(testpatch, points_sections[i])  # closest_point(testpatch, points)[1] #DKu_Wenzel: signed_distance
+        try: distances_testpatch_sections.append(trimesh.proximity.signed_distance(testpatch,
+                                                                         points_sections[i]))
+        except: break
 
     # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
-    avg_dist = sum(distances_testpatch_currentpatch) / len(distances_testpatch_currentpatch)
-    return avg_dist
-def calc_distance_fitness(chromo, L_aim, testpatch):
+    avg_dist = sum(abs(distances_testpatch_currentpatch)) / len(distances_testpatch_currentpatch)
+    max_abs_dist = max(abs(distances_testpatch_currentpatch))
+    min_dist = min(distances_testpatch_currentpatch)
+
+    return avg_dist, max_abs_dist, min_dist
+def calc_distance_fitness(L_aim, testpatch,LoP):
     #  Average distance calculation
-    avg_dist = calc_avg_dist(chromo, testpatch)
+    avg_dist, max_dist, min_dist = calc_avg_dist(testpatch,LoP)
     ###PARABOLIC###
     k_d = (100 - 90) / (0.005 ** 2)  #DKu_Wenzel: Changed from 0.05 to 0.005, higher sensitivity
 
+    if max_dist < 16:
+        max_factor = math.exp(-max_dist / 16)  #Dku_Wenzel: If max_dist close to 0, max_factor =~ 1.
+    else: max_factor = 0.33                                         # 16 = min_length of a section. For max_dist = 16, max_factor =~ 0.36
 
-
-    distance_fit = 100 - k_d * ((avg_dist) / L_aim) ** 2  # Comment_DB: max distance fitness is 100 (avg_dist = 0)
+    distance_fit = (100 - k_d * ((avg_dist) / L_aim) ** 2) * max_factor  # Comment_DB: max distance fitness is 100 (avg_dist = 0)
     ###LINEAR###
     # k_d_lin = (100 - 90) / 0.005
     # distance_fit = 100 - abs(k_d_lin * (avg_dist/L_aim))
     ###GAUSSIAN###
     # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
     # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
-    return distance_fit, avg_dist
+    return distance_fit, avg_dist, min_dist
 def evalute_adaptiv_gamma_(gen_Num):
     #if not 'p' in globals():
     #    pass
@@ -998,6 +1055,67 @@ def evalute_adaptiv_gamma_(gen_Num):
         gamma_ps_hat = gamma_ps
         gamma_pe_hat = gamma_pe
     return gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat
+def calc_beta_penalty(LoP):
+    beta_list = LoP[6]
+    beta_max = max(beta_list)
+    beta_min = min(beta_list)
+    if abs(beta_max) > abs(beta_min):  # Roboter restriction for beta: +75° to -45°.
+        beta_max_value = 75 / 180 * math.pi
+        beta_min_value = -45 / 180 * math.pi
+    else:
+        beta_max_value = 45 / 180 * math.pi
+        beta_min_value = -75 / 180 * math.pi
+    a = math.log(1 / 2, math.e) * (-1) / (math.pi / 4)  # for delta_beta = 1/4 Pi → penalty_factor = 1/2 #todo: Check behaviour of penalty factor
+    penalty_beta_max = 1
+    for i in range(len(beta_list)):
+
+        if beta_list[i] > beta_max_value:
+            penalty_factor = math.exp((-a * (beta_list[i] - beta_max_value)))
+
+            if penalty_factor < penalty_beta_max:
+                penalty_beta_max = penalty_factor
+
+        elif beta_list[i] < beta_min_value:
+            penalty_factor = math.exp((a * (beta_list[i] - beta_min_value)))
+
+            if penalty_factor < penalty_beta_max:
+                penalty_beta_max = penalty_factor
+    return penalty_beta_max
+def calc_alpha_penalty(LoP):
+    alpha_list = LoP[5]
+    penalty_alpha_max = 1
+    for i in range(len(alpha_list)):
+
+        if alpha_list[i] > math.pi / 2:
+            if alpha_list[i] < 3 * math.pi / 4:
+                a = math.log(1 / 3, math.e) * (-1) / (math.pi / 2)  # for alpha = 1/2 Pi → penalty_factor = 1/3
+                penalty_factor = math.exp((-a * (3 * math.pi / 4 - alpha_list[i])))
+                if penalty_factor < penalty_alpha_max:
+                    penalty_alpha_max = penalty_factor
+
+        else:  # alpha < math.pi/2
+            if alpha_list[i] > math.pi / 4:
+                a = math.log(1 / 3, math.e) * (-1) / (math.pi / 2)  # for alpha 1/2 Pi → penalty_factor = 1/3
+                penalty_factor = math.exp((-a * (alpha_list[i] - math.pi / 4)))
+                if penalty_factor < penalty_alpha_max:
+                    penalty_alpha_max = penalty_factor
+    return penalty_alpha_max
+def calc_length_penalty(LoP):
+    TCP_offset = 8  # mm
+    arc_length = 3  # mm
+    width_tool = 5  # mm
+    delta_L = LoP[-1]
+    length_list = LoP[4]
+    # l_min = TCP_offset + arc_length + width_tool + delta_L_start + delta_L_end
+    penalty_l_max = 1
+    for i in range(1,len(length_list)-1): # length or first an last tape section can be shorter
+        l_min_i = TCP_offset + arc_length + width_tool + abs(delta_L[i]) + abs(delta_L[i + 1])
+        if length_list[i] < l_min_i:
+            a = 2.2  # for l_segment = 1/2 l_min → penalty_factor = 1/3 , (-2*ln(1/3))
+            penalty_factor = math.exp((-a * (l_min_i - length_list[i]) / l_min_i))
+            if penalty_factor < penalty_l_max:
+                penalty_l_max = penalty_factor
+    return penalty_l_max
 
 
 # Creation of start chromosom(Comment_DB: independent of chromominmaxvalue limitation from galileo)
@@ -1025,12 +1143,13 @@ def create_start_chromo(start_2D_or_3D):
         start_chromo.append(int(chromo_resolution / 2))
     return start_chromo
 def show_chromo(chromo, Titel = "Result"):
-    points_all_filled_up = ListOfPoints(chromo)[0]
-    patch_visualisation_points = ListOfPoints(chromo)[3]
+    LoP = ListOfPoints(chromo)
+    points_all_filled_up = LoP[0]
+    patch_visualisation_points = LoP[3]
 
     #############PLOTTING###########
     figure = pyplot.figure()  # Comment_DB: create a new figure
-    figure.suptitle(Titel, fontsize=14)
+    figure.suptitle(Titel, fontsize=12)
 
     axes = mplot3d.Axes3D(figure)
     patch_visual = mplot3d.art3d.Poly3DCollection(stlprep3_6.triangle_vectors_of_stl, linewidths=1,alpha=0.5)
@@ -1206,9 +1325,10 @@ def insert_new_bendpoint_and_update_old(listlength_longer_norm, listlength_short
 
 # Remove
 def remove_bendingpoint(chromo,bend_nr):
-    array_bendingpoints = ListOfPoints(chromo)[-1] # bendpoints/midpoints, from start-endpoint
-    direction_vectors = ListOfPoints(chromo)[-3] # directions at each bendpoint, start and endpoint dont have a direction!
-    normal_vectors = ListOfPoints(chromo)[-2] # normal at each bendpoint, start and endpoint dont have a direction!
+    LoP = ListOfPoints(chromo)
+    array_bendingpoints = LoP[-3] # bendpoints/midpoints, from start-endpoint
+    direction_vectors = LoP[-5] # directions at each bendpoint, start and endpoint dont have a direction!
+    normal_vectors = LoP[-4] # normal at each bendpoint, start and endpoint dont have a direction!
 
     new_direction_vector = array_bendingpoints[bend_nr + 1] - array_bendingpoints[bend_nr - 1]
     new_length = np.linalg.norm(new_direction_vector)
@@ -1373,7 +1493,7 @@ def updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_af
     return chromo
 
 
-# Save and print parameters
+# Save startparameter
 def save_startparameter(L_aim, l_factor, Start_direction_prep_fromstart, Start_normal_prep_fromstart, patch_end,patch_start,amount_of_bends):
     file1 = open("startparameter.txt", "w")
     file1.write('%s\n' % L_aim)
@@ -1392,159 +1512,6 @@ def save_startparameter(L_aim, l_factor, Start_direction_prep_fromstart, Start_n
     file1.write('%s\n' % Start_direction_prep_fromstart[2])
     file1.write('%s\n' % amount_of_bends)
     file1.close()
-def print_consol_output_end(p):
-    print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
-          "L_Aim (From Preprocessor):", L_aim)
-    print("End Fitness: ", p.bestFitIndividual.getFitness(),
-          "\n\tEnd distance Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[1],
-          "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[2],
-          "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[3],
-          "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[4])
-    if adap_mutation == 1:
-        print("\tEnd Mutation Rate: ", p.mutationRate)
-    print("\nSettings Used: ")
-    print("Set 1 gamma_d: ", gamma_d, "\tSet 2 gamma_d: ", gamma_d2, "\tSet 3 gamma_d: ", gamma_d3, "\tSet 4 gamma_d: ",
-          gamma_d4,
-          "\nSet 1 gamma_l: ", gamma_l, "\tSet 2 gamma_l: ", gamma_l2, "\tSet 3 gamma_l: ", gamma_l3,
-          "\tSet 4 gamma_l: ",
-          gamma_l4,
-          "\nSet 1 gamma_ps: ", gamma_ps, "\tSet 2 gamma_ps: ", gamma_ps2, "\tSet 3 gamma_ps: ", gamma_ps3,
-          "\tSet 4 gamma_ps: ", gamma_ps4,
-          "\nSet 1 gamma_pe: ", gamma_pe, "\tSet 2 gamma_pe: ", gamma_pe2, "\tSet 3 gamma_pe: ", gamma_pe3,
-          "\tSet 4 gamma_pe: ", gamma_pe4,
-          "\n\nSet 2 Gen Start Point: ", num_gen_set2, "\tSet 3 Gen Start Point: ", num_gen_set3,
-          "\tSet 4 Gen Start Point: ", num_gen_set4)
-    print("\nPop Size: ", pop_size,
-          "\n# of Gens: ", num_gen,
-          "\nMutation Rate: ", p_mutation, "\tMutation Rate (Final):",
-          p.mutationRate if not adap_mutation == 0 else "N/A",
-          "\tMutation Range: ", p_mutate_range,
-          "\nCrossover Rate: ", p_crossover if not p.crossoverFunc == p.crossover_Flat else "N/A")
-    print("\n\nElapsed Time [s]: ", time_end - time_start)
-def show_fitness_and_subfitness_over_generations_end():
-    ##Comment_DB: Create plots for fitness and subfitnesses
-    plt.figure(1)
-    plt.plot(fitness_list_gen_index[0], fitness_list_gen_index[1], linewidth=2)
-    plt.xlabel('Generation')
-    plt.ylabel('Fitness')
-    plt.title('Overall Fitness 1')
-    plt.figure(2)
-    plt.plot(distance_fit_list_gen_index[0], distance_fit_list_gen_index[1])
-    plt.xlabel('Generation')
-    plt.ylabel('distance Fitness')
-    plt.title('distance Fitness 1')
-    plt.figure(3)
-    plt.plot(length_fit_list_gen_index[0], length_fit_list_gen_index[1])
-    plt.xlabel('Generation')
-    plt.ylabel('Length Fitness')
-    plt.title('Length Fitness 1')
-    plt.figure(4)
-    plt.plot(border_fit_start_list_gen_index[0], border_fit_start_list_gen_index[1])
-    plt.xlabel('Generation')
-    plt.ylabel('Border Fitness at Start')
-    plt.title('Border Fitness at Start 1')
-    plt.figure(5)
-    plt.plot(border_fit_end_list_gen_index[0], border_fit_end_list_gen_index[1])
-    plt.xlabel('Generation')
-    plt.ylabel('Border Fitness at End')
-    plt.title('Border Fitness at End 1')
-    if adap_mutation == 1:
-        plt.figure(6)
-        plt.stem(mutation_rate_list_gen_index[0], mutation_rate_list_gen_index[1])
-        plt.xlabel('Generation')
-        plt.ylabel('Mutation Rate')
-        plt.title('Mutation Rate')
-    plt.show()
-def GUI_End_Save_Patch():
-    global end
-    end = Tk()
-    Label(end, text="Do you want to save the result?").grid(row=10, column=1, )
-    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
-    Button(end, text="End", command=sys.exit).grid(row=30, column=0, )
-    Button(end, text="Save used settings", command=save_used_settings).grid(row=30, column=1, )
-    Button(end, text="Save patch parameters", command=save_patch_file).grid(row=30, column=2, )
-
-    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
-
-
-
-    mainloop()
-def save_patch_file():
-    name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
-    bestPatch_parameter_l = ListOfPoints(best_fit_with_optimized_amount_of_bendingpoints)[4]
-    bestPatch_parameter_alpha = ListOfPoints(best_fit_with_optimized_amount_of_bendingpoints)[5]
-    bestPatch_parameter_beta = ListOfPoints(best_fit_with_optimized_amount_of_bendingpoints)[6]
-    name.write("width=" + str(width) + "\n")
-    name.write("length=" + str(sum(bestPatch_parameter_l)) + "\n")
-    name.write("type=" + str(tape_type) + "\n")
-    l = 0
-    for i in range(amount_of_bends):
-        l = int(l) + int(bestPatch_parameter_l[i])
-        l = str(l)
-        if bestPatch_parameter_alpha[i] > 90 * 2 * math.pi / (360):
-            alpha = str(int((bestPatch_parameter_alpha[i] - math.pi) * 360 / (2 * math.pi)))
-        else:
-            alpha = str(int(bestPatch_parameter_alpha[i] * 360 / (2 * math.pi)))
-        beta = str(int(bestPatch_parameter_beta[i] * 360 / (2 * math.pi)))
-        name.write(l + ";" + alpha + ";" + beta + "\n")
-    name.close
-    end.destroy()
-def save_used_settings():
-    """
-    Save settingssheet, startpara and settinssheet_EA to separate folder
-
-    Also save used populations into that folder.
-
-    Populations just make sense with their settingssheets!!
-    """
-
-    # get the current script path and go to subdir where the results are getting saved
-    here = os.path.dirname(os.path.realpath(__file__))
-    subdir = "settings_population"
-    subdir_path = os.path.join(here, subdir)
-
-    if not os.path.isdir("./settings_population"):
-        os.mkdir(os.path.join(here, subdir))
-
-    # Name of the new folder. Date at the begin and time at the end for uniqunes.
-    use2D, use2DE, use3D, with_individual_optimization = "", "", "", ""
-    if use_2D_with_edge_detection: use2DE = "_2DE"
-    if use_2D_Solution: use2D = "_2D"
-    if use_3D_Solution: use3D = "_3D"
-    if individual_optimization: with_individual_optimization = "_indOpt"
-    current_pop_settings = str(datetime.date.today()) + time.strftime("_%H_%M_%S", time.localtime())+ "_gen" + str(num_gen) + "_pop" + str(
-        pop_size) + with_individual_optimization + use2D + use2DE + use3D
-    # Creat the new folder
-    os.mkdir(os.path.join(subdir_path, current_pop_settings))
-    # Patch to new folder
-    path_to_settings = os.path.join(subdir_path, current_pop_settings)
-
-
-    # copy settings in new folder
-    shutil.copy('settingssheet_EA.txt', path_to_settings)
-    shutil.copy('settingssheet.txt', path_to_settings)
-    shutil.copy('startparameter.txt', path_to_settings)
-
-
-    if use_2D_Solution:
-        shutil.copy('start_chromo_2D.txt', path_to_settings)
-        if individual_optimization:
-            shutil.copy('population_2D_Start.txt', path_to_settings)
-            shutil.copy('population_2D_after_EA.txt', path_to_settings)
-    if use_2D_with_edge_detection:
-        shutil.copy('start_chromo_2DE.txt', path_to_settings)
-        if individual_optimization:
-            shutil.copy('population_2DE_Start.txt', path_to_settings)
-            shutil.copy('population_2DE_after_EA.txt', path_to_settings)
-    if use_3D_Solution:
-        shutil.copy('start_chromo_3D.txt', path_to_settings)
-        if individual_optimization:
-            shutil.copy('population_3D_Start.txt', path_to_settings)
-            shutil.copy('population_3D_after_EA.txt', path_to_settings)
-
-    shutil.copy('population_main_Start.txt', path_to_settings)
-    shutil.copy('population_main_after_EA.txt', path_to_settings)
-
 
 # Load parameters
 def load_settings(sub_dir):
@@ -1553,7 +1520,7 @@ def load_settings(sub_dir):
     load_EA_settings(sub_dir)
 # load settingsheets
 def load_settingssheet(sub_dir):
-    global fix_number_of_pts, pointspersection, equidistant_pts_between_bendpts, step_size,\
+    global z_grid_values_trendline_KOS, fix_number_of_pts, pointspersection, equidistant_pts_between_bendpts, step_size,\
         input_file, testpatch, width, tape_type, grid_resolution, width_for_edge_detection, max_distance,calc_2D_Solution,calc_3D_Solution,calc_2D_with_edge_detection
 
     settingssheet = open(sub_dir+'settingssheet.txt')
@@ -1581,6 +1548,10 @@ def load_settingssheet(sub_dir):
 
 
     settingssheet.close()
+
+    # For calculating the signd distance, we need the interpolation. If loaded the parameters,
+    [grid_x, max_x, max_y, min_x, min_y, z_grid_values_trendline_KOS] = stlprep3_6.calc_trendline_and_interpolate(grid_resolution,input_file)
+
 def load_startparameter(sub_dir):
     global L_aim, l_factor, patch_start, patch_end, Start_normal_prep_fromstart, Start_direction_prep_fromstart,amount_of_bends
     file1 = open(sub_dir+"startparameter.txt", "r")
@@ -1747,23 +1718,23 @@ def load_last_start_chromosoms_used_for_optimization_all(pop_size, use_2D_Soluti
 """
 
 # Load preprocessor start chromosoms
-def load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, subdir):
+def load_preprocessor_start_chromosoms(calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, subdir):
     global startchromo3D, startchromo2D_edge, startchromo2D
     startchromo3D, startchromo2D_edge, startchromo2D = [],[],[]
 
 
-    if use_3D_Solution:
+    if calc_3D_Solution:
         startchromo3D = load_start_chromo(subdir+"start_chromo_3D.txt")
-    if use_2D_with_edge_detection:
+    if calc_2D_with_edge_detection:
         startchromo2D_edge = load_start_chromo(subdir + "start_chromo_2DE.txt")
-    if use_2D_Solution:
+    if calc_2D_Solution:
         startchromo2D = load_start_chromo(subdir + "start_chromo_2D.txt")
 
 
 
 #Main function
 def main():
-    global use_last_setting, load_preproc_results, step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size, useInteger, start_lengths, L_aim, start_betas, start_alphas, patch_start, patch_end, Start_direction_prep_fromstart, Start_normal_prep_fromstart, amount_of_bends, startchromo3D, startchromo2D, startchromo2D_edge, p, time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index, end , calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization
+    global z_grid_values_trendline_KOS, use_last_setting, load_preproc_results, step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size, useInteger, start_lengths, L_aim, start_betas, start_alphas, patch_start, patch_end, Start_direction_prep_fromstart, Start_normal_prep_fromstart, amount_of_bends, startchromo3D, startchromo2D, startchromo2D_edge, p, time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index, end , calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization
 
     #################### Preprocessor ####################
 
@@ -1802,8 +1773,9 @@ def main():
          Start_direction_prep_fromstart,
          Start_normal_prep_fromstart,
 
-         amount_of_bends] = stlprep3_6.startparam(input_file, max_distance, width_for_edge_detection,
-                                                              grid_resolution,calc_2D_Solution,calc_2D_with_edge_detection,calc_3D_Solution)
+         amount_of_bends,
+         z_grid_values_trendline_KOS] = stlprep3_6.startparam(input_file, max_distance, width_for_edge_detection, grid_resolution,
+                                                  calc_2D_with_edge_detection, calc_3D_Solution)
         l_factor = 0.75 * float(L_aim) / chromo_resolution
         save_startparameter(L_aim,l_factor, Start_direction_prep_fromstart,
                             Start_normal_prep_fromstart,patch_end,patch_start,amount_of_bends)
@@ -1821,9 +1793,9 @@ def main():
 
     if use_last_setting or load_preproc_results:
         try:
-            load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, "./")
+            load_preprocessor_start_chromosoms(calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, "./")
         except:
-            print("Start chromosoms are missing - Check folder")
+            print("Start chromosoms are missing - Check folder and settingssheet")
             exit()
 
     else:  # If not use last settings
@@ -1866,17 +1838,15 @@ def main():
 def repair_start_chromosoms_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution):
     global startchromo3D, startchromo2D, startchromo2D_edge
     if use_3D_Solution & use_2D_Solution:
-        if len(ListOfPoints(startchromo3D)[4]) != len(
-            ListOfPoints(startchromo2D)[4]): startchromo3D, startchromo2D = repair_start_chromo(startchromo3D,
+        if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D)[4]):
+            startchromo3D, startchromo2D = repair_start_chromo(startchromo3D,
                                                                                                 startchromo2D)
     if use_2D_with_edge_detection & use_2D_Solution:
-        if len(ListOfPoints(startchromo2D_edge)[4]) != len(
-            ListOfPoints(startchromo2D)[4]): startchromo2D_edge, startchromo2D = repair_start_chromo(startchromo2D_edge,
-                                                                                                     startchromo2D)
+        if len(ListOfPoints(startchromo2D_edge)[4]) != len(ListOfPoints(startchromo2D)[4]):
+            startchromo2D_edge, startchromo2D = repair_start_chromo(startchromo2D_edge, startchromo2D)
     if use_3D_Solution & use_2D_with_edge_detection:
-        if len(ListOfPoints(startchromo3D)[4]) != len(
-            ListOfPoints(startchromo2D_edge)[4]): startchromo3D, startchromo2D_edge = repair_start_chromo(startchromo3D,
-                                                                                                          startchromo2D_edge)
+        if len(ListOfPoints(startchromo3D)[4]) != len(ListOfPoints(startchromo2D_edge)[4]):
+            startchromo3D, startchromo2D_edge = repair_start_chromo(startchromo3D, startchromo2D_edge)
 def delete_old_population_and_start_chromo():
     # Delete 2D
     if os.path.exists("start_chromo_2D.txt"):
@@ -1925,11 +1895,30 @@ def show_and_save_preprocessor_result(calc_2D_Solution, calc_2D_with_edge_detect
         save_start_chromo(str(create_start_chromo(2)), "_2DE")
 def show_startchromos_results():
     if calc_3D_Solution:
-        show_chromo(startchromo3D, "Start solution 3D" )
+        print_penalties(startchromo3D, "Start solution 3D ")
+        show_chromo(startchromo3D, "Start solution 3D ")
+
+
     if calc_2D_Solution:
+        print_penalties(startchromo2D, "Start solution 2D")
         show_chromo(startchromo2D, "Start solution 2D")
+
+
     if calc_2D_with_edge_detection:
+        print_penalties(startchromo2D_edge, "Start solution 2DE")
         show_chromo(startchromo2D_edge, "Start solution 2DE")
+def print_penalties(start_chromo, start_solution ):
+    len_pen, alpha_pen, beta_pen, neg_pen = Fitness(start_chromo, 1, True)[6:]
+    print("\nProduction - Penalties: length, alpha and beta for " + start_solution +
+    "\n\t length penalty:" + str(len_pen) + (
+        ". Section are too short. Suggestion: increase distance to geometry in preprocessor " if len_pen < 0.3 else "") +
+    "\n\t alpha penalty:" + str(alpha_pen) + (
+        ". Alphas are to big. Suggestion: select different start and end point " if alpha_pen < 0.4 else "") +
+    "\n\t beta penalty:" + str(beta_pen) + (". Betas are to big, Suggestion: decrease distance to geometry in preprocessor " if beta_pen < 0.4 else "") +
+
+    "\n\t negativ penalty:" + str(neg_pen)
+        )
+
 
 def if_individual_optimization(individual_optimization, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution):
     global startchromo3D, startchromo2D_edge, startchromo2D
@@ -1991,10 +1980,12 @@ def main_EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set
     save_current_population(p, "_main_Start")  # Save Start_Population
     EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p, p_mutation)
     save_current_population(p, "_main_after_EA")  # Save End_Population
+
     # Print and save results
     print_consol_output_end(p)
     show_fitness_and_subfitness_over_generations_end()
     show_chromo(p.bestFitIndividual.genes,"Result of main EA")
+
     # Remove unnecessary bendingpoints (remove bendpoints for 5° > beta > -5° )  # todo: insert production accuracy
     global best_fit_with_optimized_amount_of_bendingpoints
     best_fit_with_optimized_amount_of_bendingpoints = list(p.bestFitIndividual.genes)
@@ -2038,21 +2029,17 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
             else:
                 print("\n#####Elite Population Members of Generation", i, "\b#####")
 
-        ###Comment_DB: (variable weighting) sort the chromosomes again at set gens, since the new gammas change the fitnesses###
-        if p.generationNumber == num_gen_set2 - 1 or p.generationNumber == num_gen_set3 - 1 or p.generationNumber == num_gen_set4 - 1:
-            p.currentGeneration.sort(key=p.evaluate())
-            p.currentGeneration.reverse()
-
         # Comment_DB: print elite population members and their overall fitness, distance fit, and average distance
         for j in range(p.selectionSize):
+            curren_gen_fit = Fitness(p.currentGeneration[j].genes, p.generationNumber)
             print("\n\tPopulation Member ", j, " :",
                   p.currentGeneration[j].genes,
                   "\n\t\tMember Fitness:",
-                  Fitness(p.currentGeneration[j].genes, p.generationNumber)[0],
+                  curren_gen_fit[0],
                   "\tMember distance Fit:",
-                  Fitness(p.currentGeneration[j].genes, p.generationNumber)[1],
+                  curren_gen_fit[1],
                   "\tMember Average distance:",
-                  Fitness(p.currentGeneration[j].genes, p.generationNumber)[5]
+                  curren_gen_fit[5]
                   )
 
         if adap_mutation == 1:
@@ -2064,7 +2051,8 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
         # Comment_DB: Begin Evolutionary Algorithm
         if i != num_gen - 1:
             # Calculate Fitness for each individum
-            p.evaluate()
+
+            p.evaluate() # todo: is that needed? We calculated fitness while replacement
 
             if adap_mutation == 1 and p.generationNumber > num_gen / 2:  # Comment_DB: Increase/decrease mutation rate by 0.5 for adaptive mutation for mutationrate less than 0.5. 0.999 for > 0.5
                 if p.avgFitness >= p.bestFitIndividual.fitness - 50 and p.mutationRate == p_mutation:
@@ -2085,22 +2073,23 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
             # Mutation
             p.mutate()
             # Replace old with new generation
-            p.replace()
+            p.replace() # DKu_Wenzel: Within replace_func we sort the current generation. (Takes a long time since we calculate here the fitness for sorting)
 
-            # DKu_Wenzel: New bestFitIndividual after crossover and mutation
 
+        # DKu_Wenzel: New bestFitIndividual after crossover and mutation
         p.bestFitIndividual = p.currentGeneration[0]
 
         p.generationNumber = p.generationNumber + 1  # Comment_DB: This is one plus the output (Gen 0 has generationNumber 1)
 
         # print the best fit individual, and its fitness
+        fitness_best_gen = Fitness(p.bestFitIndividual.genes, p.generationNumber)
         print("\nBest Fit Member of Generation ", i, " :", p.bestFitIndividual, "\n\tFitness:",
-              Fitness(p.bestFitIndividual.genes, p.generationNumber)[0],
-              "\n\t\tdistance Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[1],
-              "\n\t\tLength Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[2], "\n\t\tBorder Fit Start:",
-              Fitness(p.bestFitIndividual.genes, p.generationNumber)[3],
-              "\n\t\tBorder Fit End:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[4])
-        print("\t\tAverage distance", Fitness(p.bestFitIndividual.genes, p.generationNumber)[5])
+              fitness_best_gen[0],
+              "\n\t\tdistance Fit:", fitness_best_gen[1],
+              "\n\t\tLength Fit:", fitness_best_gen[2], "\n\t\tBorder Fit Start:",
+              fitness_best_gen[3],
+              "\n\t\tBorder Fit End:", fitness_best_gen[4])
+        print("\t\tAverage distance", fitness_best_gen[5])
 
         print("\n")
 
@@ -2115,13 +2104,13 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
         # Comment_DB: append determined values into arrays after each iteration
         num_gen_list = np.append(num_gen_list, [i])
 
-        fitness_list = np.append(fitness_list, [Fitness(p.bestFitIndividual.genes, p.generationNumber)[0]])
-        distance_fit_list = np.append(distance_fit_list, [Fitness(p.bestFitIndividual.genes, p.generationNumber)[1]])
-        length_fit_list = np.append(length_fit_list, [Fitness(p.bestFitIndividual.genes, p.generationNumber)[2]])
+        fitness_list = np.append(fitness_list, [fitness_best_gen[0]])
+        distance_fit_list = np.append(distance_fit_list, [fitness_best_gen[1]])
+        length_fit_list = np.append(length_fit_list, [fitness_best_gen[2]])
         border_fit_start_list = np.append(border_fit_start_list,
-                                          [Fitness(p.bestFitIndividual.genes, p.generationNumber)[3]])
+                                          [fitness_best_gen[3]])
         border_fit_end_list = np.append(border_fit_end_list,
-                                        [Fitness(p.bestFitIndividual.genes, p.generationNumber)[4]])
+                                        [fitness_best_gen[4]])
     time_end = timer()  # Comment_DB: end timer
 
     fitness_list_gen_index = np.stack((num_gen_list, fitness_list))  # Comment_DB: stack gen_list with list of fitnesses
@@ -2144,6 +2133,159 @@ def find_and_remove_unnecessary_bendingpoints(chromo):
             chromo = remove_bendingpoint(chromo, i+bend_pt_nr_variable)
             bend_pt_nr_variable -= 1
     return chromo, len(remove_bendpoint_nr)
+# Save and print parameters
+def print_consol_output_end(p):
+    print("\n\nEnd Patch length: ", patch_length_in_mm(p.bestFitIndividual.genes, l_factor),
+          "L_Aim (From Preprocessor):", L_aim)
+    print("End Fitness: ", p.bestFitIndividual.getFitness(),
+          "\n\tEnd distance Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[1],
+          "\n\tEnd Length Fit:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[2],
+          "\n\tEnd Border Fit Start:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[3],
+          "\n\tEnd Border Fit End:", Fitness(p.bestFitIndividual.genes, p.generationNumber)[4])
+    if adap_mutation == 1:
+        print("\tEnd Mutation Rate: ", p.mutationRate)
+    print("\nSettings Used: ")
+    print("Set 1 gamma_d: ", gamma_d, "\tSet 2 gamma_d: ", gamma_d2, "\tSet 3 gamma_d: ", gamma_d3, "\tSet 4 gamma_d: ",
+          gamma_d4,
+          "\nSet 1 gamma_l: ", gamma_l, "\tSet 2 gamma_l: ", gamma_l2, "\tSet 3 gamma_l: ", gamma_l3,
+          "\tSet 4 gamma_l: ",
+          gamma_l4,
+          "\nSet 1 gamma_ps: ", gamma_ps, "\tSet 2 gamma_ps: ", gamma_ps2, "\tSet 3 gamma_ps: ", gamma_ps3,
+          "\tSet 4 gamma_ps: ", gamma_ps4,
+          "\nSet 1 gamma_pe: ", gamma_pe, "\tSet 2 gamma_pe: ", gamma_pe2, "\tSet 3 gamma_pe: ", gamma_pe3,
+          "\tSet 4 gamma_pe: ", gamma_pe4,
+          "\n\nSet 2 Gen Start Point: ", num_gen_set2, "\tSet 3 Gen Start Point: ", num_gen_set3,
+          "\tSet 4 Gen Start Point: ", num_gen_set4)
+    print("\nPop Size: ", pop_size,
+          "\n# of Gens: ", num_gen,
+          "\nMutation Rate: ", p_mutation, "\tMutation Rate (Final):",
+          p.mutationRate if not adap_mutation == 0 else "N/A",
+          "\tMutation Range: ", p_mutate_range,
+          "\nCrossover Rate: ", p_crossover if not p.crossoverFunc == p.crossover_Flat else "N/A")
+    print("\n\nElapsed Time [s]: ", time_end - time_start)
+def show_fitness_and_subfitness_over_generations_end():
+    ##Comment_DB: Create plots for fitness and subfitnesses
+    plt.figure(1)
+    plt.plot(fitness_list_gen_index[0], fitness_list_gen_index[1], linewidth=2)
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.title('Overall Fitness 1')
+    plt.figure(2)
+    plt.plot(distance_fit_list_gen_index[0], distance_fit_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('distance Fitness')
+    plt.title('distance Fitness 1')
+    plt.figure(3)
+    plt.plot(length_fit_list_gen_index[0], length_fit_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('Length Fitness')
+    plt.title('Length Fitness 1')
+    plt.figure(4)
+    plt.plot(border_fit_start_list_gen_index[0], border_fit_start_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('Border Fitness at Start')
+    plt.title('Border Fitness at Start 1')
+    plt.figure(5)
+    plt.plot(border_fit_end_list_gen_index[0], border_fit_end_list_gen_index[1])
+    plt.xlabel('Generation')
+    plt.ylabel('Border Fitness at End')
+    plt.title('Border Fitness at End 1')
+    if adap_mutation == 1:
+        plt.figure(6)
+        plt.stem(mutation_rate_list_gen_index[0], mutation_rate_list_gen_index[1])
+        plt.xlabel('Generation')
+        plt.ylabel('Mutation Rate')
+        plt.title('Mutation Rate')
+    plt.show()
+def GUI_End_Save_Patch():
+    global end
+    end = Tk()
+    Label(end, text="Do you want to save the result?").grid(row=10, column=1, )
+    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
+    Button(end, text="End", command=sys.exit).grid(row=30, column=0, )
+    Button(end, text="Save used settings", command=save_used_settings).grid(row=30, column=1, )
+    Button(end, text="Save patch parameters", command=save_patch_file).grid(row=30, column=2, )
+
+    Label(end, justify=LEFT, text=" ").grid(row=11, sticky=W)
+
+
+
+    mainloop()
+def save_patch_file():
+    name = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
+    bestPatch_parameter_l = ListOfPoints(best_fit_with_optimized_amount_of_bendingpoints)[4]
+    bestPatch_parameter_alpha = ListOfPoints(best_fit_with_optimized_amount_of_bendingpoints)[5]
+    bestPatch_parameter_beta = ListOfPoints(best_fit_with_optimized_amount_of_bendingpoints)[6]
+    name.write("width=" + str(width) + "\n")
+    name.write("length=" + str(sum(bestPatch_parameter_l)) + "\n")
+    name.write("type=" + str(tape_type) + "\n")
+    l = 0
+    for i in range(amount_of_bends):
+        l = int(l) + int(bestPatch_parameter_l[i])
+        l = str(l)
+        if bestPatch_parameter_alpha[i] > 90 * 2 * math.pi / (360):
+            alpha = str(int((bestPatch_parameter_alpha[i] - math.pi) * 360 / (2 * math.pi)))
+        else:
+            alpha = str(int(bestPatch_parameter_alpha[i] * 360 / (2 * math.pi)))
+        beta = str(int(bestPatch_parameter_beta[i] * 360 / (2 * math.pi)))
+        name.write(l + ";" + alpha + ";" + beta + "\n")
+    name.close
+    end.destroy()
+def save_used_settings():
+    """
+    Save settingssheet, startpara and settinssheet_EA to separate folder
+
+    Also save used populations into that folder.
+
+    Populations just make sense with their settingssheets!!
+    """
+
+    # get the current script path and go to subdir where the results are getting saved
+    here = os.path.dirname(os.path.realpath(__file__))
+    subdir = "settings_population"
+    subdir_path = os.path.join(here, subdir)
+
+    if not os.path.isdir("./settings_population"):
+        os.mkdir(os.path.join(here, subdir))
+
+    # Name of the new folder. Date at the begin and time at the end for uniqunes.
+    use2D, use2DE, use3D, with_individual_optimization = "", "", "", ""
+    if use_2D_with_edge_detection: use2DE = "_2DE"
+    if use_2D_Solution: use2D = "_2D"
+    if use_3D_Solution: use3D = "_3D"
+    if individual_optimization: with_individual_optimization = "_indOpt"
+    current_pop_settings = str(datetime.date.today()) + time.strftime("_%H_%M_%S", time.localtime())+ "_gen" + str(num_gen) + "_pop" + str(
+        pop_size) + with_individual_optimization + use2D + use2DE + use3D
+    # Creat the new folder
+    os.mkdir(os.path.join(subdir_path, current_pop_settings))
+    # Patch to new folder
+    path_to_settings = os.path.join(subdir_path, current_pop_settings)
+
+
+    # copy settings in new folder
+    shutil.copy('settingssheet_EA.txt', path_to_settings)
+    shutil.copy('settingssheet.txt', path_to_settings)
+    shutil.copy('startparameter.txt', path_to_settings)
+
+
+    if use_2D_Solution:
+        shutil.copy('start_chromo_2D.txt', path_to_settings)
+        if individual_optimization:
+            shutil.copy('population_2D_Start.txt', path_to_settings)
+            shutil.copy('population_2D_after_EA.txt', path_to_settings)
+    if use_2D_with_edge_detection:
+        shutil.copy('start_chromo_2DE.txt', path_to_settings)
+        if individual_optimization:
+            shutil.copy('population_2DE_Start.txt', path_to_settings)
+            shutil.copy('population_2DE_after_EA.txt', path_to_settings)
+    if use_3D_Solution:
+        shutil.copy('start_chromo_3D.txt', path_to_settings)
+        if individual_optimization:
+            shutil.copy('population_3D_Start.txt', path_to_settings)
+            shutil.copy('population_3D_after_EA.txt', path_to_settings)
+
+    shutil.copy('population_main_Start.txt', path_to_settings)
+    shutil.copy('population_main_after_EA.txt', path_to_settings)
 
 chromo_resolution = 10000  # Default value
 if __name__ == '__main__':

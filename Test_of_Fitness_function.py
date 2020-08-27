@@ -73,6 +73,7 @@ except: pass
 try: shutil.copy(sub_dir + 'start_chromo_2DE.txt', "./")
 except: pass
 
+
 # Read in Startchromosoms from sub_dir
 load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,sub_dir)
 
@@ -142,11 +143,16 @@ EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_load
 """
 
 individuals = load_population(pop_size,sub_dir+"population_main_after_EA.txt")
+individuals2 = load_population(pop_size,sub_dir+"population_main_Start.txt")
 
 
 show_chromo(individuals[0])
 show_chromo(individuals[1])
 show_chromo(individuals[2])
+
+show_chromo(individuals2[0])
+show_chromo(individuals2[1])
+show_chromo(individuals2[2])
 
 
 
@@ -155,6 +161,12 @@ print(Fitness(individuals[0], 15))
 
 print(Fitness(individuals[1], 1))
 print(Fitness(individuals[1], 15))
+
+print(Fitness(individuals2[0],1))
+print(Fitness(individuals2[0], 15))
+
+print(Fitness(individuals2[1], 1))
+print(Fitness(individuals2[1], 15))
 
 
 [lengths, alphas, betas] = ListOfPoints(individuals[0])[4:7]

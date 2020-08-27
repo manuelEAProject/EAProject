@@ -329,8 +329,8 @@ class Population:
 
         self.currentGeneration[0].fitness = None #Comment_DB: make sure getFitness() returns c.evaluate()
 
-        self.maxFitness = self.currentGeneration[0].getFitness(self.generationNumber)
-        self.minFitness = self.currentGeneration[0].getFitness(self.generationNumber)
+        self.maxFitness = self.currentGeneration[0].getFitness()
+        self.minFitness = self.currentGeneration[0].getFitness()
         self.bestFitIndividual = self.currentGeneration[0]
 
 
@@ -358,7 +358,7 @@ class Population:
 
     def calc_fitness_of_chromo(self, chromo, gen_Num):
         chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
-        f = chromo.getFitness(gen_Num)
+        f = chromo.getFitness()
         return f
 
     def mutate(self):
@@ -428,7 +428,7 @@ class Population:
         wheelPosition = self.generator.uniform(0, self.sumFitness)
         i = 0
         for chromo in self.currentGeneration:
-            partialSum = partialSum + chromo.getFitness(self.generationNumber)
+            partialSum = partialSum + chromo.getFitness()
             if partialSum >= wheelPosition:
                 return chromo
             i = i + 1
