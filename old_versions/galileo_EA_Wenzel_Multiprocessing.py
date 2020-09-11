@@ -122,7 +122,9 @@ class Chromosome:
 
 
         self.fitness = None
-
+    def calc_fitness_of_chromo(self):
+        self.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
+        self.getFitness()
     def evaluate(self,gen_Num):
         """Calls evalFunc for this chromosome, and caches the fitness value
         returned. Returns None if evalFunc is not yet defined.
@@ -355,11 +357,6 @@ class Population:
 
         self.avgFitness = self.sumFitness / len(self.currentGeneration)  # Comment_DB: can be used if needed
 
-
-    def calc_fitness_of_chromo(self, chromo, gen_Num):
-        chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
-        f = chromo.getFitness()
-        return f
 
     def mutate(self):
         """At probability mutationRate, mutates each gene of each chromosome. That

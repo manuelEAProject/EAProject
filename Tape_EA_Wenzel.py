@@ -203,6 +203,16 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
                                       variable=individual_optimization)
     individual_optimization_cb.grid(row=25, column=1, sticky=W)
 
+
+
+    Label(master, text="Turn around stl-normal:").grid(row=25, column=2, sticky=W)
+    turn_around_normal = BooleanVar()
+    turn_around_normal.set(False)
+    turn_around_normal_cb = Checkbutton(master, text="",
+                                             variable=turn_around_normal)
+    turn_around_normal_cb.grid(row=25, column=3, sticky=W)
+
+
     Label(master, justify=LEFT, text=" ").grid(row=71, sticky=W)
     #####Comment_DB: Different weightings for 4 equally-divided Population Sets!#####
     Label(master, text="Fine tuning fitness function (4 Population Sets)").grid(row=73, sticky=W)
@@ -329,7 +339,7 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
     Button(master, text='Abort', command=sys.exit).grid(row=1000, column=0, pady=4)
     Button(master, text='Start', command=master.quit).grid(row=1000, column=1, pady=4)
 
-    if_settingssheet_EA_exists_fill_values(individual_optimization,adap_mutation,
+    if_settingssheet_EA_exists_fill_values(individual_optimization,turn_around_normal, adap_mutation,
                                         gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2,
                                         gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
                                         gamma_ps2, gamma_ps3, gamma_ps4,
@@ -343,6 +353,7 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
     use_2D_with_edge_detection = bool(use_2D_with_edge_detection.get())
     use_3D_Solution = bool(use_3D_Solution.get())
     individual_optimization = bool(individual_optimization.get())
+    turn_around_normal = bool(turn_around_normal.get())
 
     # Load population if wanted
     if os.path.isfile('./population_main_Start.txt'):
@@ -408,14 +419,14 @@ def get_EA_Vars_from_GUI(calc_3D_Solution,calc_2D_Solution,calc_2D_with_edge_det
     pointspersection = int(pointspersection.get())
 
 
-    save_settings([use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation,
+    save_settings([use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, turn_around_normal, adap_mutation,
      gamma_d, gamma_d2,
      gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
      gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,
      p_mutation, pop_size, pointspersection, equidistant_pts_between_bendpts, step_size], "settingssheet_EA.txt")  # Saves the selected settings
 
     master.destroy()  # closing of settings window
-    return use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,p_mutation, pop_size,pointspersection, equidistant_pts_between_bendpts, step_size, input_pop1, input_pop2, input_pop3
+    return use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, turn_around_normal, adap_mutation, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,p_mutation, pop_size,pointspersection, equidistant_pts_between_bendpts, step_size, input_pop1, input_pop2, input_pop3
 
 # Functions in GUI-Settings
 def select_stl_file(input_file):
@@ -568,7 +579,7 @@ def if_settingssheet_exists_fill_values(input_file, max_distance, grid_resolutio
         except:
             print("Please delete settingssheet.txt")
             settingssheet.close()
-def if_settingssheet_EA_exists_fill_values(individual_optimization,adap_mutation,
+def if_settingssheet_EA_exists_fill_values(individual_optimization,turn_around_normal,adap_mutation,
                                         gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2,
                                         gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
                                         gamma_ps2, gamma_ps3, gamma_ps4,
@@ -592,6 +603,11 @@ def if_settingssheet_EA_exists_fill_values(individual_optimization,adap_mutation
             individual_optimization.set(True)
         else:
             individual_optimization.set(False)
+
+        if settingssheet.readline() == t:
+            turn_around_normal.set(True)
+        else:
+            turn_around_normal.set(False)
 
 
         if settingssheet.readline() == t:
@@ -725,7 +741,7 @@ def ListOfPoints(chromo):  # Comment_DB: chromo not defined elsewhere. chromo he
     tape_sections = []
     for j in range(1, len(mid_point_list)):
         try: index = [i for i, x in enumerate(mid_point_filled_up_list[:, 0]) if x == mid_point_list[j][0]][0]+1
-        except: len(mid_point_list)
+        except: index = -1
 
         if tape_section_index == []:
             tape_sections.append(mid_point_filled_up_list[0:index])
@@ -909,7 +925,7 @@ def translate_alpha_beta_length_from_chromo(chromo):
 def Fitness(chromo,gen_Num,test_fitness = False):  # Comment DKu_Wenzel L_aim=L_aim
     LoP = ListOfPoints(chromo)
     # Distance_fitness
-    distance_fit, avg_dist, min_dist = calc_distance_fitness(L_aim, testpatch,LoP)
+    distance_fit, avg_dist, area_negativ_distances = calc_distance_fitness(L_aim, testpatch,LoP)
 
     # Lenght_fittnes
     length_fit = calc_length_fitness(L_aim, chromo, l_factor)
@@ -923,24 +939,28 @@ def Fitness(chromo,gen_Num,test_fitness = False):  # Comment DKu_Wenzel L_aim=L_
     else:
         gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat = evalute_adaptiv_gamma_(gen_Num)
 
+    fitness = distance_fit * gamma_d_hat + length_fit * gamma_l_hat + border_fit_end * gamma_pe_hat + border_fit_start * gamma_ps_hat
+
     # Penalty functions
-    penalty_l_max = calc_length_penalty(LoP)
+    penalty_l_max, l_min_list = calc_length_penalty(LoP)
 
     penalty_alpha_max = calc_alpha_penalty(LoP)
 
+    penalty_beta_minimize = calc_beta_minimize_penalty(LoP, l_min_list)
+
     penalty_beta_max = calc_beta_penalty(LoP)
 
-    penalty_negativ_position = 1
-    if min_dist < 0: # if negativ
-        if min_dist < -16: penalty_negativ_position = 0.33 # Penalty limitation
-        else: penalty_negativ_position = math.exp((min_dist / 16)) # With a negativ distance
+    penalty_negativ_position = calc_negativ_position_penalty(area_negativ_distances)
+
 
     # Calculate Fitness
-    # todo: Turn around +/- normal vector in case stl is set wrong, GUI option? Best check in interpolation
-    #           More accurate: shift start/end + avg. dist + pen_neg_pos
     # todo: penalty factor just for positiv fitness. Is negativ fitness wanted?
 
-    fitness = penalty_negativ_position * penalty_l_max * penalty_alpha_max* penalty_beta_max*(distance_fit * gamma_d_hat +  length_fit * gamma_l_hat + border_fit_end * gamma_pe_hat + border_fit_start * gamma_ps_hat)
+    if fitness > 0:
+        if with_production_restriction:
+            fitness = penalty_negativ_position * penalty_l_max * penalty_alpha_max* penalty_beta_max* fitness
+        elif with_minimize_beta:
+            fitness = penalty_beta_minimize * fitness
 
     return fitness, distance_fit, length_fit, border_fit_start, border_fit_end, avg_dist, penalty_l_max, penalty_alpha_max, penalty_beta_max, penalty_negativ_position
 
@@ -964,22 +984,22 @@ def calc_border_fitness(patch_start,patch_end, LoP ):
     #border_fit_start = 100 - (stlprep3_6.calc_distance_between_two_points(LoP[1], patch_start) ** 2) * k_p
     #border_fit_end = 100 - (stlprep3_6.calc_distance_between_two_points(LoP[2], patch_end) ** 2) * k_p  # Comment_DB: trial and error for k_p
     ###LINEAR###
-    # k_p_lin = (100-90)/5
-    # border_fit_start = 100 - abs((stlprep3_6.distance(LoP[1], patch_start)) * k_p_lin)
-    # border_fit_end = 100 - abs((stlprep3_6.distance(LoP[2], patch_end)) * k_p_lin)
+    k_p_lin = (100-90)/5
+    border_fit_start = 100 - abs((stlprep3_6.calc_distance_between_two_points(LoP[1], patch_start)) * k_p_lin)
+    border_fit_end = 100 - abs((stlprep3_6.calc_distance_between_two_points(LoP[2], patch_end)) * k_p_lin)
     ###GAUSSIAN###
-    k_p_gauss = -math.log(9 / 10) / (5 ** 2) #Comment_DB: deviation of 5 mm--> 90
-    border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.calc_distance_between_two_points(LoP[1], patch_start)) ** 2)
-    border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.calc_distance_between_two_points(LoP[2], patch_end)) ** 2)
+    #k_p_gauss = -math.log(9 / 10) / (5 ** 2) #Comment_DB: deviation of 5 mm--> 90
+    #border_fit_start = 100 * math.exp(-k_p_gauss * (stlprep3_6.calc_distance_between_two_points(LoP[1], patch_start)) ** 2)
+    #border_fit_end = 100 * math.exp(-k_p_gauss * (stlprep3_6.calc_distance_between_two_points(LoP[2], patch_end)) ** 2)
     return border_fit_end, border_fit_start
 def calc_length_fitness(L_aim, chromo, l_factor_chromo_mm):
     L = patch_length_in_mm(chromo, l_factor_chromo_mm)
     ###PARABOLIC###
-    k_l = (100 - 50) / ((L_aim * 0.2) ** 2)  # Comment_DB: = 1/128 for L_aim = 400. Higher L_aim yields lower k_l
-    length_fit = 100 - ((L - L_aim) ** 2) * k_l
+    #k_l = (100 - 50) / ((L_aim * 0.2) ** 2)  # Comment_DB: = 1/128 for L_aim = 400. Higher L_aim yields lower k_l
+    #length_fit = 100 - ((L - L_aim) ** 2) * k_l
     ###LINEAR###
-    # k_l_lin = (100-50)/(L_aim*0.2)
-    # length_fit = 100 - abs((L - L_aim) * k_l_lin)
+    k_l_lin = (100-50)/(L_aim*0.2)
+    length_fit = 100 - abs((L - L_aim) * k_l_lin)
     ###GAUSSIAN###
     # k_l_gauss = -math.log(5/10)/((0.2*L_aim) ** 2) #Comment_DB: deviation of 0.2*L_aim --> 50
     # length_fit = 100 * math.exp(-k_l_gauss * (L - L_aim) ** 2)
@@ -987,49 +1007,91 @@ def calc_length_fitness(L_aim, chromo, l_factor_chromo_mm):
 def calc_avg_dist(testpatch,LoP):
 
     points = LoP[0]
-    points_trendline_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(points, stlprep3_6.trendline_global_KOS,
-                                                          stlprep3_6.center_point_of_cloud_weighted)
+
 
     distances_testpatch_currentpatch = trimesh.proximity.closest_point(testpatch, points)[1]  # closest_point(testpatch, points)[1] #DKu_Wenzel: signed_distance
-    """
-    for i in range(len(points_trendline_KOS)):
-        if points_trendline_KOS[i][2] < z_grid_values_trendline_KOS[points_trendline_KOS[i][0], points_trendline_KOS[i][1]]:
-            distances_testpatch_currentpatch[i] = - distances_testpatch_currentpatch[i]
-    """
-    # todo: distance per tape section
-    distances_testpatch_sections = []
-    points_sections = LoP[-2]
 
-    for i in range(len(points_sections)):
-        #distances_testpatch_currentpatch = trimesh.proximity.signed_distance(testpatch, points_sections[i])  # closest_point(testpatch, points)[1] #DKu_Wenzel: signed_distance
-        try: distances_testpatch_sections.append(trimesh.proximity.signed_distance(testpatch,
-                                                                         points_sections[i]))
-        except: break
+    distances_testpatch_currentpatch,area_negativ_distances = calc_direction_sign_distance(distances_testpatch_currentpatch, points)
 
+    """# todo: distance per tape section
+        distances_testpatch_sections = []
+        points_sections = LoP[-2]
+    
+        for i in range(len(points_sections)):
+            #distances_testpatch_currentpatch = trimesh.proximity.signed_distance(testpatch, points_sections[i])  # closest_point(testpatch, points)[1] #DKu_Wenzel: signed_distance
+            try: distances_testpatch_sections.append(trimesh.proximity.signed_distance(testpatch,
+                                                                             points_sections[i]))
+            except: break
+    """
     # Comment_DKu_Wenzel trimesh.proximity.closest_point(..)[1] gives back distances
     avg_dist = sum(abs(distances_testpatch_currentpatch)) / len(distances_testpatch_currentpatch)
     max_abs_dist = max(abs(distances_testpatch_currentpatch))
-    min_dist = min(distances_testpatch_currentpatch)
 
-    return avg_dist, max_abs_dist, min_dist
+
+    return avg_dist, max_abs_dist, area_negativ_distances
+def calc_direction_sign_distance(distances_testpatch_currentpatch, points):
+    points_trendline_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(points,
+                                                                                            stlprep3_6.trendline_global_KOS,
+                                                                                            stlprep3_6.center_point_of_cloud_weighted)
+
+    # Step size
+    y_0_grid_point_index = np.asarray(np.round(max_y / (max_y - min_y) * grid_resolution), dtype=np.int32)
+    x_0_grid_point_index = np.asarray(np.round(max_x / (max_x - min_x) * grid_resolution), dtype=np.int32)
+    dy = (max_y - min_y) / grid_resolution
+    dx = (max_x - min_x) / grid_resolution
+
+    area_negativ_distances = 0
+
+
+
+    for i in range(len(points_trendline_KOS)):
+        y_index = np.asarray(
+            np.round(np.add(np.divide(points_trendline_KOS[i][1], dy), (grid_resolution - y_0_grid_point_index))),
+            dtype=np.int32)
+        x_index = np.asarray(
+            np.round(np.add(np.divide(points_trendline_KOS[i][0], dx), (grid_resolution - x_0_grid_point_index))),
+            dtype=np.int32)
+
+        if turn_around_normal: # point > z_grid_values
+            try:
+                with np.errstate(invalid='ignore'):  # ignore invalid errer (occurs if z_grid_value is NaN)
+                    true_if_points_below_surface = (points_trendline_KOS[i][2] > z_grid_values_trendline_KOS[x_index, y_index])
+            except: true_if_points_below_surface = True  # Exception for index out of bounds → Points outside of geometry. Distance set negativ → higher penalty
+        else:
+            try:
+                with np.errstate(invalid='ignore'):  # ignore invalid errer (occurs if z_grid_value is NaN)
+                    true_if_points_below_surface = (oints_trendline_KOS[i][2] < z_grid_values_trendline_KOS[x_index, y_index])
+            except:true_if_points_below_surface = True  # Exception for index out of bounds → Points outside of geometry. Distance set negativ → higher penalty
+
+        if true_if_points_below_surface:
+           if i > 0:
+                dx_i = (points_trendline_KOS[i][0] - points_trendline_KOS[i-1][0])
+                dy_i = (points_trendline_KOS[i][1] - points_trendline_KOS[i-1][1])
+                width_dx_dy_section = math.pow(dx_i*dx_i + dy_i*dy_i, 1/2)
+
+                distances_testpatch_currentpatch[i] = - distances_testpatch_currentpatch[i]
+                area_negativ_distances += distances_testpatch_currentpatch[i]*width_dx_dy_section
+
+
+    return distances_testpatch_currentpatch, area_negativ_distances
 def calc_distance_fitness(L_aim, testpatch,LoP):
     #  Average distance calculation
-    avg_dist, max_dist, min_dist = calc_avg_dist(testpatch,LoP)
+    avg_dist, max_dist, area_negativ_distances = calc_avg_dist(testpatch,LoP)
+
+    if max_dist < 16:                          # 16 = min_length of a section. For max_dist = 16, max_factor =~ 0.36
+        max_factor = math.exp(-max_dist / 16)  #Dku_Wenzel: If max_dist close to 0, max_factor =~ 1.
+    else: max_factor = 0.33
+
     ###PARABOLIC###
     k_d = (100 - 90) / (0.005 ** 2)  #DKu_Wenzel: Changed from 0.05 to 0.005, higher sensitivity
-
-    if max_dist < 16:
-        max_factor = math.exp(-max_dist / 16)  #Dku_Wenzel: If max_dist close to 0, max_factor =~ 1.
-    else: max_factor = 0.33                                         # 16 = min_length of a section. For max_dist = 16, max_factor =~ 0.36
-
     distance_fit = (100 - k_d * ((avg_dist) / L_aim) ** 2) * max_factor  # Comment_DB: max distance fitness is 100 (avg_dist = 0)
     ###LINEAR###
     # k_d_lin = (100 - 90) / 0.005
-    # distance_fit = 100 - abs(k_d_lin * (avg_dist/L_aim))
+    # distance_fit = (100 - abs(k_d_lin * (avg_dist/L_aim))) * max_factor
     ###GAUSSIAN###
     # k_d_gauss = -math.log(9/10)/(0.005**2) #Comment_DB: deviation of 0.005L_aim --> 90
-    # distance_fit = 100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)
-    return distance_fit, avg_dist, min_dist
+    # distance_fit = (100 * math.exp(-k_d_gauss*(avg_dist / L_aim) ** 2)) * max_factor
+    return distance_fit, avg_dist, area_negativ_distances
 def evalute_adaptiv_gamma_(gen_Num):
     #if not 'p' in globals():
     #    pass
@@ -1055,16 +1117,17 @@ def evalute_adaptiv_gamma_(gen_Num):
         gamma_ps_hat = gamma_ps
         gamma_pe_hat = gamma_pe
     return gamma_d_hat, gamma_l_hat, gamma_pe_hat, gamma_ps_hat
+# Penalty
 def calc_beta_penalty(LoP):
     beta_list = LoP[6]
     beta_max = max(beta_list)
     beta_min = min(beta_list)
-    if abs(beta_max) > abs(beta_min):  # Roboter restriction for beta: +75° to -45°.
-        beta_max_value = 75 / 180 * math.pi
-        beta_min_value = -45 / 180 * math.pi
+    if abs(beta_max) > abs(beta_min):  # Roboter restriction for beta: +90° to -55°.
+        beta_max_value = 90 / 180 * math.pi
+        beta_min_value = -55 / 180 * math.pi
     else:
-        beta_max_value = 45 / 180 * math.pi
-        beta_min_value = -75 / 180 * math.pi
+        beta_max_value = 55 / 180 * math.pi
+        beta_min_value = -90 / 180 * math.pi
     a = math.log(1 / 2, math.e) * (-1) / (math.pi / 4)  # for delta_beta = 1/4 Pi → penalty_factor = 1/2 #todo: Check behaviour of penalty factor
     penalty_beta_max = 1
     for i in range(len(beta_list)):
@@ -1080,6 +1143,7 @@ def calc_beta_penalty(LoP):
 
             if penalty_factor < penalty_beta_max:
                 penalty_beta_max = penalty_factor
+
     return penalty_beta_max
 def calc_alpha_penalty(LoP):
     alpha_list = LoP[5]
@@ -1108,15 +1172,58 @@ def calc_length_penalty(LoP):
     length_list = LoP[4]
     # l_min = TCP_offset + arc_length + width_tool + delta_L_start + delta_L_end
     penalty_l_max = 1
+    l_min_list = []
     for i in range(1,len(length_list)-1): # length or first an last tape section can be shorter
         l_min_i = TCP_offset + arc_length + width_tool + abs(delta_L[i]) + abs(delta_L[i + 1])
+        l_min_list.append(l_min_i)
         if length_list[i] < l_min_i:
             a = 2.2  # for l_segment = 1/2 l_min → penalty_factor = 1/3 , (-2*ln(1/3))
             penalty_factor = math.exp((-a * (l_min_i - length_list[i]) / l_min_i))
             if penalty_factor < penalty_l_max:
                 penalty_l_max = penalty_factor
-    return penalty_l_max
+    return penalty_l_max, l_min_list
+def calc_negativ_position_penalty(area_negativ_distances):
+    penalty_negativ_position = 1
 
+    if area_negativ_distances < 0:  # if negativ
+        if area_negativ_distances < -L_aim * 8: #  (L_aim * 1mm) = Area, if Tape is around 1mm below surface
+            penalty_negativ_position = 0.22  # Penalty limitation
+        else:
+            penalty_negativ_position = math.exp((area_negativ_distances / (L_aim * 6)))  # With a negativ distance
+    return penalty_negativ_position
+def calc_beta_minimize_penalty(LoP, l_min_list):
+    beta_list = LoP[6]
+    length_list = LoP[4]
+    length_ratios = []
+    for i in range(len(length_list)-2):  # start and end section doesnt have a l_min
+        length_ratio_i = length_list[i+1]/l_min_list[i]
+        length_ratios.append(length_ratio_i)
+
+    sum_beta = 0
+    nr_penalty_sections = 0
+    a = math.log(1 / 3, math.e) / (math.pi * 10 / 180)  # for beta = 10° → penalty_factor = 1/3
+
+    for i in range(len(length_ratios)):
+        beta_1, beta_2 = 1,1
+
+        length_ratio_setting = 1
+        if length_ratios[i] < length_ratio_setting and length_ratios[i] > 0: # todo: try with different length_ratios. 1, just smaller sections, 5, also bigger sections strait!?
+                                                                                 # max is length_ratio.max?
+
+            beta_1 = abs(beta_list[i])
+            if i != len(length_ratios)-1:
+                beta_2 = abs(beta_list[i+1])
+
+            smaller_beta = beta_1 if beta_1 < beta_2 else beta_2
+
+
+            if smaller_beta > math.pi/180 *5: #If beta is small enough to get deleted, dont take add it to the sum
+                sum_beta += smaller_beta
+            nr_penalty_sections += 1
+
+    sum_beta_avg = sum_beta/nr_penalty_sections if nr_penalty_sections > 0 else 0
+    penalty_beta_minimize = math.exp((a * (sum_beta_avg)))
+    return penalty_beta_minimize
 
 # Creation of start chromosom(Comment_DB: independent of chromominmaxvalue limitation from galileo)
 def create_start_chromo(start_2D_or_3D):
@@ -1175,8 +1282,9 @@ def show_chromo(chromo, Titel = "Result"):
 
     axes.scatter(patch_start[0], patch_start[1], patch_start[2], c='black')
     axes.scatter(patch_end[0], patch_end[1], patch_end[2], c='black')
-    face_color = [0.5, 0.5, 1]  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
+    face_color = (0.5, 0.5, 1,1)  # alternative: matplotlib.colors.rgb2hex([0.5, 0.5, 1])
     patch_visual.set_facecolor(face_color)
+    patch_visual.set_edgecolor((0.5, 0.5, 1,0.5))
     axes.add_collection3d(patch_visual)
 
     # Show the plot to the screen
@@ -1239,6 +1347,9 @@ def initialize_Population_with_global_Settings(pop_size, num_gen, amount_of_bend
     p.maxGenerations = num_gen
 
     p.testpatch = testpatch
+    p.num_gen_set2 = num_gen_set2
+    p.num_gen_set3 = num_gen_set3
+    p.num_gen_set4 = num_gen_set4
 
     return p
 
@@ -1333,6 +1444,9 @@ def remove_bendingpoint(chromo,bend_nr):
     new_direction_vector = array_bendingpoints[bend_nr + 1] - array_bendingpoints[bend_nr - 1]
     new_length = np.linalg.norm(new_direction_vector)
     new_direction_vector = stlprep3_6.norm_vector(new_direction_vector)
+    new_normal_vector = stlprep3_6.norm_vector((normal_vectors[bend_nr -1] + normal_vectors[bend_nr])/2)
+    new_side_vector = np.cross(new_direction_vector, new_normal_vector)
+    trendline_patch_new = np.stack([new_direction_vector, new_side_vector, new_normal_vector])
 
     if bend_nr > 1:
         # Old Vectors, they dont change
@@ -1345,18 +1459,15 @@ def remove_bendingpoint(chromo,bend_nr):
             direction_after = direction_vectors[bend_nr + 1]
             normal_after = normal_vectors[bend_nr + 1]
             side_direction_after = np.cross(direction_after, normal_after)
+            trendline_patch_after = np.stack([direction_after, side_direction_after, normal_after])
 
         new_alpha_bend_before, new_beta_bend_before, new_normal_vector_alpha_beta, new_side_direction = calc_alpha_beta_before(
-            array_bendingpoints, bend_nr, direction_before, new_direction_vector, normal_before, side_direction_before,
-            trendline_patch_before)
+            array_bendingpoints, bend_nr, trendline_patch_before, trendline_patch_new)
 
         trendline_patch_new = np.stack([new_direction_vector, new_side_direction, new_normal_vector_alpha_beta])
 
         if bend_nr < len(direction_vectors) - 1:
-            new_alpha_bend_after, new_beta_bend_after = calc_alpha_beta_after(direction_after, new_direction_vector,
-                                                                              new_normal_vector_alpha_beta,
-                                                                              new_side_direction, normal_after,
-                                                                              side_direction_after, trendline_patch_new)
+            new_alpha_bend_after, new_beta_bend_after = calc_alpha_beta_after(array_bendingpoints, bend_nr, trendline_patch_after, trendline_patch_new)
 
         # Updating Chromosom
         chromo = updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length)
@@ -1380,19 +1491,16 @@ def remove_bendingpoint(chromo,bend_nr):
         if len(direction_vectors) > 2:
             direction_after = direction_vectors[bend_nr + 1]
             normal_after = normal_vectors[bend_nr + 1]
-            side_direction_after = np.cross(direction_after,normal_after)
+            side_direction_after = np.cross(direction_after, normal_after)
+            trendline_patch_after = np.stack([direction_after, side_direction_after, normal_after])
 
         new_alpha_bend_before, new_beta_bend_before, new_normal_vector_alpha_beta, new_side_direction = calc_alpha_beta_before(
-            array_bendingpoints, bend_nr, direction_before, new_direction_vector, normal_before, side_direction_before,
-            trendline_patch_before)
+            array_bendingpoints, bend_nr, trendline_patch_before, trendline_patch_new)
 
         trendline_patch_new = np.stack([new_direction_vector, new_side_direction, new_normal_vector_alpha_beta])
 
         if len(direction_vectors) > 2:
-            new_alpha_bend_after, new_beta_bend_after = calc_alpha_beta_after(direction_after, new_direction_vector,
-                                                                              new_normal_vector_alpha_beta,
-                                                                              new_side_direction, normal_after,
-                                                                              side_direction_after, trendline_patch_new)
+            new_alpha_bend_after, new_beta_bend_after = calc_alpha_beta_after(array_bendingpoints, bend_nr, trendline_patch_after, trendline_patch_new)
 
       # Updating Chromosom
         # new length before
@@ -1417,22 +1525,23 @@ def remove_bendingpoint(chromo,bend_nr):
 
     return chromo
 # Functions in remove bendingpoint
-def calc_alpha_beta_before(array_bendingpoints, bend_nr, direction_before, new_direction_vector, normal_before,side_direction_before, trendline_patch_before):
-    # Projection of new endpoint
-    projected_new_direction_point = stlprep3_6.project_pointtoplane(array_bendingpoints[bend_nr + 1], normal_before,
-                                                                    array_bendingpoints[bend_nr - 1])
-    projected_new_direction_vector = stlprep3_6.norm_vector(
-        projected_new_direction_point - array_bendingpoints[bend_nr - 1])
-    # Calc new beta before
-    new_beta_bend_before = math.acos(np.dot(new_direction_vector, projected_new_direction_vector))
-    # Calc new alpha before
+def calc_alpha_beta_before(array_bendingpoints, bend_nr, trendline_patch_before, trendline_patch_new):
+
+    new_beta_bend_before = math.acos(np.dot(trendline_patch_before[2], trendline_patch_new[2]))
+
+    point_on_bending_edge = calc_plane_line_intersection(trendline_patch_before[2], array_bendingpoints[bend_nr - 1], trendline_patch_new[1], array_bendingpoints[bend_nr + 1], epsilon=1e-6)
+    vector_along_bending_edge = stlprep3_6.norm_vector(point_on_bending_edge - array_bendingpoints[bend_nr-1])
+
     try:
-        new_alpha_bend_before = -math.acos(np.dot(direction_before, projected_new_direction_vector))
+        new_alpha_bend_before = -math.acos(np.dot(trendline_patch_before[1], vector_along_bending_edge))
     except:
         new_alpha_bend_before = 0
+    if new_alpha_bend_before < -math.pi/2:
+        new_alpha_bend_before = -(new_alpha_bend_before+math.pi)
+
     # new direction vector in patch_KOS
     direction_vector_before_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
-        np.asarray([new_direction_vector, direction_before]),
+        np.asarray([trendline_patch_new[0], trendline_patch_before[0]]),
         trendline_patch_before,
         np.asarray([0, 0, 0]))
     # sign beta
@@ -1442,25 +1551,31 @@ def calc_alpha_beta_before(array_bendingpoints, bend_nr, direction_before, new_d
     if direction_vector_before_patch_KOS[0, 1] < -0.001:
         new_alpha_bend_before = -new_alpha_bend_before
     # Vectors
-    new_normal_vector_beta = Quaternion(axis=side_direction_before, angle=-new_beta_bend_before).rotate(normal_before)
-    new_normal_vector_alpha_beta = Quaternion(axis=normal_before, angle=new_alpha_bend_before).rotate(
+    new_normal_vector_beta = Quaternion(axis=trendline_patch_before[1], angle=-new_beta_bend_before).rotate(trendline_patch_before[2])
+    new_normal_vector_alpha_beta = Quaternion(axis=trendline_patch_before[2], angle=new_alpha_bend_before).rotate(
         new_normal_vector_beta)
-    new_side_direction = np.cross(new_normal_vector_alpha_beta, new_direction_vector)
+    new_side_direction = np.cross(new_normal_vector_alpha_beta, trendline_patch_new[0])
     # For chromosom translation
     if new_alpha_bend_before < 0:
         new_alpha_bend_before = math.pi + new_alpha_bend_before
     return new_alpha_bend_before, new_beta_bend_before, new_normal_vector_alpha_beta, new_side_direction
-def calc_alpha_beta_after(direction_after, new_direction_vector, new_normal_vector_alpha_beta, new_side_direction,normal_after, side_direction_after, trendline_patch_new):
-    # Calc new beta after
-    new_beta_bend_after = -math.acos(np.dot(normal_after, new_normal_vector_alpha_beta))
-    # Calc new alpha after
+def calc_alpha_beta_after(array_bendingpoints, bend_nr, trendline_patch_after, trendline_patch_new):
+    new_beta_bend_after = -math.acos(np.dot(trendline_patch_after[2], trendline_patch_new[2]))
+
+    point_on_bending_edge = calc_plane_line_intersection(trendline_patch_after[2], array_bendingpoints[bend_nr + 1],
+                                                         trendline_patch_new[1], array_bendingpoints[bend_nr -1], epsilon=1e-6)
+    vector_along_bending_edge = stlprep3_6.norm_vector(point_on_bending_edge - array_bendingpoints[bend_nr + 1])
+
     try:
-        new_alpha_bend_after = math.acos(np.dot(side_direction_after, new_side_direction))
+        new_alpha_bend_after = -math.acos(np.dot(trendline_patch_after[1], vector_along_bending_edge))
     except:
         new_alpha_bend_after = 0
+    if new_alpha_bend_after < -math.pi/2:
+        new_alpha_bend_after = -(new_alpha_bend_after+math.pi)
+
     # new direction vector in patch_KOS
     new_direction_vector_patch_KOS = stlprep3_6.translate_and_rotate_points_from_OLD_to_trendline_KOS(
-        np.asarray([direction_after, new_direction_vector]),
+        np.asarray([trendline_patch_after[0], trendline_patch_new[0]]),
         trendline_patch_new,
         np.asarray([0, 0, 0]))
     # sign beta
@@ -1468,7 +1583,11 @@ def calc_alpha_beta_after(direction_after, new_direction_vector, new_normal_vect
         new_beta_bend_after = -new_beta_bend_after
     # sign alpha
     if new_direction_vector_patch_KOS[0, 1] < -0.001:
-        new_alpha_bend_after = math.pi - new_alpha_bend_after
+        new_alpha_bend_after = - new_alpha_bend_after
+
+    if new_alpha_bend_after < 0:
+        new_alpha_bend_after = math.pi + new_alpha_bend_after
+
     return new_alpha_bend_after, new_beta_bend_after
 def updating_length_angel_before(bend_nr, chromo, new_alpha_bend_before, new_beta_bend_before, new_length):
     # new length before
@@ -1491,6 +1610,15 @@ def updating_angel_after(bend_nr, chromo, new_alpha_bend_after, new_beta_bend_af
     chromo[3 * (bend_nr) + 2] = int(round((new_beta_bend_after / (math.pi) + 1 / 2) * chromo_resolution))
 
     return chromo
+def calc_plane_line_intersection(plane_normal, plane_point, line_direction, line_point, epsilon=1e-6):
+    ndotu = plane_normal.dot(line_direction)
+    if abs(ndotu) < epsilon:
+        raise RuntimeError("no intersection or line is within plane")
+
+    w = line_point - plane_point
+    si = -plane_normal.dot(w) / ndotu
+    Psi = w + si * line_direction + plane_point
+    return Psi
 
 
 # Save startparameter
@@ -1517,10 +1645,10 @@ def save_startparameter(L_aim, l_factor, Start_direction_prep_fromstart, Start_n
 def load_settings(sub_dir):
     load_settingssheet(sub_dir)
     load_startparameter(sub_dir)
-    load_EA_settings(sub_dir)
+    #load_EA_settings(sub_dir)
 # load settingsheets
 def load_settingssheet(sub_dir):
-    global z_grid_values_trendline_KOS, fix_number_of_pts, pointspersection, equidistant_pts_between_bendpts, step_size,\
+    global z_grid_values_trendline_KOS, max_x, max_y, min_x, min_y, fix_number_of_pts, pointspersection, equidistant_pts_between_bendpts, step_size,\
         input_file, testpatch, width, tape_type, grid_resolution, width_for_edge_detection, max_distance,calc_2D_Solution,calc_3D_Solution,calc_2D_with_edge_detection
 
     settingssheet = open(sub_dir+'settingssheet.txt')
@@ -1579,7 +1707,7 @@ def load_startparameter(sub_dir):
         [Start_direction_prep_fromstart_x, Start_direction_prep_fromstart_y, Start_direction_prep_fromstart_z])
 def load_EA_settings(sub_dir):
     settingssheet = open(sub_dir+"settingssheet_EA.txt", "r")
-    global use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, \
+    global use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, turn_around_normal,gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, \
         gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, num_gen_set2, num_gen_set3, num_gen_set4, pop_size, num_gen, \
         chromo_resolution, p_mutation, adap_mutation, p_mutate_range, p_crossover,fix_number_of_pts, pointspersection,equidistant_pts_between_bendpts,step_size
 
@@ -1601,6 +1729,11 @@ def load_EA_settings(sub_dir):
         individual_optimization = True
     else:
         individual_optimization = False
+
+    if settingssheet.readline() == "True" + '\n':
+        turn_around_normal = True
+    else:
+        turn_around_normal = False
 
     if settingssheet.readline() == "True" + '\n':
         adap_mutation = True
@@ -1734,13 +1867,22 @@ def load_preprocessor_start_chromosoms(calc_2D_Solution, calc_2D_with_edge_detec
 
 #Main function
 def main():
-    global z_grid_values_trendline_KOS, use_last_setting, load_preproc_results, step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size, useInteger, start_lengths, L_aim, start_betas, start_alphas, patch_start, patch_end, Start_direction_prep_fromstart, Start_normal_prep_fromstart, amount_of_bends, startchromo3D, startchromo2D, startchromo2D_edge, p, time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index, end , calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization
+    global  grid_resolution, max_x, max_y, min_x, min_y, z_grid_values_trendline_KOS, turn_around_normal, use_last_setting, load_preproc_results, step_size, testpatch, tape_type, width, pointspersection, equidistant_pts_between_bendpts, adap_mutation, chromo_resolution, gamma_d, gamma_d2, gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps, gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range, p_mutation, pop_size, useInteger, start_lengths, L_aim, start_betas, start_alphas, patch_start, patch_end, Start_direction_prep_fromstart, Start_normal_prep_fromstart, amount_of_bends, startchromo3D, startchromo2D, startchromo2D_edge, p, time_start, time_end, fitness_list_gen_index, distance_fit_list_gen_index, length_fit_list_gen_index, border_fit_start_list_gen_index, border_fit_end_list_gen_index, mutation_rate_list_gen_index, end , calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,l_factor, use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization
 
     #################### Preprocessor ####################
 
     # GUI Preprocessor Settings
     [use_last_setting, load_preproc_results, tape_type, width, input_file, max_distance, grid_resolution, width_for_edge_detection, \
     calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution]=get_Preprocessor_Vars_from_GUI()
+
+    # Default values to plot preprocessor results
+    global turn_around_normal, equidistant_pts_between_bendpts, step_size, pointspersection, with_production_restriction, with_minimize_beta
+    turn_around_normal = False
+    with_production_restriction = False
+    with_minimize_beta = False
+    equidistant_pts_between_bendpts = True
+    step_size = 1
+    pointspersection = 10
 
     if use_last_setting:
         try:
@@ -1774,7 +1916,8 @@ def main():
          Start_normal_prep_fromstart,
 
          amount_of_bends,
-         z_grid_values_trendline_KOS] = stlprep3_6.startparam(input_file, max_distance, width_for_edge_detection, grid_resolution,
+         z_grid_values_trendline_KOS,
+         max_x, max_y, min_x, min_y] = stlprep3_6.startparam(input_file, max_distance, width_for_edge_detection, grid_resolution,
                                                   calc_2D_with_edge_detection, calc_3D_Solution)
         l_factor = 0.75 * float(L_aim) / chromo_resolution
         save_startparameter(L_aim,l_factor, Start_direction_prep_fromstart,
@@ -1782,8 +1925,6 @@ def main():
         # Default value for displaying the results of the preprocessor.
         show_and_save_preprocessor_result(calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, patch_end,
                                           patch_start)
-
-
 
     # Preproc results in chromosom format
     # Initialize
@@ -1808,7 +1949,7 @@ def main():
     #################### Evolutionary Algorithm ####################
 
     # GUI EA Settings
-    [use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation,
+    [use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, turn_around_normal, adap_mutation,
      gamma_d, gamma_d2,
      gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
      gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,
@@ -1821,12 +1962,14 @@ def main():
 
     # EA initialized with start chromosom
     else:
-        # Repair Startchromosoms to get same amount of bendpoints
-        repair_start_chromosoms_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+
 
         # Individual optimization
         if_individual_optimization(individual_optimization, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
 
+        # Repair Startchromosoms to get same amount of bendpoints
+        repair_start_chromosoms_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection,
+                                                             use_3D_Solution)
         # Main EA
         main_EA(adap_mutation, amount_of_bends, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_mutation, pop_size,
                 startchromo2D, startchromo2D_edge, startchromo3D, use_2D_Solution, use_2D_with_edge_detection,
@@ -1879,10 +2022,7 @@ def delete_old_population_and_start_chromo():
         os.remove("population_main_after_EA.txt")
 def show_and_save_preprocessor_result(calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, patch_end,
                                       patch_start):
-    global equidistant_pts_between_bendpts, step_size, pointspersection
-    equidistant_pts_between_bendpts = True
-    step_size = 1
-    pointspersection = 10
+
     if calc_3D_Solution:
         stlprep3_6.show_startstrip(ListOfPoints(create_start_chromo(0))[3], patch_start, patch_end, "3D")
         save_start_chromo(str(create_start_chromo(0)), "_3D")
@@ -1921,15 +2061,29 @@ def print_penalties(start_chromo, start_solution ):
 
 
 def if_individual_optimization(individual_optimization, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution):
-    global startchromo3D, startchromo2D_edge, startchromo2D
+    global startchromo3D, startchromo2D_edge, startchromo2D, with_minimize_beta
     if individual_optimization:
+        with_minimize_beta = True
 
         if use_3D_Solution:
             startchromo3D = individual_optimization_of_chromo(startchromo3D, "_3D")
+            save_start_chromo(str(startchromo3D), "_3D")
+            startchromo3D, amount_removed_bends = find_and_remove_unnecessary_bendingpoints(startchromo3D)
+            if amount_removed_bends > 0:
+                show_chromo(startchromo3D,"Startchromo3D after individual Opti. with " + str(amount_removed_bends) + " bendpts removed.")
         if use_2D_with_edge_detection:
             startchromo2D_edge = individual_optimization_of_chromo(startchromo2D_edge, "_2DE")
+            startchromo2D_edge, amount_removed_bends = find_and_remove_unnecessary_bendingpoints(startchromo2D_edge)
+            if amount_removed_bends > 0:
+                show_chromo(startchromo2D_edge,"Startchromo2D_edge after individual Opti. with "+str(amount_removed_bends)+" bendpts removed.")
+
         if use_2D_Solution:
             startchromo2D = individual_optimization_of_chromo(startchromo2D, "_2D")
+            startchromo2D, amount_removed_bends = find_and_remove_unnecessary_bendingpoints(startchromo2D)
+            if amount_removed_bends > 0:
+                show_chromo(startchromo2D,"Startchromo2D after individual Opti. with " + str(amount_removed_bends) + " bendpts removed.")
+
+        with_minimize_beta = False
 def individual_optimization_of_chromo(start_chromo, string_dimension):
     #show_chromo(start_chromo, "Start solution "+string_dimension)
     #Initialize and Prep
@@ -1943,7 +2097,7 @@ def individual_optimization_of_chromo(start_chromo, string_dimension):
     save_current_population(p_individual, string_dimension+"_after_EA")
     # Update startchromo
     start_chromo = p_individual.currentGeneration[0].genes
-
+    show_chromo(start_chromo)
     return start_chromo
 
 
@@ -1977,6 +2131,8 @@ def main_EA_with_loaded_pop(adap_mutation, amount_of_bends, input_pop1, input_po
                                                loaded_pop_3)
     main_EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_loaded, p_mutation)
 def main_EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p, p_mutation):
+    global with_production_restriction
+    with_production_restriction = True
     save_current_population(p, "_main_Start")  # Save Start_Population
     EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p, p_mutation)
     save_current_population(p, "_main_after_EA")  # Save End_Population
@@ -2079,7 +2235,7 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
         # DKu_Wenzel: New bestFitIndividual after crossover and mutation
         p.bestFitIndividual = p.currentGeneration[0]
 
-        p.generationNumber = p.generationNumber + 1  # Comment_DB: This is one plus the output (Gen 0 has generationNumber 1)
+
 
         # print the best fit individual, and its fitness
         fitness_best_gen = Fitness(p.bestFitIndividual.genes, p.generationNumber)
@@ -2093,13 +2249,7 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
 
         print("\n")
 
-        ###Comment_DB: Show iterations for Total Gen 100 or Total Gen 50###
-        if num_gen == 100:
-            if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 50 or p.generationNumber == 90:
-                show_chromo(p.bestFitIndividual.genes)
-        if num_gen == 50:
-            if p.generationNumber == 1 or p.generationNumber == 5 or p.generationNumber == 25 or p.generationNumber == 40:
-                show_chromo(p.bestFitIndividual.genes)
+        p.generationNumber = p.generationNumber + 1  # Comment_DB: This is one plus the output (Gen 0 has generationNumber 1)
 
         # Comment_DB: append determined values into arrays after each iteration
         num_gen_list = np.append(num_gen_list, [i])
@@ -2111,6 +2261,7 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
                                           [fitness_best_gen[3]])
         border_fit_end_list = np.append(border_fit_end_list,
                                         [fitness_best_gen[4]])
+
     time_end = timer()  # Comment_DB: end timer
 
     fitness_list_gen_index = np.stack((num_gen_list, fitness_list))  # Comment_DB: stack gen_list with list of fitnesses
@@ -2120,6 +2271,7 @@ def EA_loop(adap_mutation, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p,
     border_fit_end_list_gen_index = np.stack((num_gen_list, border_fit_end_list))
     if adap_mutation == 1:
         mutation_rate_list_gen_index = np.stack((num_gen_list, mutation_rate_list))
+
 def find_and_remove_unnecessary_bendingpoints(chromo):
     betas = ListOfPoints(chromo)[6][0:-1]
     remove_bendpoint_nr = []

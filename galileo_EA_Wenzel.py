@@ -31,6 +31,7 @@ import copy
 from functools import total_ordering
 from random import Random
 from random import gauss
+
 from itertools import repeat
 import concurrent.futures
 
@@ -136,7 +137,9 @@ class Chromosome:
             return self.fitness
         else:
             return None
-
+    def calc_fitness_of_chromo(self):
+        self.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
+        self.getFitness()
     def getFitness(self):
         """Calls evaluate if there is no cached value, otherwise returns the cached
         fitness value.
@@ -235,6 +238,9 @@ class Population:
         self.startchromo2D_edge = None
         self.selectionSize = int(self.numChromosomes/4)
 
+        self.num_gen_set2 = 0
+        self.num_gen_set3 = 0
+        self.num_gen_set4 = 0
 
         self.mutationRate = 0.0
         self.crossoverRate = 0.0
@@ -435,28 +441,30 @@ class Population:
         Be sure to assign an evalFunc
         """
 
+        # Usually a generaion is already evaluated. Change of weighting factor at num_gen_set → new evaluation
+        if self.generationNumber == self.num_gen_set2 - 1 or self.generationNumber == self.num_gen_set3 - 1 or self.generationNumber == self.num_gen_set4 - 1:
+            self.currentGeneration[0].fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
 
         self.sumFitness = 0.0
         self.avgFitness = 0.0
 
         for chromo in self.currentGeneration:
-            chromo.current_generation = self.generationNumber
+            chromo.current_generation_nr = self.generationNumber
 
-        #self.currentGeneration[0].fitness = None #Comment_DB: make sure getFitness() returns c.evaluate()     # todo : Don´t set back fitness value! explain why, should have already fitness value
 
         self.maxFitness = self.currentGeneration[0].getFitness()
         self.minFitness = self.currentGeneration[0].getFitness()
         self.bestFitIndividual = self.currentGeneration[0]
 
-        from Tape_EA_Wenzel import num_gen_set2, num_gen_set3, num_gen_set4
+
         for chromo in self.currentGeneration:
+            if self.generationNumber == self.num_gen_set2 - 1 or self.generationNumber == self.num_gen_set3 - 1 or self.generationNumber == self.num_gen_set4 - 1:
+                chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
             #chromo.fitness = None  # Comment_DB: make sure getFitness() returns c.evaluate()
 
             ###Comment_DB: (variable weighting) sort the chromosomes again at set gens, since the new gammas change the fitnesses###
 
-            if self.generationNumber == num_gen_set2 - 1 or self.generationNumber == num_gen_set3 - 1 or self.generationNumber == num_gen_set4 - 1:
-                self.currentGeneration.sort(key=self.evaluate())
-                self.currentGeneration.reverse()
+
 
             f = chromo.getFitness()
 
@@ -498,8 +506,8 @@ class Population:
             s1.parent = (s1, s1)  # Comment_DB: Tuple
             s2.parent = (s2, s2)  # Comment_DB: Tuple
 
-            s1.current_generation = self.generationNumber
-            s2.current_generation = self.generationNumber
+            s1.current_generation_nr = self.generationNumber
+            s2.current_generation_nr = self.generationNumber
 
             self.nextGeneration.append(s1)
             self.nextGeneration.append(s2)  # Comment_DB: append the two elite[k-1] chromosomes into next generation. Do this replacementSize/2 times! (WheelPosition CHANGES! as selectFunc() is called!)
@@ -760,6 +768,7 @@ class Population:
                     flag = 1
             if flag == 0:
                 self.currentGeneration.append(chromo)
+
         self.currentGeneration.sort() #Comment_DB: sort by fitness
         self.currentGeneration.reverse()
         self.currentGeneration = self.currentGeneration[:self.numChromosomes]

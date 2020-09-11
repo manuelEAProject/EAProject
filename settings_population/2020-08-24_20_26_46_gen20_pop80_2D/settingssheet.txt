@@ -1,9 +1,0 @@
-C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Testgeometrien/EntlangLinieExtrudiert_red200tri.stl
-15.0
-BASF_CFK_Tape
-1500
-1.0
-0.3
-True
-False
-False

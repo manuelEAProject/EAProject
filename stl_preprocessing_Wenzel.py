@@ -9,6 +9,7 @@ from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from pyquaternion import Quaternion
 
+
 equidistant_step_size = 3
 percentile_pc = 5
 max_points_in_pc = 72000
@@ -61,11 +62,8 @@ def startparam(input_file, max_distance, width_for_edge_detection, grid_resoluti
 
 
     start_parameter = [l_list, L_aim, beta_list, alpha_list, startpoint_on_surface,
-                       endpoint_on_surface, Start_r_3d_atstart, Start_n_3d_atstart,amount_of_bends,z_grid_values_linear]
+                       endpoint_on_surface, Start_r_3d_atstart, Start_n_3d_atstart,amount_of_bends,z_grid_values_linear, max_x, max_y, min_x, min_y]
     return start_parameter
-
-
-
 
 
 #######################################################################################################################
@@ -460,24 +458,24 @@ def translate_points_to_new_zero(new_zero_point_in_old_KOS_rotated, points_in_tr
 
 #######################################################################################################################
 # Calculation of the bending parameters
-def calc_bending_parameters(grid_ressolution_int, grid_x, max_distance, width_for_edge_detection, max_x, max_y, min_x, min_y,
-                            z_grid_values_linear,calc_2D_with_edge_detection,calc_3D_Solution):
+def calc_bending_parameters(grid_resolution_int, grid_x, max_distance, width_for_edge_detection, max_x, max_y, min_x, min_y,
+                            z_grid_values_linear, calc_2D_with_edge_detection, calc_3D_Solution):
 
-    y_0_grid_point_index = np.asarray(np.round(max_y / (max_y - min_y) * grid_ressolution_int), dtype=np.int32)
-    x_0_grid_point_index = np.asarray(np.round(max_x / (max_x - min_x) * grid_ressolution_int), dtype=np.int32)
+    y_0_grid_point_index = np.asarray(np.round(max_y / (max_y - min_y) * grid_resolution_int), dtype=np.int32)
+    x_0_grid_point_index = np.asarray(np.round(max_x / (max_x - min_x) * grid_resolution_int), dtype=np.int32)
 
 
     initialize_global_lists_of_3D_bending_and_plot_parameter()
 
 
     # Calc 2D-Bendpoints
-    calc_bending_points( grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
-        z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance,
-        width_for_edge_detection, 0, 0, True, calc_2D_with_edge_detection, calc_3D_Solution)
+    calc_bending_points(grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
+                        z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance,
+                        width_for_edge_detection, 0, 0, True, calc_2D_with_edge_detection, calc_3D_Solution)
 
     if calc_3D_Solution:
         # Start calculating bendingpoints
-        calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list_3D, grid_ressolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
+        calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list_3D, grid_resolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
                                                        max_y, min_x, min_y, x_0_grid_point_index, x_values_trim_stacked,
                                                        xdata_list, y_0_grid_point_index, y_values_trim_stacked, ydata_list,
                                                        z_grid_values_linear)
@@ -521,13 +519,13 @@ def initialize_global_lists_of_3D_bending_and_plot_parameter():
     global counter_failed_matches_of_edges
     counter_failed_matches_of_edges = 0
 
-def calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list, grid_ressolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
+def calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list, grid_resolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
                                                    max_y, min_x, min_y, x_0_grid_point_index, x_values_trim_stacked,
                                                    xdata_list, y_0_grid_point_index, y_values_trim_stacked, ydata_list,
                                                    z_grid_values_linear):
     # calc_tilted_bending_points has no return value except num_bendpoints. All the bending parameters are saved in the global lists
     num_bendpoints = calc_bending_points(
-        grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
+        grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
         z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance, width_for_edge_detection,
         0, 0)
 
@@ -540,7 +538,7 @@ def calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list, grid_ressol
 
     while num_bendpoints > 2:
         num_bendpoints = calc_bending_points(
-            grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
+            grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
             z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance, width_for_edge_detection,
             alpha_angle_list[-1], alpha_end=0)
 
@@ -649,15 +647,15 @@ def calc_2D_lengths(bend_pts_xz_local):
 
 #######################################################################################################################
 # For every iteration in calc_bending_parameters new bendpoints and parameters have to be calculated.
-def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index,
-                        x_0_grid_point_index, z_grid_values_linear, xdata, ydata, max_distance, width_for_edge_detection, alpha_start=0, alpha_end=0, calc_tape_para_2D=False,calc_2D_with_edge_detection=False, calc_3D_Solution=True):
+def calc_bending_points(grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index,
+                        x_0_grid_point_index, z_grid_values_linear, xdata, ydata, max_distance, width_for_edge_detection, alpha_start=0, alpha_end=0, calc_tape_para_2D=False, calc_2D_with_edge_detection=False, calc_3D_Solution=True):
     ##### Oblique linear line y(x)
     # 2 lines needed:   • mathematical decription with coordinates for Plot.
     #                   • with Indizies for extraction from grid
 
     # Step size
-    dy = (max_y - min_y) / grid_ressolution_int
-    dx = (max_x - min_x) / grid_ressolution_int
+    dy = (max_y - min_y) / grid_resolution_int
+    dx = (max_x - min_x) / grid_resolution_int
     x_values = grid_x[:, 0]
 
     # incline/x_slope and y-intercept with Leastsquare, y = x_slope*x + y_intercept
@@ -669,7 +667,7 @@ def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x
 
     # Calc bendpoints on surface in new trendline direction, including left and right for edge directions
     bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local = calc_bend_pts_in_new_directions(
-        alpha_end, alpha_start, dx, dy, grid_ressolution_int, max_distance, trendline_new_direction_current_KOS,
+        alpha_end, alpha_start, dx, dy, grid_resolution_int, max_distance, trendline_new_direction_current_KOS,
         width_for_edge_detection, x_0_grid_point_index, x_slope, x_values, xdata, y_0_grid_point_index, ydata,
         z_grid_values_linear,calc_2D_with_edge_detection)
 
@@ -707,15 +705,15 @@ def calc_bending_points(grid_ressolution_int, grid_x, max_y, min_y, max_x, min_x
                                                               x_direction_list_current_direction,calc_2D_with_edge_detection,calc_3D_Solution)
 
     return len(bend_pts_xyz_global_left)
-def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolution_int, max_distance,
+def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_resolution_int, max_distance,
                                     trendline_new_direction_current_KOS, width_for_edge_detection, x_0_grid_point_index,
-                                    x_slope, x_values, xdata, y_0_grid_point_index, ydata, z_grid_values_linear,calc_2D_with_edge_detection):
+                                    x_slope, x_values, xdata, y_0_grid_point_index, ydata, z_grid_values_linear, calc_2D_with_edge_detection):
 
     # Start and endpoint for tape section
     end_point_xyz_trendline_data, \
     start_point_xyz_trendline_data, \
     x_start_index, \
-    x_end_index = calc_Start_End_in_trendline_KOS_from_xdata_ydata(dx, dy, grid_ressolution_int, x_0_grid_point_index,
+    x_end_index = calc_Start_End_in_trendline_KOS_from_xdata_ydata(dx, dy, grid_resolution_int, x_0_grid_point_index,
                                                                    xdata,
                                                                    y_0_grid_point_index, ydata, z_grid_values_linear)
     #Start and endpoint from side line for estimating bending angels
@@ -729,7 +727,7 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolu
     x_start_index_right = calc_start_end_point_side_in_trendline_KOS(False, delta_length_end_bend,
                                                                      delta_length_start_bend,
                                                                      dx, dy, end_point_xyz_trendline_data,
-                                                                     grid_ressolution_int,
+                                                                     grid_resolution_int,
                                                                      start_point_xyz_trendline_data,
                                                                      width_for_edge_detection,
                                                                      x_0_grid_point_index,
@@ -743,7 +741,7 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolu
     x_start_index_left = calc_start_end_point_side_in_trendline_KOS(True, delta_length_end_bend,
                                                                     delta_length_start_bend,
                                                                     dx, dy, end_point_xyz_trendline_data,
-                                                                    grid_ressolution_int,
+                                                                    grid_resolution_int,
                                                                     start_point_xyz_trendline_data,
                                                                     width_for_edge_detection,
                                                                     x_0_grid_point_index,
@@ -756,19 +754,19 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolu
     # Left
     bend_pts_xyz_global_left, bend_pts_xyz_trendline_left, bend_pts_xz_local_left, new_bending_direction_points_on_surface_global_KOS_left, \
     new_bending_direction_points_tilted_KOS_left, x_values_trim_left, y_values_trim_left = calc_points_on_surface_and_extract_bendline(
-        dy, grid_ressolution_int, max_distance, start_point_xyz_trendline_data_left,
+        dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data_left,
         trendline_new_direction_current_KOS, x_end_index_left, x_slope, x_start_index_left, x_values,
         y_0_grid_point_index, z_grid_values_linear)
     # Right
     bend_pts_xyz_global_right, bend_pts_xyz_trendline_right, bend_pts_xz_local_right, new_bending_direction_points_on_surface_global_KOS_right, \
     new_bending_direction_points_tilted_KOS_right, x_values_trim_right, y_values_trim_right = calc_points_on_surface_and_extract_bendline(
-        dy, grid_ressolution_int, max_distance, start_point_xyz_trendline_data_right,
+        dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data_right,
         trendline_new_direction_current_KOS,
         x_end_index_right, x_slope, x_start_index_right, x_values, y_0_grid_point_index, z_grid_values_linear)
     # Center
     bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, new_bending_direction_points_on_surface_global_KOS, \
     new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim = calc_points_on_surface_and_extract_bendline(
-        dy, grid_ressolution_int, max_distance, start_point_xyz_trendline_data, trendline_new_direction_current_KOS,
+        dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data, trendline_new_direction_current_KOS,
         x_end_index, x_slope, x_start_index, x_values, y_0_grid_point_index, z_grid_values_linear)
 
 
@@ -785,14 +783,14 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_ressolu
                                                             x_values_trim, y_values_trim)
 
     return bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local
-def calc_points_on_surface_and_extract_bendline(dy, grid_ressolution_int, max_distance,
+def calc_points_on_surface_and_extract_bendline(dy, grid_resolution_int, max_distance,
                                                 start_point_xyz_trendline_data, trendline_new_direction_current_KOS,
                                                 x_end_index, x_slope, x_start_index, x_values, y_0_grid_point_index,
                                                 z_grid_values_linear):
 
     new_bending_direction_points_on_surface_global_KOS, y_intercept, x_values_indizes_trim, \
     x_values_trim, y_values_indizes_trim, y_values_trim = calc_new_direction_points_on_surface(
-        start_point_xyz_trendline_data, dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index,
+        start_point_xyz_trendline_data, dy, grid_resolution_int, x_slope, x_values, y_0_grid_point_index,
         z_grid_values_linear,
         x_start_index, x_end_index)
 
@@ -1171,7 +1169,7 @@ def calc_local_trendline_KOS(x_slope):
         (x_trendline_new_direction, y_trendline_new_direction, z_trendline_new_direction))
     return trendline_new_direction_current_KOS
 def calc_start_end_point_side_in_trendline_KOS(calc_left_side, delta_length_end_bend, delta_length_start_bend, dx, dy, end_point_drawn,
-                                               grid_ressolution_int, start_point_drawn, width, x_0_grid_point_index,
+                                               grid_resolution_int, start_point_drawn, width, x_0_grid_point_index,
                                                x_trendline_new_direction, y_0_grid_point_index, z_grid_values_linear,
                                                y_trendline_new_direction):
 
@@ -1201,7 +1199,7 @@ def calc_start_end_point_side_in_trendline_KOS(calc_left_side, delta_length_end_
     y_data_side_start_end = (Start_point_side[1], End_point_side[1])
 
     end_point_drawn_side, start_point_drawn_side, x_start_index_side, x_end_index_side = calc_Start_End_in_trendline_KOS_from_xdata_ydata(
-        dx, dy, grid_ressolution_int,
+        dx, dy, grid_resolution_int,
         x_0_grid_point_index, x_data_side_start_end,
         y_0_grid_point_index, y_data_side_start_end,
         z_grid_values_linear)
@@ -1217,35 +1215,35 @@ def calc_local_and_global_bendpoints(max_distance, new_bending_direction_points_
     bend_pts_xyz_trendline, bend_pts_xyz_global = new_bending_points_tilted_to_global(y_intercept, bend_pts_xyz,
                                                                   trendline_new_direction_current_KOS)
     return bend_pts_xz_local, bend_pts_xyz_trendline, bend_pts_xyz_global
-def calc_Start_End_in_trendline_KOS_from_xdata_ydata(dx, dy, grid_ressolution_int, x_0_grid_point_index, xdata,
+def calc_Start_End_in_trendline_KOS_from_xdata_ydata(dx, dy, grid_resolution_int, x_0_grid_point_index, xdata,
                                                      y_0_grid_point_index, ydata, z_grid_values_linear):
     # Start und Endpunkt der Eingezeichnet wurde
 
-    y_end_index = np.asarray(np.round(np.add(np.divide(ydata[1], dy), (grid_ressolution_int - y_0_grid_point_index))),
+    y_end_index = np.asarray(np.round(np.add(np.divide(ydata[1], dy), (grid_resolution_int - y_0_grid_point_index))),
                              dtype=np.int32)
-    x_end_index = np.asarray(np.round(np.add(np.divide(xdata[1], dx), (grid_ressolution_int - x_0_grid_point_index))),
+    x_end_index = np.asarray(np.round(np.add(np.divide(xdata[1], dx), (grid_resolution_int - x_0_grid_point_index))),
                              dtype=np.int32)
-    y_start_index = np.asarray(np.round(np.add(np.divide(ydata[0], dy), (grid_ressolution_int - y_0_grid_point_index))),
+    y_start_index = np.asarray(np.round(np.add(np.divide(ydata[0], dy), (grid_resolution_int - y_0_grid_point_index))),
                                dtype=np.int32)
-    x_start_index = np.asarray(np.round(np.add(np.divide(xdata[0], dx), (grid_ressolution_int - x_0_grid_point_index))),
+    x_start_index = np.asarray(np.round(np.add(np.divide(xdata[0], dx), (grid_resolution_int - x_0_grid_point_index))),
                                dtype=np.int32)
 
     # Left and right starting point can be outside the grit, when they are outside, they get a default value. The z-Data would be needed for the plot.
-    if x_start_index < 0 or x_start_index >= grid_ressolution_int or \
-            y_start_index < 0 or y_start_index >= grid_ressolution_int:
+    if x_start_index < 0 or x_start_index >= grid_resolution_int or \
+            y_start_index < 0 or y_start_index >= grid_resolution_int:
         z_start_data = z_grid_values_linear[0, 0]
     else: z_start_data = z_grid_values_linear[x_start_index, y_start_index]
 
-    if x_end_index < 0 or x_end_index >= grid_ressolution_int or \
-            y_end_index < 0 or y_end_index >= grid_ressolution_int:
-        z_end_data = z_grid_values_linear[grid_ressolution_int - 1, grid_ressolution_int - 1]
+    if x_end_index < 0 or x_end_index >= grid_resolution_int or \
+            y_end_index < 0 or y_end_index >= grid_resolution_int:
+        z_end_data = z_grid_values_linear[grid_resolution_int - 1, grid_resolution_int - 1]
     else: z_end_data = z_grid_values_linear[x_end_index, y_end_index]
 
 
     start_point_xyz_data = (np.vstack((xdata[0], ydata[0], z_start_data)).T)[0][:]
     end_point_xyz_data = (np.vstack((xdata[1], ydata[1], z_end_data)).T)[0][:]
     return end_point_xyz_data, start_point_xyz_data, x_start_index, x_end_index
-def trim_x_y_values_to_geometry(grid_ressolution_int, x_slope, x_values, x_values_indizes, y_values, y_values_indizes):
+def trim_x_y_values_to_geometry(grid_resolution_int, x_slope, x_values, x_values_indizes, y_values, y_values_indizes):
 
     y_start_index = -1
     y_end_index = -1
@@ -1253,12 +1251,12 @@ def trim_x_y_values_to_geometry(grid_ressolution_int, x_slope, x_values, x_value
 
         if x_slope >= 0:
             if (y_values_indizes[k] >= 0) & (y_start_index < 0): y_start_index = k
-            if (y_values_indizes[k] >= grid_ressolution_int) & (y_end_index < 0): y_end_index = k - 1
+            if (y_values_indizes[k] >= grid_resolution_int) & (y_end_index < 0): y_end_index = k - 1
 
         if x_slope < 0:
-            if (y_values_indizes[k] < grid_ressolution_int) & (y_start_index < 0): y_start_index = k
+            if (y_values_indizes[k] < grid_resolution_int) & (y_start_index < 0): y_start_index = k
             if (y_values_indizes[k] <= 0) & (y_end_index < 0): y_end_index = k - 1
-    if y_end_index <= 0: y_end_index = grid_ressolution_int - 2 # default value
+    if y_end_index <= 0: y_end_index = grid_resolution_int - 2 # default value
 
     # Trim indizes and coordinates to grid size
     x_values_indizes_trim = x_values_indizes[y_start_index:y_end_index]
@@ -1281,7 +1279,7 @@ def trim_x_y_values_to_start_end_point(x_start_index, x_end_index, x_values, x_v
         y_values_trim = y_values[x_end_index:x_start_index]
 
     return x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
-def calc_new_direction_points_on_surface(Start_point, dy, grid_ressolution_int, x_slope, x_values, y_0_grid_point_index,
+def calc_new_direction_points_on_surface(Start_point, dy, grid_resolution_int, x_slope, x_values, y_0_grid_point_index,
                                          z_grid_values_linear, x_start_index, x_end_index):
 
 
@@ -1290,8 +1288,8 @@ def calc_new_direction_points_on_surface(Start_point, dy, grid_ressolution_int, 
     # x-y-values in coordinates
     y_values = np.add(np.multiply(x_values, x_slope), y_intercept)
     # x-y-values with Indizies
-    x_values_indizes = np.asarray(list(range(grid_ressolution_int)), dtype=np.int32)
-    y_values_indizes = np.add(np.divide(y_values, dy), (grid_ressolution_int - y_0_grid_point_index))
+    x_values_indizes = np.asarray(list(range(grid_resolution_int)), dtype=np.int32)
+    y_values_indizes = np.add(np.divide(y_values, dy), (grid_resolution_int - y_0_grid_point_index))
     y_values_indizes = np.asarray(np.round(y_values_indizes), dtype=np.int32)
 
 
@@ -1299,9 +1297,9 @@ def calc_new_direction_points_on_surface(Start_point, dy, grid_ressolution_int, 
     x_indizes_trim, x_values_trim, y_indizes_trim, y_values_trim = trim_x_y_values_to_start_end_point(
             x_start_index, x_end_index, x_values, x_values_indizes, y_values, y_values_indizes)
 
-    if min(y_values_indizes) < 0 or  max(y_values_indizes) > grid_ressolution_int-1:
+    if min(y_values_indizes) < 0 or  max(y_values_indizes) > grid_resolution_int-1:
       x_indizes_trim, x_values_trim, y_indizes_trim, y_values_trim = trim_x_y_values_to_geometry(
-                grid_ressolution_int, x_slope, x_values_trim, x_indizes_trim, y_values_trim, y_indizes_trim)
+                grid_resolution_int, x_slope, x_values_trim, x_indizes_trim, y_values_trim, y_indizes_trim)
 
     # z Values from grid
     z_values_new_bending_direction = []
