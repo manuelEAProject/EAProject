@@ -61,22 +61,6 @@ from Tape_EA_Wenzel import load_settings, delete_old_population_and_start_chromo
 delete_old_population_and_start_chromo()
 load_settings(sub_dir)
 from Tape_EA_Wenzel import load_preprocessor_start_chromosoms, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution # import loaded settings
-
-
-# Copy the loaded settingssheet and startparameter into the current folder, in case the result should be saved
-
-try: shutil.copy(sub_dir+'settingssheet.txt', "./")
-except: pass
-try: shutil.copy(sub_dir+'startparameter.txt', "./")
-except: pass
-try: shutil.copy(sub_dir+'start_chromo_2D.txt', "./")
-except: pass
-try: shutil.copy(sub_dir + 'start_chromo_3D.txt', "./")
-except: pass
-try: shutil.copy(sub_dir + 'start_chromo_2DE.txt', "./")
-except: pass
-
-
 # Read in Startchromosoms from sub_dir
 load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,sub_dir)
 

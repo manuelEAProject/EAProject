@@ -236,7 +236,7 @@ class Population:
         self.startchromo3D = None
         self.startchromo2D = None
         self.startchromo2D_edge = None
-        self.selectionSize = int(self.numChromosomes/4)
+        self.selectionSize = int(self.numChromosomes/3)
 
         self.num_gen_set2 = 0
         self.num_gen_set3 = 0
@@ -761,6 +761,26 @@ class Population:
         back into the currentGeneration.
         """
         # this one is like above, but no duplicates are allowed!
+        for chromo in self.nextGeneration:
+            flag = 0
+            for chromo2 in self.currentGeneration:
+                if chromo.isIdentical(chromo2):
+                    flag = 1
+            if flag == 0:
+                self.currentGeneration.append(chromo)
+
+        self.currentGeneration.sort() #Comment_DB: sort by fitness
+        self.currentGeneration.reverse()
+        self.currentGeneration = self.currentGeneration[:self.numChromosomes]
+
+        self.nextGeneration = []
+    def replace_SteadyStateNoDuplicates_just_offsprings(self):
+        """Replacement function that can be assigned to replaceFunc. Same as
+        replace_SteadyState, exccept that duplicate chromosomes are not inserted
+        back into the currentGeneration.
+        """
+        # this one is like above, but no duplicates are allowed!
+        self.currentGeneration = []
         for chromo in self.nextGeneration:
             flag = 0
             for chromo2 in self.currentGeneration:

@@ -42,7 +42,7 @@ def startparam(input_file, max_distance, width_for_edge_detection, grid_resoluti
         exit()
 
     Start_r_3d_atstart = norm_vector(x_direction_list_global_KOS[0])
-    Start_n_3d_atstart = norm_vector(normal_patch_global_KOS[0])
+    Start_n_3d_atstart = norm_vector(normal_direction_start) #normal_patch_global_KOS[0]
 
     # l-list for Chromo
     l_list = [np.asarray(length_list_3D),lenght_list_2D, length_list_2D_with_edge_detection]
@@ -385,7 +385,7 @@ def translate_and_rotate_points_from_OLD_to_trendline_KOS(points_in_old_KOS, new
                                                                                             new_zero_point_in_old_KOS,
                                                                                             reverse)
     #  translate rotated points to new zero
-    translate_points_to_new_zero(translation_vector, points_in_trendline_KOS)
+    points_in_trendline_KOS = translate_points_to_new_zero(translation_vector, points_in_trendline_KOS)
 
     return points_in_trendline_KOS
 def calc_angle_for_coordinate_rotation_x_trendline(x_axis, z_axis, new_trendline_axis_in_old_KOS):
@@ -419,12 +419,12 @@ def correction_angle_x_axis_for_y_z_orientation(angley, anglez, new_trendline_ax
         new_trendline_axis_in_trendline_KOS.append(new_trendline_axis_points_rotatet_i)
 
     # Check orientations of rotated y and z
-    if new_trendline_axis_in_trendline_KOS[1][1] < 0.9:  #If new_trendline_axis_in_trendline_KOS[1][1] > 0.9 -> then y = [0,1,0], no rotation needed
-        if new_trendline_axis_in_trendline_KOS[1][1] < -0.9:
+    if new_trendline_axis_in_trendline_KOS[1][1] < 0.75:  #If new_trendline_axis_in_trendline_KOS[1][1] > 0.9 -> then y = [0,1,0], no rotation needed
+        if new_trendline_axis_in_trendline_KOS[1][1] < -0.75:
             anglex = math.pi
-        elif new_trendline_axis_in_trendline_KOS[1][2] > 0.9:
+        elif new_trendline_axis_in_trendline_KOS[1][2] > 0.75:
             anglex = -math.pi / 2
-        else:  # new_trendline_axis_in_trendline_KOS[1][2] < -0.9:
+        else:  #new_trendline_axis_in_trendline_KOS[1][2] < -0.75:
             anglex = math.pi / 2
     else:
         anglex = 0
@@ -454,7 +454,7 @@ def translate_points_to_new_zero(new_zero_point_in_old_KOS_rotated, points_in_tr
     points_in_trendline_KOS[:, 0] = np.subtract(points_in_trendline_KOS[:, 0], new_zero_point_in_old_KOS_rotated[0])
     points_in_trendline_KOS[:, 1] = np.subtract(points_in_trendline_KOS[:, 1], new_zero_point_in_old_KOS_rotated[1])
     points_in_trendline_KOS[:, 2] = np.subtract(points_in_trendline_KOS[:, 2], new_zero_point_in_old_KOS_rotated[2])
-
+    return points_in_trendline_KOS
 
 #######################################################################################################################
 # Calculation of the bending parameters
@@ -665,20 +665,36 @@ def calc_bending_points(grid_resolution_int, grid_x, max_y, min_y, max_x, min_x,
     # x_y_z_Axis of new KOS
     trendline_new_direction_current_KOS = calc_local_trendline_KOS(x_slope)
 
+
+
     # Calc bendpoints on surface in new trendline direction, including left and right for edge directions
-    bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local = calc_bend_pts_in_new_directions(
+    bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local,trendline_new_direction_global_KOS = calc_bend_pts_in_new_directions(
         alpha_end, alpha_start, dx, dy, grid_resolution_int, max_distance, trendline_new_direction_current_KOS,
         width_for_edge_detection, x_0_grid_point_index, x_slope, x_values, xdata, y_0_grid_point_index, ydata,
         z_grid_values_linear,calc_2D_with_edge_detection)
 
-    # L_aim, Start Direction and Start Normal
-    global surfacepoints_between_Start_and_End
-    if surfacepoints_between_Start_and_End == []:  # Start_End_connection for L_aim
-        surfacepoints_between_Start_and_End = bend_pts_xz_local
-
+    # Lokal x_direction and normal
     x_direction_start = norm_vector(bend_pts_xyz_global[1] - bend_pts_xyz_global[0])  # Start_direction
-    normal_at_start = calc_tape_normal(bend_pts_xyz_global[1], bend_pts_xyz_global_left[0],
-                                        bend_pts_xyz_global_right[0])  # Start_normal
+
+    """ normal_at_start = calc_tape_normal(bend_pts_xyz_global[1], bend_pts_xyz_global_left[0],
+                                       bend_pts_xyz_global_right[0])  # Start_normal
+
+    normal_patch_global_KOS"""
+
+    # L_aim, Start Direction and Start Normal
+    global surfacepoints_between_Start_and_End, normal_direction_start
+    if surfacepoints_between_Start_and_End == []:  # Just once from the first calculation cycle
+        # Start_End_connection for L_aim
+        surfacepoints_between_Start_and_End = bend_pts_xz_local
+        # Start normal
+        normal_direction_start = np.cross(x_direction_start, trendline_new_direction_global_KOS[1])
+        normal_direction_start = norm_vector(normal_direction_start)
+
+        normal_at_start = normal_direction_start
+
+    else:
+        normal_at_start = calc_tape_normal(bend_pts_xyz_global[1], bend_pts_xyz_global_left[0],
+                                       bend_pts_xyz_global_right[0])  # Start_normal #normal_patch_global_KOS[-1]
 
     # Calc Tapeparameters 2D
     if calc_tape_para_2D:
@@ -693,7 +709,7 @@ def calc_bending_points(grid_resolution_int, grid_x, max_y, min_y, max_x, min_x,
     rotated_x_direction_around_edge_current_direction, \
     beta_angle_between_planes_list_current_direction,\
     alpha_angle_list_current_direction,\
-    lengths_between_planes_list= calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, edge_directions,x_direction_start,normal_at_start,bend_pts_xz_local,lenght_between_first_two_bends)
+    lengths_between_planes_list= calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, edge_directions,x_direction_start,normal_at_start,bend_pts_xz_local,lenght_between_first_two_bends,calc_2D_with_edge_detection)
 
     # Add Bend/Tapeparameters from second bendpoint to global list(first bendpoint = startpoint)
     append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
@@ -753,19 +769,19 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_resolut
     # Calculation of the surfacepoints in the local, trendline and global direction and extracting bendpoints from them.
     # Left
     bend_pts_xyz_global_left, bend_pts_xyz_trendline_left, bend_pts_xz_local_left, new_bending_direction_points_on_surface_global_KOS_left, \
-    new_bending_direction_points_tilted_KOS_left, x_values_trim_left, y_values_trim_left = calc_points_on_surface_and_extract_bendline(
+    new_bending_direction_points_tilted_KOS_left, x_values_trim_left, y_values_trim_left,trendline_new_direction_global_KOS_left = calc_points_on_surface_and_extract_bendline(
         dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data_left,
         trendline_new_direction_current_KOS, x_end_index_left, x_slope, x_start_index_left, x_values,
         y_0_grid_point_index, z_grid_values_linear)
     # Right
     bend_pts_xyz_global_right, bend_pts_xyz_trendline_right, bend_pts_xz_local_right, new_bending_direction_points_on_surface_global_KOS_right, \
-    new_bending_direction_points_tilted_KOS_right, x_values_trim_right, y_values_trim_right = calc_points_on_surface_and_extract_bendline(
+    new_bending_direction_points_tilted_KOS_right, x_values_trim_right, y_values_trim_right,trendline_new_direction_global_KOS_right = calc_points_on_surface_and_extract_bendline(
         dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data_right,
         trendline_new_direction_current_KOS,
         x_end_index_right, x_slope, x_start_index_right, x_values, y_0_grid_point_index, z_grid_values_linear)
     # Center
     bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, new_bending_direction_points_on_surface_global_KOS, \
-    new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim = calc_points_on_surface_and_extract_bendline(
+    new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim,trendline_new_direction_global_KOS = calc_points_on_surface_and_extract_bendline(
         dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data, trendline_new_direction_current_KOS,
         x_end_index, x_slope, x_start_index, x_values, y_0_grid_point_index, z_grid_values_linear)
 
@@ -782,7 +798,7 @@ def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_resolut
                                                             new_bending_direction_points_tilted_KOS_right,
                                                             x_values_trim, y_values_trim)
 
-    return bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local
+    return bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local,trendline_new_direction_global_KOS
 def calc_points_on_surface_and_extract_bendline(dy, grid_resolution_int, max_distance,
                                                 start_point_xyz_trendline_data, trendline_new_direction_current_KOS,
                                                 x_end_index, x_slope, x_start_index, x_values, y_0_grid_point_index,
@@ -803,7 +819,7 @@ def calc_points_on_surface_and_extract_bendline(dy, grid_resolution_int, max_dis
                                                                                                       new_bending_direction_points_tilted_KOS,
                                                                                                       trendline_new_direction_current_KOS,
                                                                                                       y_intercept)
-    return bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, new_bending_direction_points_on_surface_global_KOS, new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim
+    return bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, new_bending_direction_points_on_surface_global_KOS, new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim,trendline_new_direction_global_KOS
 def append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
                                                               bend_pts_xyz_trendline,
                                                               beta_angle_between_planes_list_current_direction,
@@ -869,7 +885,7 @@ def append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_c
             # Directions
             x_direction_list_global_KOS.append(x_direction_list_current_direction[0])
             x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction[0])
-            normal_patch_global_KOS.append(normal_patch_current_direction[0])
+            normal_patch_global_KOS.append(normal_patch_current_direction[1])
 
 def calc_new_endpoint(bend_pts_xyz_trendline, rotated_x_direction_around_edge_trendline_KOS_current_direction,
                       xdata_list, ydata_list):
@@ -1018,7 +1034,7 @@ def calc_points_on_line_between_bends_filled_up(bend_pts_xy, bend_pts_xy_curve, 
     bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)  # Comment_DB: This is now one linear curve from start to end point. Everything here is dependent on xy_patch_curve. Below will take divergence into consideration
     return bend_pts_xy_curve
 def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right,bend_pts_xyz_trendline,
-                                            edge_directions,x_direction_start,normal_at_start,bend_pts_xz_local,lenght_between_first_two_bends):
+                                            edge_directions,x_direction_start,normal_at_start,bend_pts_xz_local,lenght_between_first_two_bends,calc_2D_with_edge_detection):
 
     x_direction_list = [x_direction_start]
 
@@ -1031,9 +1047,12 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
     beta_angle_between_planes_list = []
     alpha_angle_between_planes_list = []
 
+    if calc_2D_with_edge_detection:
+        range_till_end = (len(edge_directions) - 1)
+    else:
+        range_till_end = 2
 
-
-    for i in range(1, (len(edge_directions) - 1)):
+    for i in range(1, range_till_end):
         try:
             length_current_direction = np.linalg.norm(bend_pts_xz_local[i+1] - bend_pts_xz_local[i])
         except:
@@ -1043,8 +1062,8 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
         x_direction_before_bend = norm_vector(bend_pts_xyz_global[i] - bend_pts_xyz_global[i - 1])
 
         # We get the normal of the plane defined by the right and left bendpoint of the bend and the middlepoint on the next/previous bend.
-        normal_at_bendpoint_0_tape = -calc_tape_normal(bend_pts_xyz_global[i-1], bend_pts_xyz_global_left[i],
-                                                      bend_pts_xyz_global_right[i])
+        normal_at_bendpoint_0_tape = -calc_tape_normal(bend_pts_xyz_global[i-1], bend_pts_xyz_global_left[i],bend_pts_xyz_global_right[i])
+
         try: normal_at_bendpoint_1_tape = calc_tape_normal(bend_pts_xyz_global[i+1], bend_pts_xyz_global_left[i],
                                                       bend_pts_xyz_global_right[i])
         except:
@@ -1104,7 +1123,7 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
         x_direction_list.append(x_direction_before_bend)    #x_direction_start is two times in the list. If there are 1+ bending points. For special case there is no bending point, the x_direction is put in the list also outside the loop
         alpha_angle_between_planes_list.append(alpha_angle)
         beta_angle_between_planes_list.append(beta_angle_between_planes)
-        normal_patch.append(normal_at_bendpoint_0_tape)
+        normal_patch.append(normal_at_bendpoint_1_tape)
         lengths_between_planes_list.append(length_current_direction)
 
     # Rotate new Tape-Orientation to Trendline KOS as referenz for the next bending direction
