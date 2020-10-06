@@ -1,8 +1,8 @@
-C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/NeueTestgeometrien/shape_model1.stl
+C:/Users/Manu/Uni/HIWI/WBK/DKu_Arbeit/KI_Evo_Project/Masterarbeit_Lukas_Biergans/Code/Beispiel_IRTG_Demonstrator/IRTG_Gen1_20200629_T100.stl
 25.0
 BASF_CFK_Tape
 2500
-0.05
+0.1
 1.0
 True
 True

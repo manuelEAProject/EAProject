@@ -1,6 +1,7 @@
 from Tape_EA_Wenzel import load_settings, delete_old_population_and_start_chromo, copy_loaded_settings_to_main_folder, GUI_select_folder_directory
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 
 def get_results_of_test_run(sub_dir):
     list_setup_results = []
@@ -45,13 +46,12 @@ def get_results_of_test_run(sub_dir):
         list_setup_results.append(list_setup_executions)
         # Load/Open Fitness Over Generation
     return list_setup_results
-def plot_setup_results(j, list_setup_results,list_setup_results2,color1,color2):
+def plot_setup_results(j, list_setup_results,color1,color2):
     plt.figure(1)
     for i in range(10):
         plt.plot(list_setup_results[j][i][0], list_setup_results[j][i][1], linewidth=1, color=color1)
         plt.plot(list_setup_results[j + 1][i][0], list_setup_results[j + 1][i][1], linewidth=1, color=color2)
-        plt.plot(list_setup_results2[j][i][0], list_setup_results2[j][i][1], linewidth=1, color="yellow")
-        plt.plot(list_setup_results2[j + 1][i][0], list_setup_results2[j + 1][i][1], linewidth=1, color="green")
+
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
     plt.figure(2)
@@ -128,9 +128,10 @@ list_setup_results = get_results_of_test_run(sub_dir)
 list_setup_results2 = get_results_of_test_run(sub_dir2)
 
 j = 0
-plot_setup_results(j, list_setup_results,list_setup_results2,"r","b")
+plot_setup_results(j, list_setup_results,"r","b")
 plt.show(block=False)
-plot_setup_results(j, list_setup_results2,list_setup_results2,"y","green")
+k = 0
+plot_setup_results(k, list_setup_results2,"y","green")
 plt.show()
 
 max_fitness_end = []
@@ -140,10 +141,13 @@ max_fitness_end12 = []
 for i in range(len(list_setup_results[j])):
     max_fitness_end.append(list_setup_results[j][i][1][-1])
     max_fitness_end1.append(list_setup_results[j+1][i][1][-1])
-    max_fitness_end2.append(list_setup_results2[j][i][1][-1])
-    max_fitness_end12.append(list_setup_results2[j + 1][i][1][-1])
+    max_fitness_end2.append(list_setup_results2[k][i][1][-1])
+    max_fitness_end12.append(list_setup_results2[k + 1][i][1][-1])
+
+
+
 
 plt.figure(12)
-plt.boxplot([max_fitness_end,max_fitness_end1,max_fitness_end2,max_fitness_end12],positions=[1,3,2,4])
+plt.boxplot([max_fitness_end,max_fitness_end1])#,max_fitness_end2,max_fitness_end12],positions=[1,3,2,4])
 
 plt.show()

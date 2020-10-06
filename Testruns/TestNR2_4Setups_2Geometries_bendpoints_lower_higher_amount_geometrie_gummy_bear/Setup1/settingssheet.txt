@@ -1,0 +1,9 @@
+X:/Kupzik/DKu_Wenzel/Code/2020_10_05_Code/NeueTestgeometrien/test_neu.stl
+25.0
+BASF_CFK_Tape
+2500
+0.1
+4.0
+True
+True
+False

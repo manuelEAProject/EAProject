@@ -45,7 +45,7 @@ def save_results_of_run():
 sub_dir = GUI_select_folder_directory()
 
 
-different_setups = 6
+different_setups = 4
 amount_of_execution_per_setup = 10
 execute_main_EA = True
 execute_individual = False
@@ -53,7 +53,7 @@ execute_Population_EA = False
 
 
 for i in range(different_setups):
-    setup_subdir = sub_dir + "/Setup" + str(i) + "/"
+    setup_subdir = sub_dir + "Setup" + str(i) + "/"
     load_setup(setup_subdir)
     from Tape_EA_Wenzel import load_preprocessor_start_chromosoms, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution  # import loaded settings
 
@@ -85,7 +85,7 @@ for i in range(different_setups):
 
         if execute_Population_EA:
             input_pop1,input_pop2,input_pop3 = [],[],[]
-            input_pop1 = setup_subdir+"population_2D_Start.txt"
+            input_pop1 = setup_subdir+"population_main_Start.txt"
 
             if input_pop1 != [] or input_pop2 != [] or input_pop3 != []:
                 main_EA_with_loaded_pop(adap_mutation, amount_of_bends, input_pop1, input_pop2, input_pop3, num_gen,

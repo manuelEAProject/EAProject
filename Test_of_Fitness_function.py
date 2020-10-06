@@ -142,18 +142,16 @@ show_chromo(individuals2[1])
 show_chromo(individuals2[2])
 
 """
+show_chromo(individuals[0])
 
-print(Fitness(individuals[0],1))
-print(Fitness(individuals[0], 15))
+show_chromo(individuals2[0])
+show_chromo(individuals2[1])
 
-print(Fitness(individuals[1], 1))
-print(Fitness(individuals[1], 15))
+#print(Fitness(individuals[0],1))
+#print(Fitness(individuals2[0],1))
 
-print(Fitness(individuals2[0],1))
-print(Fitness(individuals2[0], 15))
 
-print(Fitness(individuals2[1], 1))
-print(Fitness(individuals2[1], 15))
+
 
 """
 [lengths, alphas, betas] = ListOfPoints(individuals[0])[4:7]

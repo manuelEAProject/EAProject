@@ -12,7 +12,7 @@ from pyquaternion import Quaternion
 
 equidistant_step_size = 3
 percentile_pc = 5
-max_points_in_pc = 72000
+max_points_in_pc = 50000
 
 
 
@@ -617,9 +617,7 @@ def calc_tape_parameter_for_2D_solution(bend_pts_xyz_global,bend_pts_xz_local):
     lenght_list_2D = calc_2D_lengths(bend_pts_xz_local)
     alpha_angle_list_2D = np.zeros(len(bend_pts_xz_local))
 
-
-
-    # beta-list for Chromo
+# beta-list for Chromo
 def calc_2D_betas(bend_pts_xz_local):
     beta_list = []
     for i in range(1, len(bend_pts_xz_local) - 1):
@@ -668,7 +666,8 @@ def calc_bending_points(grid_resolution_int, grid_x, max_y, min_y, max_x, min_x,
 
 
     # Calc bendpoints on surface in new trendline direction, including left and right for edge directions
-    bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local,trendline_new_direction_global_KOS = calc_bend_pts_in_new_directions(
+    bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, \
+    bend_pts_xz_local,trendline_new_direction_global_KOS = calc_bend_pts_in_new_directions(
         alpha_end, alpha_start, dx, dy, grid_resolution_int, max_distance, trendline_new_direction_current_KOS,
         width_for_edge_detection, x_0_grid_point_index, x_slope, x_values, xdata, y_0_grid_point_index, ydata,
         z_grid_values_linear,calc_2D_with_edge_detection)
@@ -1035,17 +1034,12 @@ def calc_points_on_line_between_bends_filled_up(bend_pts_xy, bend_pts_xy_curve, 
     return bend_pts_xy_curve
 def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right,bend_pts_xyz_trendline,
                                             edge_directions,x_direction_start,normal_at_start,bend_pts_xz_local,lenght_between_first_two_bends,calc_2D_with_edge_detection):
-
     x_direction_list = [x_direction_start]
-
-    rotated_x_direction_around_edge = []
-    rotated_y_direction_around_edge = []
-
     normal_patch = [normal_at_start]
-
     lengths_between_planes_list = [lenght_between_first_two_bends]
-    beta_angle_between_planes_list = []
-    alpha_angle_between_planes_list = []
+    rotated_x_direction_around_edge, rotated_y_direction_around_edge = [],[]
+    beta_angle_between_planes_list, alpha_angle_between_planes_list = [],[]
+
 
     if calc_2D_with_edge_detection:
         range_till_end = (len(edge_directions) - 1)
@@ -1137,7 +1131,6 @@ def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_gl
     rotated_x_direction_around_edge = np.asarray(rotated_x_direction_around_edge)
     x_direction_list = np.asarray(x_direction_list)
 
-
     return x_direction_list, normal_patch, rotated_x_direction_around_edge,beta_angle_between_planes_list,alpha_angle_between_planes_list,lengths_between_planes_list
 def calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right):
     global counter_failed_matches_of_edges
@@ -1145,7 +1138,6 @@ def calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right):
     while len(bend_pts_xyz_global_right) != len(bend_pts_xyz_global_left):  # Comment_DKu_Wenzel: Just looking for the first Bend would optimize stability and would be faster
         if len(bend_pts_xyz_global_right) < len(bend_pts_xyz_global_left): bend_pts_xyz_global_left = np.delete(bend_pts_xyz_global_left,-1,axis=0)
         else:  bend_pts_xyz_global_right = np.delete(bend_pts_xyz_global_right,-1,axis=0) # right < left
-
         print("left and right not same amount of bendingpoints")
         counter_failed_matches_of_edges += 1
         if counter_failed_matches_of_edges > 25:
@@ -1157,8 +1149,6 @@ def calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right):
         edge_direction = bend_pts_xyz_global_right[i] - bend_pts_xyz_global_left[i]
         edge_direction = norm_vector(edge_direction)
         edge_directions.append(edge_direction)
-
-
 
     return edge_directions
 def calc_tape_normal(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right):
