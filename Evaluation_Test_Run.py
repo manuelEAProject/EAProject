@@ -127,10 +127,10 @@ sub_dir2 = GUI_select_folder_directory()
 list_setup_results = get_results_of_test_run(sub_dir)
 list_setup_results2 = get_results_of_test_run(sub_dir2)
 
-j = 0
+j = 2
 plot_setup_results(j, list_setup_results,"r","b")
 plt.show(block=False)
-k = 0
+k = 2
 plot_setup_results(k, list_setup_results2,"y","green")
 plt.show()
 

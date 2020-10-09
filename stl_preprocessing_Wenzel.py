@@ -305,6 +305,7 @@ def calc_points_in_trendline_KOS_for_interpolation():
     return points
 def show_interpolation_and_draw_start_end_points(max_x, max_y, min_x, min_y, z_grid_values_linear):
     # Show interpolation
+    print("Please close window after selecting Start- and Endpoint")
     figure = pyplot.figure()  # Comment_DB: create a new figure
     plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
     plt.colorbar()

@@ -1207,7 +1207,7 @@ def translate_start_varriation_from_chomo(chromo):
         variation_start_alpha = (135 + (chromo[-3] * 45 / (chromo_resolution / 2))) * 2 * math.pi / 360
     else:
         variation_start_alpha = ((chromo[-3] - chromo_resolution / 2) * 45 / (
-                chromo_resolution / 2)) * 2 * math.pi / 360  # Quadratische Vert. von 135°-180°
+                chromo_resolution / 2)) * 2 * math.pi / 360
 
     variation_start_beta = (chromo[-2] * (180 / chromo_resolution) - 90) * 2 * math.pi / 360
 
@@ -2378,10 +2378,13 @@ def if_individual_optimization(individual_optimization, use_2D_Solution, use_2D_
     if individual_optimization:
         with_minimize_beta = True
         if use_3D_Solution:
+            print("Individual optimization of the 3D Startchromosom")
             startchromo3D = optimize_startchromo_and_remove_bendpoints(startchromo3D,show_solution, "_3D")
         if use_2D_with_edge_detection:
+            print("Individual optimization of the 2DE Startchromosom")
             startchromo2D_edge = optimize_startchromo_and_remove_bendpoints(startchromo2D_edge, show_solution, "_2DE")
         if use_2D_Solution:
+            print("Individual optimization of the 2D Startchromosom")
             startchromo2D = optimize_startchromo_and_remove_bendpoints(startchromo2D,show_solution, "_2D")
         with_minimize_beta = False
 def optimize_startchromo_and_remove_bendpoints(startchromo, show_solution, string_dim):
@@ -2413,10 +2416,13 @@ def if_individual_bendpoint_removed(individual_optimization, use_2D_Solution, us
     global startchromo3D, startchromo2D_edge, startchromo2D, with_minimize_beta
     if individual_optimization:
         if use_3D_Solution:
+            print("Individual optimization of the 3D Startchromosom - Removing one bendpoint")
             startchromo3D = optimize_with_removed_bendpoint(startchromo3D, show_solution, "_3D")
         if use_2D_with_edge_detection:
+            print("Individual optimization of the 2DE Startchromosom - Removing one bendpoint")
             startchromo2D_edge = optimize_with_removed_bendpoint(startchromo2D_edge, show_solution, "_2DE")
         if use_2D_Solution:
+            print("Individual optimization of the 2D Startchromosom - Removing one bendpoint")
             startchromo2D = optimize_with_removed_bendpoint(startchromo2D, show_solution, "_2D")
 def optimize_with_removed_bendpoint(startchromo, show_solution, string_dim):
     startchromo = individual_optimization_with_removed_bendpoint(startchromo,string_dim)
@@ -2434,17 +2440,8 @@ def create_chromosoms_with_one_bendpoint_removed(start_chromo):
 def individual_optimization_with_removed_bendpoint(start_chromo,string_dim):
     #Initialize and Prep
     new_startchromosoms, new_amount_of_bendpoints = create_chromosoms_with_one_bendpoint_removed(start_chromo)
-    partial_pop_size = math.ceil(pop_size/new_amount_of_bendpoints)
 
-    p_removed_bendpoint = initialize_Population_with_global_Settings(pop_size, num_gen, new_amount_of_bendpoints,new_startchromosoms[0], [], [])
-    p_removed_bendpoint.prepPopulation(True, False, False)
-    p_removed_bendpoint.currentGeneration = p_removed_bendpoint.currentGeneration[:partial_pop_size]
-
-    for startchromo in new_startchromosoms[1:]:
-        p_individual = initialize_Population_with_global_Settings(partial_pop_size, num_gen, new_amount_of_bendpoints, startchromo, [], [])
-        p_individual.prepPopulation(True, False, False)
-        for chromo in p_individual.currentGeneration:
-            p_removed_bendpoint.currentGeneration.append(chromo)
+    p_removed_bendpoint = create_population_with_new_startchromosoms(new_amount_of_bendpoints, new_startchromosoms)
 
     # Save Start_Population
     save_current_population(p_removed_bendpoint, string_dim+"_Start")
@@ -2455,6 +2452,28 @@ def individual_optimization_with_removed_bendpoint(start_chromo,string_dim):
     # Update startchromo
     start_chromo = p_removed_bendpoint.currentGeneration[0].genes
     return start_chromo
+def create_population_with_new_startchromosoms(new_amount_of_bendpoints, new_startchromosoms):
+    partial_pop_size = math.ceil(pop_size / (new_amount_of_bendpoints + 1))
+
+    p_removed_bendpoint = initialize_Population_with_global_Settings(pop_size, num_gen, new_amount_of_bendpoints,
+                                                                    new_startchromosoms[0], [], [])
+    p_removed_bendpoint.prepPopulation(True, False, False)
+    p_removed_bendpoint.currentGeneration = p_removed_bendpoint.currentGeneration[:partial_pop_size]
+
+    for startchromo in new_startchromosoms[1:]:
+        p_individual = initialize_Population_with_global_Settings(partial_pop_size, num_gen, new_amount_of_bendpoints,
+                                                                  startchromo, [], [])
+        p_individual.prepPopulation(True, False, False)
+        for chromo in p_individual.currentGeneration:
+            p_removed_bendpoint.currentGeneration.append(chromo)
+
+    differenz_pop_size = pop_size - len(p_removed_bendpoint.currentGeneration)
+    if differenz_pop_size < 0:
+        p_removed_bendpoint.currentGeneration = p_removed_bendpoint.currentGeneration[:pop_size]
+    elif differenz_pop_size > 0:
+        for i in range(differenz_pop_size):
+            p_removed_bendpoint.currentGeneration.append(p_removed_bendpoint.currentGeneration[0])
+    return p_removed_bendpoint
 
 
 # Save and print parameters
