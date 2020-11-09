@@ -144,10 +144,19 @@ for i in range(len(list_setup_results[j])):
     max_fitness_end2.append(list_setup_results2[k][i][1][-1])
     max_fitness_end12.append(list_setup_results2[k + 1][i][1][-1])
 
+max_dist_end,max_dist_end1,max_dist_end2,max_dist_end12 = [],[],[],[]
+
+for i in range(len(list_setup_results[j])):
+    max_dist_end.append(list_setup_results[j][i][2][-1])
+    max_dist_end1.append(list_setup_results[j+1][i][2][-1])
+    max_dist_end2.append(list_setup_results2[k][i][2][-1])
+    max_dist_end12.append(list_setup_results2[k + 1][i][2][-1])
+
 
 
 
 plt.figure(12)
-plt.boxplot([max_fitness_end,max_fitness_end1])#,max_fitness_end2,max_fitness_end12],positions=[1,3,2,4])
-
+plt.boxplot([max_fitness_end1,max_fitness_end2,max_fitness_end12],positions=[1,2,3])#1])#max_fitness_end
+plt.figure(13)
+plt.boxplot([max_dist_end,max_dist_end1,max_dist_end2,max_dist_end12],positions=[1,2,3,4])#1])#
 plt.show()

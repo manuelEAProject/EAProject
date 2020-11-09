@@ -276,7 +276,7 @@ class Population:
         self.avgFitnessNextGen = None
         self.sumFitnessNextGen = None
         self.bestFitIndividualNextGen = None
-    def prepPopulation(self, start_2D, start_2D_edge, start_3D): #Comment_DB: For both random and preprocessed initialization
+    def prepPopulation(self, use_start_2D, use_start_2D_edge, use_start_3D,use_best_Solution = False): #Comment_DB: For both random and preprocessed initialization
         """Radnomly initializes each chromosome according to the values in
         chromosMinValues and chromosMaxValues.
         """
@@ -286,7 +286,9 @@ class Population:
         self.currentGeneration = []
         # Add Startchromo to the starting population once (if using preprocessor):
         if self.preprocessedInit == True: #Comment_DB: preprocessed initialization
-            if start_3D:
+            amount_of_startchromosoms = 0
+            if use_start_3D:
+                amount_of_startchromosoms +=1
                 c = Chromosome() #Comment_DB: create chromosome object
                 c.geneMinValues = self.chromoMinValues #Comment_DB: input in tape_EA
                 c.geneMaxValues = self.chromoMaxValues #Comment_DB: input in tape_EA
@@ -297,7 +299,8 @@ class Population:
                 c.evalFunc = self.evalFunc
                 self.currentGeneration.append(c) #Comment_DB: append the startchromo into the current generation
                 c.initrange=self.initrange #Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
-            if start_2D_edge:
+            if use_start_2D_edge:
+                amount_of_startchromosoms += 1
                 c = Chromosome() #Comment_DB: create chromosome object
                 c.geneMinValues = self.chromoMinValues #Comment_DB: input in tape_EA
                 c.geneMaxValues = self.chromoMaxValues #Comment_DB: input in tape_EA
@@ -308,7 +311,8 @@ class Population:
                 c.evalFunc = self.evalFunc
                 self.currentGeneration.append(c) #Comment_DB: append the startchromo into the current generation
                 c.initrange=self.initrange #Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
-            if start_2D:
+            if use_start_2D:
+                amount_of_startchromosoms += 1
                 c = Chromosome()  # Comment_DB: create chromosome object
                 c.geneMinValues = self.chromoMinValues  # Comment_DB: input in tape_EA
                 c.geneMaxValues = self.chromoMaxValues  # Comment_DB: input in tape_EA
@@ -319,6 +323,38 @@ class Population:
                 c.evalFunc = self.evalFunc
                 self.currentGeneration.append(c)  # Comment_DB: append the startchromo into the current generation
                 c.initrange = self.initrange  # Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
+            if use_best_Solution:
+                amount_of_startchromosoms += 1
+                c = Chromosome()  # Comment_DB: create chromosome object
+                c.geneMinValues = self.chromoMinValues  # Comment_DB: input in tape_EA
+                c.geneMaxValues = self.chromoMaxValues  # Comment_DB: input in tape_EA
+                for i in range(len(self.bestFitIndividual)):  # Comment_DB: startchromo is the startchromo in tape_EA
+                    c.genes.append(self.bestFitIndividual[i])  # Comment_DB: append the initial startchromo from tape EA!
+
+                c.fitness = None
+                c.evalFunc = self.evalFunc
+                self.currentGeneration.append(c)  # Comment_DB: append the startchromo into the current generation
+                c.initrange = self.initrange  # Comment_DB: Interval for variation of preprocessed gene. As of now, 1 generation.
+
+            partial_pop_size = self.numChromosomes/amount_of_startchromosoms
+
+            pop_size_range = partial_pop_size
+            pop_size_range_3D,pop_size_range_2DE,pop_size_range_2D,pop_size_range_best = 0,0,0,0
+
+            if use_start_3D:
+
+                pop_size_range_3D = pop_size_range
+                pop_size_range+=partial_pop_size
+
+            if use_start_2D_edge:
+                pop_size_range_2DE= pop_size_range
+                pop_size_range+=partial_pop_size
+            if use_start_2D:
+                pop_size_range_2D= pop_size_range
+                pop_size_range+=partial_pop_size
+            if use_best_Solution:
+                pop_size_range_best= pop_size_range
+                pop_size_range+=partial_pop_size
 
         # Create the start population, if PreprocessedInit = True the population is created around Startchromo
         for i in range(self.numChromosomes): #Comment_DB: numChromosomes is the # of chromosomes (population) in each generation
@@ -331,26 +367,38 @@ class Population:
             # Using the preprocessed parameters (#Comment_DB: to generate the start population?)
             if self.preprocessedInit == True:
 
-                if start_2D & start_3D & start_2D_edge:
+                if use_start_3D:
+                   if i<pop_size_range_3D:c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
+
+                if use_start_2D_edge:
+                    if i < pop_size_range_2DE and i >=pop_size_range_3D:c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
+                if use_start_2D:
+                    if i < pop_size_range_2D and i >=pop_size_range_3D and i >=pop_size_range_2DE:c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
+                if use_best_Solution:
+                    if i < pop_size_range_best and i >=pop_size_range_3D and i >=pop_size_range_2DE and i >=pop_size_range_2D:c.preprocessedInit(self.generator, self.bestFitIndividual, self.useInteger)
+
+
+                    """
+                if use_start_2D & use_start_3D & use_start_2D_edge:
                     if i<(self.numChromosomes/3):c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
                     elif i < (2*self.numChromosomes / 3):
                         c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
                     else:c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
 
-                elif start_2D & start_3D:
+                elif use_start_2D & use_start_3D:
                     if i<(self.numChromosomes/2):c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
                     else:c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
-                elif start_2D & start_2D_edge:
+                elif use_start_2D & use_start_2D_edge:
                     if i<(self.numChromosomes/2):c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
                     else:c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
-                elif start_3D & start_2D_edge:
+                elif use_start_3D & use_start_2D_edge:
                     if i<(self.numChromosomes/2):c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
                     else:c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
 
-                elif start_2D: c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
-                elif start_2D_edge: c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
-                elif start_3D: c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
-
+                elif use_start_2D: c.preprocessedInit(self.generator, self.startchromo2D, self.useInteger)
+                elif use_start_2D_edge: c.preprocessedInit(self.generator, self.startchromo2D_edge, self.useInteger)
+                elif use_start_3D: c.preprocessedInit(self.generator, self.startchromo3D, self.useInteger)
+                    """
             else:
                 c.randomInit(self.generator, self.useInteger)
             c.evalFunc = self.evalFunc
@@ -693,25 +741,47 @@ class Population:
         """Mutation function that can be assigned to mutateFunc.
         Uniform mutation within the mutation radius.
         """
-        for i in range(len(chromo.genes)):
+        for gen_nr in range(len(chromo.genes)):
             prob = self.generator.random() #Comment_DB: produces value between 0 (inclusive) and 1 (not inclusive)
             #print("mutation rate in mutate func:",self.mutationRate)
             if prob <= self.mutationRate:
                 # then we mutate!
                 f = 0
-                chromorange = self.chromoMaxValues[i] - self.chromoMinValues[i]
-                lowstop = max(self.chromoMinValues[i], chromo.genes[i] - self.mutationRange * chromorange)
-                highstop = min(self.chromoMaxValues[i], chromo.genes[i] + self.mutationRange * chromorange)
+                chromorange = self.chromoMaxValues[gen_nr] - self.chromoMinValues[gen_nr]
+                lowstop = max(self.chromoMinValues[gen_nr], chromo.genes[gen_nr] - self.mutationRange * chromorange)
+                highstop = min(self.chromoMaxValues[gen_nr], chromo.genes[gen_nr] + self.mutationRange * chromorange)
 
-                if lowstop > self.chromoMaxValues[i]: lowstop = self.chromoMaxValues[i] # Comment_DKu_Wenzel: Fehler: lowstop > highstop. Highstop min() ist max chromomax. Lowstop max() kann höher sein. Problem?
+                if lowstop > self.chromoMaxValues[gen_nr]: lowstop = self.chromoMaxValues[gen_nr] # Comment_DKu_Wenzel: Fehler: lowstop > highstop. Highstop min() ist max chromomax. Lowstop max() kann höher sein. Problem?
                 if highstop < 0: highstop = 0
 
                 if self.useInteger == 1:
                     f = self.generator.randint(int(lowstop), int(highstop))
                 else:
                     f = self.generator.uniform(
-                        self.chromoMinValues[i], self.chromoMaxValues[i])
-                chromo.genes[i] = int(f)
+                        self.chromoMinValues[gen_nr], self.chromoMaxValues[gen_nr])
+
+                delta_f = int(f) - chromo.genes[gen_nr]
+
+                chromo.genes[gen_nr] = int(f)
+
+                mutate_compensate = False
+                if mutate_compensate:
+                    if delta_f > chromorange/36:  # 180°/36 = 5°, ab einer Änderung von 5° wird Kompensiert.
+                        nr_of_bendpoints = (len(chromo.genes)-7)/3
+                        if gen_nr <= nr_of_bendpoints*3-3:
+                            list_alpha = []
+                            for j in range(int(nr_of_bendpoints)):
+                                list_alpha.append(1+j*3)
+
+                            if (gen_nr in list_alpha):
+                                chromo.genes[gen_nr + 3] = chromo.genes[gen_nr + 3] + delta_f
+                            else:
+                                chromo.genes[gen_nr + 3] = chromo.genes[gen_nr + 3] - delta_f
+
+                            if chromo.genes[gen_nr + 3] < self.chromoMinValues[gen_nr + 3]:
+                                chromo.genes[gen_nr + 3] = 1
+                            elif chromo.genes[gen_nr + 3] > self.chromoMaxValues[gen_nr + 3]:
+                                chromo.genes[gen_nr + 3] = self.chromoMaxValues[gen_nr + 3]
         return chromo
     def mutate_Gauss(self, chromo):
         """Mutation function that can be assigned to mutateFunc.

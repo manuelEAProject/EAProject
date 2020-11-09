@@ -39,7 +39,7 @@ def create_chromo(lengths, alphas, betas):
     # Fill length1, alpha1, beta1, length2...
     for i in range(len(lengths)):
         chromo.append(int(lengths[i] / l_factor))
-        if i < len(betas):  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
+        if i < len(betas)-1:  # Comment_DB: range of beta_list compared to range of l_list is smaller by 1
 
             #start_chromo.append(int(chromo_resolution / 2))  # Comment_DB: Alphas -> zero on default
             if alphas[i] > math.pi/2:
@@ -58,11 +58,11 @@ def create_chromo(lengths, alphas, betas):
 ############################## GUI and read in start chromosoms ####################################################################
 sub_dir = GUI_Population()
 from Tape_EA_Wenzel import load_settings, delete_old_population_and_start_chromo
-delete_old_population_and_start_chromo()
+#delete_old_population_and_start_chromo()
 load_settings(sub_dir)
-from Tape_EA_Wenzel import load_preprocessor_start_chromosoms, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution # import loaded settings
+from Tape_EA_Wenzel import load_preprocessor_start_chromosomes, calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,calc_best_Solution # import loaded settings
 # Read in Startchromosoms from sub_dir
-load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,sub_dir)
+load_preprocessor_start_chromosomes(calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, calc_best_Solution, sub_dir)
 
 
 
@@ -144,8 +144,8 @@ show_chromo(individuals2[2])
 """
 show_chromo(individuals[0])
 
-show_chromo(individuals2[0])
-show_chromo(individuals2[1])
+#show_chromo(individuals2[0])
+#show_chromo(individuals2[1])
 
 #print(Fitness(individuals[0],1))
 #print(Fitness(individuals2[0],1))
@@ -153,10 +153,24 @@ show_chromo(individuals2[1])
 
 
 
-"""
+
 [lengths, alphas, betas] = ListOfPoints(individuals[0])[4:7]
 
-lengths[0]=100
+delta_beta_rad = 0.3
+delta_alpha_rad = 0.2
+delta_length = 20
+
+bend1 = 1
+bend2 = 2
+
+betas[bend1]= betas[bend1] + delta_beta_rad
+betas[bend2]= betas[bend2] - delta_beta_rad
+
+lengths[bend1]= lengths[bend1] + delta_length
+lengths[bend2]= lengths[bend2] - delta_length
+
+alphas[bend1]= alphas[bend1] + delta_alpha_rad
+alphas[bend2]= alphas[bend2] + delta_alpha_rad
 
 chromo = create_chromo(lengths, alphas, betas)
 
@@ -164,4 +178,3 @@ show_chromo(chromo)
 
 print(Fitness(individuals[1], 1))
 
-"""

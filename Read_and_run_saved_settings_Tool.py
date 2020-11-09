@@ -109,9 +109,9 @@ from Tape_EA_Wenzel import load_settings, delete_old_population_and_start_chromo
 delete_old_population_and_start_chromo()
 load_settings(sub_dir)
 # import loaded settings
-from Tape_EA_Wenzel import load_preprocessor_start_chromosoms, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution
+from Tape_EA_Wenzel import load_preprocessor_start_chromosomes, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, use_best_Solution
 # Read in Startchromosoms from sub_dir
-load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,sub_dir)
+load_preprocessor_start_chromosomes(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, sub_dir)
 from Tape_EA_Wenzel import *
 # Copy the loaded settingssheet and startparameter into the current folder, in case the result should be saved or population should be loaded
 copy_loaded_settings_to_main_folder(sub_dir)
@@ -119,7 +119,7 @@ copy_loaded_settings_to_main_folder(sub_dir)
 ##################################### Read in all Tape_EA Values ####################################################################################
 # Import all variables from TapeEA (read_in_last_start_chromosoms creats startchromos in Tape_EA, have to be exportet afterwards)
 
-[use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution, individual_optimization, adap_mutation,
+[use_2D_with_edge_detection, use_2D_Solution, use_3D_Solution,use_best_Solution, individual_optimization, adap_mutation,
      gamma_d, gamma_d2,
      gamma_d3, gamma_d4, gamma_l, gamma_l2, gamma_l3, gamma_l4, gamma_pe, gamma_pe2, gamma_pe3, gamma_pe4, gamma_ps,
      gamma_ps2, gamma_ps3, gamma_ps4, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_crossover, p_mutate_range,
@@ -131,14 +131,14 @@ copy_loaded_settings_to_main_folder(sub_dir)
 ############################################# Run EA on importet Population #############################################################################
 
 # Repair 3D-2D-Startsolution to get same amount of bendpoint
-repair_start_chromosoms_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+repair_start_chromosomes_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
 
 # Individual optimization
-if_individual_optimization(individual_optimization, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+individual_optimization_and_removing_unnecessary_bends(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,use_best_Solution)
 
 # Optimiziation
-main_EA(adap_mutation, amount_of_bends, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_mutation, pop_size,
-            startchromo2D, startchromo2D_edge, startchromo3D, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution)
+main_EA(adap_mutation, amount_of_bends, num_gen, p_mutation, pop_size, startchromo2D, startchromo2D_edge, startchromo3D,startchromo_current_best,
+        use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution,use_best_Solution )
 
 GUI_End_Save_Patch()
 

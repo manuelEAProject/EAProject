@@ -45,20 +45,20 @@ def save_results_of_run():
 sub_dir = GUI_select_folder_directory()
 
 
-different_setups = 4
-amount_of_execution_per_setup = 10
+different_setups = 2
+amount_of_execution_per_setup = 2
 execute_main_EA = True
 execute_individual = False
 execute_Population_EA = False
-
+use_best_Solution = False
 
 for i in range(different_setups):
     setup_subdir = sub_dir + "Setup" + str(i) + "/"
     load_setup(setup_subdir)
-    from Tape_EA_Wenzel import load_preprocessor_start_chromosoms, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution  # import loaded settings
+    from Tape_EA_Wenzel import load_preprocessor_start_chromosomes, calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution,calc_best_Solution  # import loaded settings
 
     # Read in Startchromosoms from sub_dir
-    load_preprocessor_start_chromosoms(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, setup_subdir)
+    load_preprocessor_start_chromosomes(calc_2D_Solution, calc_2D_with_edge_detection, calc_3D_Solution, calc_best_Solution, setup_subdir)
     from Tape_EA_Wenzel import *
 
     # Initialize lists to save result of setup run
@@ -69,17 +69,16 @@ for i in range(different_setups):
 
         if execute_individual:
             print("Individual Optimization")
-            if_individual_optimization(individual_optimization, use_2D_Solution, use_2D_with_edge_detection,
-                                       use_3D_Solution,False)
+            individual_optimization_and_removing_unnecessary_bends(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, use_best_Solution)
             save_fitness_over_gen()
             save_results_of_run()
 
         if execute_main_EA:
             print("Main EA Optimization")
-            repair_start_chromosoms_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection,use_3D_Solution)
-            main_EA(adap_mutation, amount_of_bends, num_gen, num_gen_set2, num_gen_set3, num_gen_set4, p_mutation, pop_size,
-                    startchromo2D, startchromo2D_edge, startchromo3D, use_2D_Solution, use_2D_with_edge_detection,
-                    use_3D_Solution,False)
+            repair_start_chromosomes_to_same_amount_of_bendpoints(use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, use_best_Solution)
+            main_EA(adap_mutation, amount_of_bends, num_gen, p_mutation, pop_size, startchromo2D, startchromo2D_edge,
+            startchromo3D,startchromo_current_best, use_2D_Solution, use_2D_with_edge_detection, use_3D_Solution, use_best_Solution,
+                    False)
 
             save_results_of_run()
 
