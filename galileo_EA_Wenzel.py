@@ -210,6 +210,28 @@ class Chromosome:
         """If the genes in self and other are identical, returns 0
         """
         return (self.genes == other.genes)
+    def isSimilar(self, other):
+        """If the genes in self and other are identical, returns 0
+        """
+        deviation_in_percent = 0.20
+        max_deviation = 1 + deviation_in_percent
+        min_deviation = 1 - deviation_in_percent
+        for i in [-6, -5, -4, -3, -2, -1]:
+            if i == -3: #and self.genes[-2] == int(self.geneMaxValues[-2] / 2):
+                pass
+            else:
+                if self.genes[i] < max_deviation * other.genes[i] and self.genes[i] > min_deviation * other.genes[i]:
+                    pass
+                else:
+                    return False
+
+        for i in range(len(self.genes)-6):
+            if self.genes[i] < max_deviation* other.genes[i] and self.genes[i] > min_deviation* other.genes[i]:
+                pass
+            else:
+                return False
+        return True
+
 """The Population class represents an entire population of a single
     generation of Chromosomes. This population is replaced with each iteration
     of the algorithm. Functions are provided for storing generations for later
@@ -840,6 +862,25 @@ class Population:
                 self.currentGeneration.append(chromo)
 
         self.currentGeneration.sort() #Comment_DB: sort by fitness
+        self.currentGeneration.reverse()
+        self.currentGeneration = self.currentGeneration[:self.numChromosomes]
+
+        self.nextGeneration = []
+    def replace_SteadyStateNoSimilares(self):
+        """Replacement function that can be assigned to replaceFunc. Same as
+        replace_SteadyState, exccept that duplicate chromosomes are not inserted
+        back into the currentGeneration.
+        """
+        # this one is like above, but no duplicates are allowed!
+        for chromo in self.nextGeneration:
+            flag = 0
+            for chromo2 in self.currentGeneration:
+                if chromo.isSimilar(chromo2):
+                    flag = 1
+            if flag == 0:
+                self.currentGeneration.append(chromo)
+
+        self.currentGeneration.sort()  # Comment_DB: sort by fitness
         self.currentGeneration.reverse()
         self.currentGeneration = self.currentGeneration[:self.numChromosomes]
 

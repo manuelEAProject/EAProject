@@ -88,8 +88,7 @@ for i in range(different_setups):
 
             if input_pop1 != [] or input_pop2 != [] or input_pop3 != []:
                 main_EA_with_loaded_pop(adap_mutation, amount_of_bends, input_pop1, input_pop2, input_pop3, num_gen,
-                                        num_gen_set2,
-                                        num_gen_set3, num_gen_set4, p_mutation, pop_size,False)
+                                        p_mutation, pop_size, False)
                 save_results_of_run()
     save_fitness_per_setup(setup_subdir, i)
 

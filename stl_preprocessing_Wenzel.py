@@ -17,31 +17,30 @@ max_points_in_pc = 50000
 
 
 ####MAIN
-def startparam(input_file, max_distance, width_for_edge_detection, grid_resolution, calc_2D_with_edge_detection,
+def startparam(input_file, max_distance, width_for_edge_detection, grid_resolution, calc_2D_Solution, calc_2D_with_edge_detection,
                calc_3D_Solution):
     print(
         "Preprocessing in progress... With high-resolution stl files and large area size differences it can lead to longer calculation times")
 
     # Read in the file:
-    calc_trendline_of_geometry_from_stl_file(input_file) # saved in global var!
+    calc_trendline_KOS_of_geometry_from_stl_file(input_file) # saved in global var!
 
     # Interpolation:
-    grid_resolution_j = grid_resolution*1j
-    grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear = interpolate_geometrie_in_trendline_KOS_and_draw_start_end_point( # start end saved in global var!
-         grid_resolution_j)
+
+    z_grid_values_linear_trendline_KOS = interpolate_geometrie_in_trendline_KOS_and_draw_start_end_point( # start end saved in global var!
+         grid_resolution)
 
     # Calculation of the bending parameters:
-    calc_bending_parameters(grid_resolution, grid_x, max_distance, width_for_edge_detection, max_x, max_y, min_x, min_y, z_grid_values_linear,calc_2D_with_edge_detection,calc_3D_Solution) # saved in global var!
+    calc_bending_parameters(grid_resolution, max_distance, width_for_edge_detection, z_grid_values_linear_trendline_KOS,
+                            calc_2D_with_edge_detection, calc_3D_Solution)  # saved in global var!
 
     ##### Extract start parameters ####
-    L_aim, normal_at_start_global_KOS, direction_at_start_global_KOS, alpha_list, amount_of_bends, beta_list, endpoint_on_surface, l_list, startpoint_on_surface = calc_start_parameters()
+    L_aim, normal_at_start_global_KOS, direction_at_start_global_KOS, alpha_list, amount_of_bends, beta_list, endpoint_on_surface, l_list, startpoint_on_surface = extract_start_parameters(calc_2D_Solution,calc_3D_Solution)
 
     start_parameter = [l_list, L_aim, beta_list, alpha_list, startpoint_on_surface,
-                       endpoint_on_surface, direction_at_start_global_KOS, normal_at_start_global_KOS,amount_of_bends,z_grid_values_linear, max_x, max_y, min_x, min_y]
+                       endpoint_on_surface, direction_at_start_global_KOS, normal_at_start_global_KOS,amount_of_bends,z_grid_values_linear_trendline_KOS, max_x, max_y, min_x, min_y,gamma_start]
     return start_parameter
-
-
-def calc_start_parameters():
+def extract_start_parameters(calc_2D_Solution,calc_3D_Solution):
     startpoint_on_surface = bend_pts_xyz_global_2D[0][:]
     endpoint_on_surface = bend_pts_xyz_global_2D[-1][:]
     if x_direction_list_global_KOS == []:
@@ -49,14 +48,17 @@ def calc_start_parameters():
         exit()
 
     direction_at_start_global_KOS = norm_vector(x_direction_list_global_KOS[0])
-    normal_at_start_global_KOS = norm_vector(normal_direction_start)  # normal_patch_global_KOS[0]
+    if not calc_2D_Solution and calc_3D_Solution:
+        normal_at_start_global_KOS = norm_vector(normal_direction_start_3D)
+    else:
+        normal_at_start_global_KOS = norm_vector(normal_direction_start)  # normal_patch_global_KOS[0]
     # l-list for Chromo
-    l_list = [np.asarray(length_list_3D), lenght_list_2D, length_list_2D_with_edge_detection]
+    l_list = [np.asarray(length_list_3D), lenght_list_2D, length_list_2DE]
     # Beta_liste from calc_bending_parameters
     beta_list = [np.asarray(beta_angle_between_planes_list_3D), beta_angle_list_2D,
-                 beta_angle_between_planes_list_2D_with_edge_detection]
+                 beta_angle_between_planes_list_2DE]
     # Alpha_liste from calc_bending_parameters
-    alpha_list = [np.asarray(alpha_angle_list_3D), alpha_angle_list_2D, alpha_angle_list_2D_with_edge_detection]
+    alpha_list = [np.asarray(alpha_angle_list_3D), alpha_angle_list_2D, alpha_angle_list_2DE]
     # L_aim:  Curve of interpolated surface. 2D_solution
     L_aim = calc_L_aim(surfacepoints_between_Start_and_End)  # summed up distances
     if len(l_list[0]) > len(l_list[1]):
@@ -65,11 +67,9 @@ def calc_start_parameters():
         amount_of_bends = len(l_list[1]) - 1
     return L_aim, normal_at_start_global_KOS, direction_at_start_global_KOS, alpha_list, amount_of_bends, beta_list, endpoint_on_surface, l_list, startpoint_on_surface
 
-
 #######################################################################################################################
 # Load stl file and analyse the geometry. Calc centerpoint and trendline of the geometry
-
-def calc_trendline_of_geometry_from_stl_file(input_file):
+def calc_trendline_KOS_of_geometry_from_stl_file(input_file):
     patch_vectors_of_stl_input = mesh.Mesh.from_file(input_file)  # Comment_DB: stl mesh
 
     # Triangel vectors needed for the visualization of the patch.
@@ -267,13 +267,11 @@ def norm_vector(vector):
 #######################################################################################################################
 # Interpolte geometry in rotated and translated trendline KOS
 def interpolate_geometrie_in_trendline_KOS_and_draw_start_end_point(grid_resolution):
-    grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear = interpolate_geometrie(grid_resolution)
+    z_grid_values_linear_trendline_KOS = interpolate_geometrie(grid_resolution)
 
+    show_interpolation_and_draw_start_end_points(z_grid_values_linear_trendline_KOS) # In this function x_data_drawn and y_data_drawn are calculated
 
-
-    show_interpolation_and_draw_start_end_points(max_x, max_y, min_x, min_y, z_grid_values_linear) # In this function x_data_drawn and y_data_drawn are calculated
-
-    return grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear
+    return z_grid_values_linear_trendline_KOS
 # Functions in Interpolate start_geometrie
 def interpolate_geometrie(grid_resolution):
     # Comment_DKu_Wenzel: Interpolation mit Centerpoints teils ungenauer
@@ -289,29 +287,34 @@ def interpolate_geometrie(grid_resolution):
     points_z_trendline_KOS = tri_corner_points_trendline_KOS[:, 2]
 
     # Creat grid
+    global max_x,min_x,max_y,min_y,grid_x,dx,dy,y_0_grid_point_index,x_0_grid_point_index
     grid_resolution_j = grid_resolution * 1j
     max_x = max(points_x_y_trendline_KOS[:, 0])
     min_x = min(points_x_y_trendline_KOS[:, 0])
     max_y = max(points_x_y_trendline_KOS[:, 1])
     min_y = min(points_x_y_trendline_KOS[:, 1])
+    dy = (max_y - min_y) / grid_resolution
+    dx = (max_x - min_x) / grid_resolution
+    y_0_grid_point_index = np.asarray(np.round(max_y / (max_y - min_y) * grid_resolution), dtype=np.int32)
+    x_0_grid_point_index = np.asarray(np.round(max_x / (max_x - min_x) * grid_resolution), dtype=np.int32)
+    
     grid_x, grid_y = np.mgrid[min_x:max_x:grid_resolution_j, min_y:max_y:grid_resolution_j]
 
-
     # Interpolating  the Surface Geometry
-    z_grid_values_linear = griddata(np.asarray(points_x_y_trendline_KOS, dtype=np.float32), np.asarray(points_z_trendline_KOS, dtype=np.float32), (grid_x, grid_y),
+    z_grid_values_linear_trendline_KOS = griddata(np.asarray(points_x_y_trendline_KOS, dtype=np.float32), np.asarray(points_z_trendline_KOS, dtype=np.float32), (grid_x, grid_y),
                                     method='linear')
 
-    return grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear
+    return z_grid_values_linear_trendline_KOS
 def calc_points_in_trendline_KOS_for_interpolation():
     tri_corner_points = calc_tri_corner_points(triangle_vectors_of_stl)
     points = translate_and_rotate_points_from_OLD_to_NEW_KOS(tri_corner_points, trendline_KOS_in_global_KOS, center_of_pointcloud_weighted_in_global_KOS)
 
     return points
-def show_interpolation_and_draw_start_end_points(max_x, max_y, min_x, min_y, z_grid_values_linear):
+def show_interpolation_and_draw_start_end_points(z_grid_values_linear_trendline_KOS):
     # Show interpolation
     print("Please close window after selecting Start- and Endpoint")
     figure = pyplot.figure()  # Comment_DB: create a new figure
-    plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
+    plt.imshow(z_grid_values_linear_trendline_KOS.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
     plt.colorbar()
     # plt.plot(x_values_trim, y_values, 'bo', linewidth=2.0, label='Schnitt')
     plt.title('Please select Start- and Endpoint')
@@ -365,12 +368,12 @@ def show_interpolation_and_draw_start_end_points(max_x, max_y, min_x, min_y, z_g
 # Not used in stl_preprocessing, but needed if we load settings (see load settingssheet)
 def calc_trendline_and_interpolate(grid_resolution, input_file):
     # Read in the file:
-    calc_trendline_of_geometry_from_stl_file(input_file)  # saved in global var!
+    calc_trendline_KOS_of_geometry_from_stl_file(input_file)  # saved in global var!
     # Interpolation:
 
-    grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear,x_0_grid_point_index, y_0_grid_point_index = interpolate_geometrie(grid_resolution)
+    z_grid_values_linear_trendline_KOS = interpolate_geometrie(grid_resolution)
 
-    return grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear,x_0_grid_point_index, y_0_grid_point_index
+    return grid_x, max_x, max_y, min_x, min_y, z_grid_values_linear_trendline_KOS,x_0_grid_point_index, y_0_grid_point_index
 
 #######################################################################################################################
 # Translation and rotation from Points to new trendline_axis_KOS
@@ -489,31 +492,28 @@ def translate_points_to_new_zero(new_zero_point_in_old_KOS_rotated, points_in_ne
 
 #######################################################################################################################
 # Calculation of the bending parameters
-def calc_bending_parameters(grid_resolution_int, grid_x, max_distance, width_for_edge_detection, max_x, max_y, min_x, min_y,
-                            z_grid_values_linear, calc_2D_with_edge_detection, calc_3D_Solution):
-
-    y_0_grid_point_index = np.asarray(np.round(max_y / (max_y - min_y) * grid_resolution_int), dtype=np.int32)
-    x_0_grid_point_index = np.asarray(np.round(max_x / (max_x - min_x) * grid_resolution_int), dtype=np.int32)
-
+def calc_bending_parameters(grid_resolution_int, max_distance, width_for_edge_detection, z_grid_values_linear_trendline_KOS,
+                            calc_2D_with_edge_detection, calc_3D_Solution):
 
     initialize_global_lists_of_3D_bending_and_plot_parameter()
 
     # Calc 2D-Bendpoints
-    calc_bending_points(grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
-                        z_grid_values_linear, [x_start_end_point_list[-2], x_start_end_point_list[-1]], [y_start_end_point_list[-2], y_start_end_point_list[-1]], max_distance,
+    calc_bending_points(grid_resolution_int, z_grid_values_linear_trendline_KOS,
+                        [x_start_end_point_list[-2], x_start_end_point_list[-1]],
+                        [y_start_end_point_list[-2], y_start_end_point_list[-1]], max_distance,
                         width_for_edge_detection, 0, 0, True, calc_2D_with_edge_detection, calc_3D_Solution)
 
     if calc_3D_Solution:
         # Start calculating bendingpoints
-        calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list_3D, grid_resolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
-                                                       max_y, min_x, min_y, x_0_grid_point_index, x_values_trim_stacked,
-                                                       x_start_end_point_list, y_0_grid_point_index, y_values_trim_stacked, y_start_end_point_list,
-                                                       z_grid_values_linear)
+        calculate_iteratively_local_bendingpoints(alpha_angle_list_3D, grid_resolution_int, max_distance,
+                                                  width_for_edge_detection, x_values_trim_trendline_KOS_stacked,
+                                                  x_start_end_point_list, y_values_trim_trendline_KOS_stacked,
+                                                  y_start_end_point_list, z_grid_values_linear_trendline_KOS)
         # Show results
-        show_results_2D_Plots_and_Colormap(max_x, max_y, min_x, min_y, new_bending_direction_points_local_KOS_left_stacked,
-                                           new_bending_direction_points_local_KOS_right_stacked,
-                                           new_bending_direction_points_local_KOS_stacked, x_values_trim_stacked,
-                                           y_values_trim_stacked, z_grid_values_linear)
+        show_results_2D_Plots_and_Colormap(surface_points_local_KOS_left_stacked,
+                                           surface_points_local_KOS_right_stacked,
+                                           surface_points_local_KOS_stacked, x_values_trim_trendline_KOS_stacked,
+                                           y_values_trim_trendline_KOS_stacked, z_grid_values_linear_trendline_KOS)
 # Functions in calc_bending_parameters
 def initialize_global_lists_of_3D_bending_and_plot_parameter():
     #  Startpoint and one additional Point for the direction (Endpoint). First values are drawn into the colormap.
@@ -522,78 +522,71 @@ def initialize_global_lists_of_3D_bending_and_plot_parameter():
     y_start_end_point_list = y_start_end_point
     new_start_left, new_start_right = [],[]
     # List of Bendingparameters
-    global x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, beta_angle_between_planes_list_3D, alpha_angle_list_3D, length_list_3D, edge_line_global, bend_pts_xyz_global_3D
-    x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, beta_angle_between_planes_list_3D, alpha_angle_list_3D, edge_line_global, length_list_3D, bend_pts_xyz_global_3D = [], [], [], [], [], [], [], []
+    global x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, beta_angle_between_planes_list_3D, alpha_angle_list_3D, length_list_3D, edge_line_global, bend_pts_xyz_global_3D, normal_direction_start_3D, gamma_start
+    x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, beta_angle_between_planes_list_3D, alpha_angle_list_3D, edge_line_global, length_list_3D, bend_pts_xyz_global_3D, normal_direction_start_3D,gamma_start = [], [], [], [], [], [], [], [], [], 0
 
-    global length_list_2D_with_edge_detection, beta_angle_between_planes_list_2D_with_edge_detection, alpha_angle_list_2D_with_edge_detection
-    length_list_2D_with_edge_detection, beta_angle_between_planes_list_2D_with_edge_detection, alpha_angle_list_2D_with_edge_detection = [],[],[]
+    global length_list_2DE, beta_angle_between_planes_list_2DE, alpha_angle_list_2DE
+    length_list_2DE, beta_angle_between_planes_list_2DE, alpha_angle_list_2DE = [], [], []
 
     # Blue Points for 3D-global Plot
-    global surfacepoints_between_Start_and_End, new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked
-    surfacepoints_between_Start_and_End, new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked = [], [], [], []
+    global surfacepoints_between_Start_and_End, surface_points_global_KOS_stacked, surface_points_global_KOS_left_stacked, surface_points_global_KOS_right_stacked
+    surfacepoints_between_Start_and_End, surface_points_global_KOS_stacked, surface_points_global_KOS_left_stacked, surface_points_global_KOS_right_stacked = [], [], [], []
 
     # 2D Plot tildet local KOS
-    global new_bending_direction_points_local_KOS_stacked, new_bending_direction_points_local_KOS_left_stacked, new_bending_direction_points_local_KOS_right_stacked, \
+    global surface_points_local_KOS_stacked, surface_points_local_KOS_left_stacked, surface_points_local_KOS_right_stacked, \
         bend_pts_xz_local_stacked, bend_pts_xz_local_right_stacked, bend_pts_xz_local_left_stacked
-    new_bending_direction_points_local_KOS_stacked, new_bending_direction_points_local_KOS_left_stacked, new_bending_direction_points_local_KOS_right_stacked, \
+    surface_points_local_KOS_stacked, surface_points_local_KOS_left_stacked, surface_points_local_KOS_right_stacked, \
     bend_pts_xz_local_stacked, bend_pts_xz_local_right_stacked, bend_pts_xz_local_left_stacked = [], [], [], [], [], []
 
     # Line in 2D Colormap
-    global x_values_trim_stacked, y_values_trim_stacked
-    x_values_trim_stacked, y_values_trim_stacked = [], []
+    global x_values_trim_trendline_KOS_stacked, y_values_trim_trendline_KOS_stacked
+    x_values_trim_trendline_KOS_stacked, y_values_trim_trendline_KOS_stacked = [], []
 
-    # Orientation of Tape
-    global x_y_direction_tape_in_trendline_KOS_stacked
-    x_y_direction_tape_in_trendline_KOS_stacked = []
 
     global counter_failed_matches_of_edges
     counter_failed_matches_of_edges = 0
 
-def calculate_iteratively_the_tilted_bendingpoints(alpha_angle_list, grid_resolution_int, grid_x, max_distance, width_for_edge_detection, max_x,
-                                                   max_y, min_x, min_y, x_0_grid_point_index, x_values_trim_stacked,
-                                                   xdata_list, y_0_grid_point_index, y_values_trim_stacked, ydata_list,
-                                                   z_grid_values_linear):
-    # calc_tilted_bending_points has no return value except num_bendpoints. All the bending parameters are saved in the global lists
-    num_bendpoints = calc_bending_points(
-        grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
-        z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance, width_for_edge_detection,
-        0, 0)
+def calculate_iteratively_local_bendingpoints(alpha_angle_list, grid_resolution_int, max_distance,
+                                              width_for_edge_detection, x_values_trim_stacked, xdata_list,
+                                              y_values_trim_stacked, ydata_list, z_grid_values_linear_trendline_KOS):
+    # calc_local_bending_points has no return value except num_bendpoints. All the bending parameters are saved in the global lists
+    num_bendpoints = calc_bending_points(grid_resolution_int, z_grid_values_linear_trendline_KOS, [xdata_list[-2], xdata_list[-1]],
+                                         [ydata_list[-2], ydata_list[-1]], max_distance, width_for_edge_detection, 0, 0)
 
     # Show calculated direction in colormap
     pyplot.figure()
-    plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
+    plt.imshow(z_grid_values_linear_trendline_KOS.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
     plt.plot(x_values_trim_stacked[0][:], y_values_trim_stacked[0][:], 'bo', linewidth=1.0, label='Schnitt')
     plt.show(block=False)
     pyplot.pause(0.3) #Give system time to print the plot
 
     while num_bendpoints > 2:
-        num_bendpoints = calc_bending_points(
-            grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index, x_0_grid_point_index,
-            z_grid_values_linear, [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]], max_distance, width_for_edge_detection,
-            alpha_angle_list[-1], alpha_end=0)
+        num_bendpoints = calc_bending_points(grid_resolution_int, z_grid_values_linear_trendline_KOS,
+                                             [xdata_list[-2], xdata_list[-1]], [ydata_list[-2], ydata_list[-1]],
+                                             max_distance, width_for_edge_detection, alpha_angle_list[-1], alpha_end=0)
 
         # Update colormap
         for i in range(len(x_values_trim_stacked)):
             plt.plot(x_values_trim_stacked[i][:], y_values_trim_stacked[i][:], 'bo', linewidth=1.0, label='Schnitt')
         plt.draw()
         pyplot.pause(0.01)
-def show_results_2D_Plots_and_Colormap(max_x, max_y, min_x, min_y, new_bending_direction_points_local_KOS_left_stacked,
-                                       new_bending_direction_points_local_KOS_right_stacked,
-                                       new_bending_direction_points_local_KOS_stacked, x_values_trim_stacked,
-                                       y_values_trim_stacked, z_grid_values_linear):
+def show_results_2D_Plots_and_Colormap(surface_points_local_KOS_left_stacked,
+                                       surface_points_local_KOS_right_stacked,
+                                       surface_points_local_KOS_stacked, x_values_trim_stacked,
+                                       y_values_trim_stacked, z_grid_values_linear_trendline_KOS):
 
-    # In the different tilted KOS the x-Values don´t allign. Correcting it here for nicer 2Dplots
-    connect_points_in_tilted_KOS(new_bending_direction_points_local_KOS_stacked)
-    connect_points_in_tilted_KOS(new_bending_direction_points_local_KOS_left_stacked)
-    connect_points_in_tilted_KOS(new_bending_direction_points_local_KOS_right_stacked)
-    connect_points_in_tilted_KOS(bend_pts_xz_local_stacked)
-    connect_points_in_tilted_KOS(bend_pts_xz_local_left_stacked)
-    connect_points_in_tilted_KOS(bend_pts_xz_local_right_stacked)
+    # In the different local KOS the x-Values don´t allign. Correcting it here for nicer 2Dplots
+    connect_points_in_local_KOS(surface_points_local_KOS_stacked)
+    connect_points_in_local_KOS(surface_points_local_KOS_left_stacked)
+    connect_points_in_local_KOS(surface_points_local_KOS_right_stacked)
+    connect_points_in_local_KOS(bend_pts_xz_local_stacked)
+    connect_points_in_local_KOS(bend_pts_xz_local_left_stacked)
+    connect_points_in_local_KOS(bend_pts_xz_local_right_stacked)
 
     #Colormap
     pyplot.figure()
     plt.title('Interpolation with start- end- connection')
-    plt.imshow(z_grid_values_linear.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
+    plt.imshow(z_grid_values_linear_trendline_KOS.T, extent=(min_x, max_x, min_y, max_y), origin='lower')
     plt.plot(x_values_trim_stacked[0][:], y_values_trim_stacked[0][:], 'bo', linewidth=1.0,
              label='Tape direction')
     plt.legend()
@@ -604,13 +597,13 @@ def show_results_2D_Plots_and_Colormap(max_x, max_y, min_x, min_y, new_bending_d
     #2D-Sideview
     pyplot.figure()
     plt.title('Sideview height profil')
-    plt.plot(new_bending_direction_points_local_KOS_stacked[0][:, 0],
-             new_bending_direction_points_local_KOS_stacked[0][:, 2], 'bo', linewidth=1.0, label='surface points')
+    plt.plot(surface_points_local_KOS_stacked[0][:, 0],
+             surface_points_local_KOS_stacked[0][:, 2], 'bo', linewidth=1.0, label='surface points')
     plt.plot(bend_pts_xz_local_stacked[0][:, 0], bend_pts_xz_local_stacked[0][:, 1], color='green', linewidth=3.0,label='linear Approximation')
     plt.legend()
     for i in range(1,len(x_values_trim_stacked)):
-        plt.plot(new_bending_direction_points_local_KOS_stacked[i][:, 0],
-                 new_bending_direction_points_local_KOS_stacked[i][:, 2], 'bo', linewidth=1.0)
+        plt.plot(surface_points_local_KOS_stacked[i][:, 0],
+                 surface_points_local_KOS_stacked[i][:, 2], 'bo', linewidth=1.0)
         plt.plot(bend_pts_xz_local_stacked[i][:, 0], bend_pts_xz_local_stacked[i][:, 1], color='green', linewidth=3.0)
 
 
@@ -618,25 +611,25 @@ def show_results_2D_Plots_and_Colormap(max_x, max_y, min_x, min_y, new_bending_d
     plt.subplot(211)
     plt.title('right')
     for i in range(len(x_values_trim_stacked)):
-        plt.plot(new_bending_direction_points_local_KOS_left_stacked[i][:, 0],
-                 new_bending_direction_points_local_KOS_left_stacked[i][:, 2], 'bo', linewidth=1.0, label='cross section')
+        plt.plot(surface_points_local_KOS_left_stacked[i][:, 0],
+                 surface_points_local_KOS_left_stacked[i][:, 2], 'bo', linewidth=1.0, label='cross section')
         plt.plot(bend_pts_xz_local_left_stacked[i][:, 0], bend_pts_xz_local_left_stacked[i][:, 1], color='green', linewidth=3.0,
              label='linear Approximation')
     plt.subplot(212)
     plt.title('left')
     for i in range(len(x_values_trim_stacked)):
-        plt.plot(new_bending_direction_points_local_KOS_right_stacked[i][:, 0],
-                 new_bending_direction_points_local_KOS_right_stacked[i][:, 2], 'bo', linewidth=1.0, label='cross section')
+        plt.plot(surface_points_local_KOS_right_stacked[i][:, 0],
+                 surface_points_local_KOS_right_stacked[i][:, 2], 'bo', linewidth=1.0, label='cross section')
         plt.plot(bend_pts_xz_local_right_stacked[i][:, 0], bend_pts_xz_local_right_stacked[i][:, 1], color='green', linewidth=3.0,
              label='linear Approximation')
     plt.show()
-def connect_points_in_tilted_KOS(new_bending_direction_points_local_KOS_stacked):
-    for i in range(1, len(new_bending_direction_points_local_KOS_stacked)):
-        startx_i = new_bending_direction_points_local_KOS_stacked[i][0, 0]
-        endx_i_1 = new_bending_direction_points_local_KOS_stacked[i - 1][-1, 0]
+def connect_points_in_local_KOS(surface_points_local_KOS_stacked):
+    for i in range(1, len(surface_points_local_KOS_stacked)):
+        startx_i = surface_points_local_KOS_stacked[i][0, 0]
+        endx_i_1 = surface_points_local_KOS_stacked[i - 1][-1, 0]
         difx = startx_i - endx_i_1
-        new_bending_direction_points_local_KOS_stacked[i][:, 0] = np.subtract(
-            new_bending_direction_points_local_KOS_stacked[i][:, 0], difx)
+        surface_points_local_KOS_stacked[i][:, 0] = np.subtract(
+            surface_points_local_KOS_stacked[i][:, 0], difx)
 
 #######################################################################################################################
 # Calculation of the 2D-Solution.
@@ -675,209 +668,240 @@ def calc_2D_lengths(bend_pts_xz_local):
 
 #######################################################################################################################
 # For every iteration in calc_bending_parameters new bendpoints and parameters have to be calculated.
-def calc_bending_points(grid_resolution_int, grid_x, max_y, min_y, max_x, min_x, y_0_grid_point_index,
-                        x_0_grid_point_index, z_grid_values_linear, x_start_end_point_trendline_KOS, y_start_end_point_trendline_KOS, max_distance, width_for_edge_detection, alpha_start=0, alpha_end=0, calc_tape_para_2D=False, calc_2D_with_edge_detection=False, calc_3D_Solution=True):
-    ##### Oblique linear line y(x)
-    # 2 lines needed:   • mathematical decription with coordinates for Plot.
-    #                   • with Indizies for extraction from grid
+def calc_bending_points(grid_resolution_int, z_grid_values_linear_trendline_KOS, x_start_end_point_trendline_KOS,
+                        y_start_end_point_trendline_KOS, max_distance, width_for_edge_detection, alpha_start=0,
+                        alpha_end=0, calc_tape_para_2D=False, calc_2D_with_edge_detection=False, calc_3D_Solution=True):
+    
 
-    # Step size
-    dy = (max_y - min_y) / grid_resolution_int
-    dx = (max_x - min_x) / grid_resolution_int
-    x_values = grid_x[:, 0]
-
-    # incline/x_slope and y-intercept with Leastsquare, y = x_slope*x + y_intercept
-    A = np.vstack([x_start_end_point_trendline_KOS, np.ones(len(x_start_end_point_trendline_KOS))]).T
-    x_slope, y_intercept = np.linalg.lstsq(A, y_start_end_point_trendline_KOS, rcond=None)[0]
 
     # x_y_z_Axis of new KOS
-    trendline_new_direction_current_KOS = calc_local_trendline_KOS(x_slope)
-
+    local_KOS_in_trendline_KOS, x_slope = calc_local_KOS_in_trendline_KOS(x_start_end_point_trendline_KOS,y_start_end_point_trendline_KOS)
 
 
     # Calc bendpoints on surface in new trendline direction, including left and right for edge directions
     bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, \
-    bend_pts_xz_local,trendline_new_direction_global_KOS = calc_bend_pts_in_new_directions(
-        alpha_end, alpha_start, dx, dy, grid_resolution_int, max_distance, trendline_new_direction_current_KOS,
-        width_for_edge_detection, x_0_grid_point_index, x_slope, x_values, x_start_end_point_trendline_KOS, y_0_grid_point_index, y_start_end_point_trendline_KOS,
-        z_grid_values_linear,calc_2D_with_edge_detection,calc_tape_para_2D)
+    bend_pts_xz_local,local_KOS_in_global_KOS = calc_bend_pts_between_start_and_end(alpha_end, alpha_start,
+                                                                                    grid_resolution_int, max_distance,
+                                                                                    local_KOS_in_trendline_KOS,
+                                                                                    width_for_edge_detection, x_slope,
+                                                                                    x_start_end_point_trendline_KOS,
+                                                                                    y_start_end_point_trendline_KOS,
+                                                                                    z_grid_values_linear_trendline_KOS,
+                                                                                    calc_tape_para_2D)
 
-    # Lokal x_direction and normal
-    x_direction_start = norm_vector(bend_pts_xyz_global[1] - bend_pts_xyz_global[0])  # Start_direction
-
-
-    # L_aim, Start Direction and Start Normal
-    global surfacepoints_between_Start_and_End, normal_direction_start
-    if surfacepoints_between_Start_and_End == []:  # Just once from the first calculation cycle
-        # Start_End_connection for L_aim
-        surfacepoints_between_Start_and_End = bend_pts_xz_local
-        # Start normal
-        normal_direction_start = np.cross(x_direction_start, trendline_new_direction_global_KOS[1])
-        normal_direction_start = norm_vector(normal_direction_start)
-
-        normal_at_start = normal_direction_start
-
-    else:
-        normal_at_start = calc_tape_normal(bend_pts_xyz_global[1], bend_pts_xyz_global_left[0],
-                                       bend_pts_xyz_global_right[0])  # Start_normal #normal_patch_global_KOS[-1]
+    normal_at_start, x_direction_start = calc_start_vectors_from_bendpoints(bend_pts_xyz_global,
+                                                                            bend_pts_xyz_global_left,
+                                                                            bend_pts_xyz_global_right,
+                                                                            bend_pts_xz_local, local_KOS_in_global_KOS)
 
     # Calc Tapeparameters 2D
     if calc_tape_para_2D:
         calc_tape_parameter_for_2D_solution(bend_pts_xyz_global,bend_pts_xz_local)
 
-    # Calc Tapeparameters 3D
+    # Calc Tapeparameters 2DE/3D
     edge_directions = calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right)
+    if calc_tape_para_2D:
+        global edge_directions_global_2DE
+        edge_directions_global_2DE = edge_directions
 
-
-    x_direction_list_current_direction, \
-    normal_patch_current_direction, \
-    rotated_x_direction_around_edge_current_direction, \
+    x_direction_list_current_direction_global_KOS, \
+    normal_patch_current_direction_global_KOS, \
+    rotated_x_direction_around_edge_current_direction_global_KOS, \
     beta_angle_between_planes_list_current_direction,\
     alpha_angle_list_current_direction,\
-    lengths_between_planes_list = calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left,
-                                                                         bend_pts_xyz_global_right,
-                                                                         bend_pts_xyz_trendline, edge_directions,
-                                                                         x_direction_start, normal_at_start,
-                                                                         bend_pts_xz_local, calc_2D_with_edge_detection)
+    lengths_between_planes_list = calc_tape_parameter_2DE_3D(bend_pts_xyz_global, bend_pts_xyz_global_left,
+                                                             bend_pts_xyz_global_right,
+                                                             bend_pts_xyz_trendline, edge_directions,
+                                                             x_direction_start, normal_at_start,
+                                                             bend_pts_xz_local, calc_2D_with_edge_detection)
 
-    # Add Bend/Tapeparameters from second bendpoint to global list(first bendpoint = startpoint)
-    append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
-                                                              bend_pts_xyz_trendline,
-                                                              beta_angle_between_planes_list_current_direction,
-                                                              edge_directions, lengths_between_planes_list,
-                                                              normal_patch_current_direction,
-                                                              rotated_x_direction_around_edge_current_direction,
-                                                              x_direction_list_current_direction,calc_2D_with_edge_detection,calc_3D_Solution)
+    # Add Bend/Tapeparameters from first found bendpoint to global list
+    append_bend_parameters_at_first_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
+                                                             bend_pts_xyz_trendline,
+                                                             beta_angle_between_planes_list_current_direction,
+                                                             edge_directions, lengths_between_planes_list,
+                                                             normal_patch_current_direction_global_KOS,
+                                                             rotated_x_direction_around_edge_current_direction_global_KOS,
+                                                             x_direction_list_current_direction_global_KOS, calc_tape_para_2D, calc_3D_Solution)
 
     return len(bend_pts_xyz_global_left)
-def calc_bend_pts_in_new_directions(alpha_end, alpha_start, dx, dy, grid_resolution_int, max_distance,
-                                    trendline_new_direction_current_KOS, width_for_edge_detection, x_0_grid_point_index,
-                                    x_slope, x_values, xdata, y_0_grid_point_index, ydata, z_grid_values_linear, calc_2D_with_edge_detection,calc_tape_para_2D):
 
-    # Start and endpoint for tape section
-    end_point_xyz_trendline_data, \
-    start_point_xyz_trendline_data, \
-    x_start_index, \
-    x_end_index = calc_Start_End_in_trendline_KOS_from_xdata_ydata(dx, dy, grid_resolution_int, x_0_grid_point_index,
-                                                                   xdata,
-                                                                   y_0_grid_point_index, ydata, z_grid_values_linear)
-    #Start and endpoint from side line for estimating bending angels
-    #Cornerpoints
-    delta_length_start_bend = calc_delta_length_at_bend(width_for_edge_detection, alpha_start)
-    delta_length_end_bend = calc_delta_length_at_bend(width_for_edge_detection, alpha_end)
 
-    end_point_xyz_trendline_data_right, \
-    start_point_xyz_trendline_data_right, \
-    x_end_index_right, \
-    x_start_index_right = calc_start_end_point_side_in_trendline_KOS(False, delta_length_end_bend,
-                                                                     delta_length_start_bend,
-                                                                     dx, dy, end_point_xyz_trendline_data,
-                                                                     grid_resolution_int,
-                                                                     start_point_xyz_trendline_data,
-                                                                     width_for_edge_detection,
-                                                                     x_0_grid_point_index,
-                                                                     trendline_new_direction_current_KOS[0],
-                                                                     y_0_grid_point_index,
-                                                                     z_grid_values_linear,
-                                                                     trendline_new_direction_current_KOS[1])
-    end_point_xyz_trendline_data_left, \
-    start_point_xyz_trendline_data_left, \
-    x_end_index_left, \
-    x_start_index_left = calc_start_end_point_side_in_trendline_KOS(True, delta_length_end_bend,
-                                                                    delta_length_start_bend,
-                                                                    dx, dy, end_point_xyz_trendline_data,
-                                                                    grid_resolution_int,
-                                                                    start_point_xyz_trendline_data,
-                                                                    width_for_edge_detection,
-                                                                    x_0_grid_point_index,
-                                                                    trendline_new_direction_current_KOS[0],
-                                                                    y_0_grid_point_index,
-                                                                    z_grid_values_linear,
-                                                                    trendline_new_direction_current_KOS[1])
+def calc_start_vectors_from_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right,
+                                       bend_pts_xz_local, local_KOS_in_global_KOS):
+    # Lokal x_direction and normal
+    x_direction_start = norm_vector(bend_pts_xyz_global[1] - bend_pts_xyz_global[0])  # Start_direction
+    # L_aim, Start Direction and Start Normal
+    global surfacepoints_between_Start_and_End, normal_direction_start, normal_direction_start_3D, gamma_start
+    if surfacepoints_between_Start_and_End == []:  # Just once from the first calculation cycle
+        # Start_End_connection for L_aim
+        surfacepoints_between_Start_and_End = bend_pts_xz_local
+        # Start normal
+        normal_direction_start = np.cross(x_direction_start, local_KOS_in_global_KOS[1])
+        normal_direction_start = norm_vector(normal_direction_start)
+
+
+        normal_at_start = calc_tape_normal(bend_pts_xyz_global[1], bend_pts_xyz_global_left[0],
+                                           bend_pts_xyz_global_right[0])  # Start_normal #normal_patch_global_KOS[-1]
+
+        if normal_direction_start_3D == []:
+            normal_direction_start_3D = normal_at_start
+
+            gamma_start = math.acos(np.dot(normal_direction_start_3D, normal_direction_start))
+
+            normals_rotated = translate_and_rotate_points_from_OLD_to_NEW_KOS(
+                np.stack([x_direction_start, normal_direction_start_3D, normal_direction_start]),
+                local_KOS_in_global_KOS, np.asarray([0, 0, 0]))
+
+            if normals_rotated[1][1] > 0:
+                gamma_start = -gamma_start
+
+
+    else:
+        normal_at_start = calc_tape_normal(bend_pts_xyz_global[1], bend_pts_xyz_global_left[0],
+                                           bend_pts_xyz_global_right[0])  # Start_normal #normal_patch_global_KOS[-1]
+
+    return normal_at_start, x_direction_start
+
+
+def calc_bend_pts_between_start_and_end(alpha_end, alpha_start, grid_resolution_int, max_distance,
+                                        local_KOS_in_trendline_KOS, width_for_edge_detection, x_slope,
+                                        x_start_end_point_trendline_KOS, y_start_end_point_trendline_KOS,
+                                        z_grid_values_linear_trendline_KOS, calc_tape_para_2D):
+
+    start_point_xyz_trendline_KOS, start_point_xyz_trendline_KOS_left, start_point_xyz_trendline_KOS_right, \
+    x_end_index, x_end_index_left, x_end_index_right, \
+    x_start_index, x_start_index_left, x_start_index_right = calc_start_end_point_trendline_KOS(
+        alpha_end, alpha_start, grid_resolution_int, local_KOS_in_trendline_KOS, width_for_edge_detection,
+        x_start_end_point_trendline_KOS, y_start_end_point_trendline_KOS, z_grid_values_linear_trendline_KOS)
 
     # Calculation of the surfacepoints in the local, trendline and global direction and extracting bendpoints from them.
+
     # Left
-    bend_pts_xyz_global_left, bend_pts_xyz_trendline_left, bend_pts_xz_local_left, new_bending_direction_points_on_surface_global_KOS_left, \
-    new_bending_direction_points_tilted_KOS_left, x_values_trim_left, y_values_trim_left,trendline_new_direction_global_KOS_left = calc_points_on_surface_and_extract_bendline(
-        dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data_left,
-        trendline_new_direction_current_KOS, x_end_index_left, x_slope, x_start_index_left, x_values,
-        y_0_grid_point_index, z_grid_values_linear)
+    bend_pts_xyz_global_left, bend_pts_xyz_trendline_left, bend_pts_xz_local_left, surface_points_global_KOS_left, \
+    surface_points_local_KOS_left, x_values_trim_left_trendline_KOS, y_values_trim_left_trendline_KOS, local_KOS_in_global_KOS_left = calc_points_on_surface_and_extract_bendline(
+        grid_resolution_int, max_distance, start_point_xyz_trendline_KOS_left, local_KOS_in_trendline_KOS,
+        x_end_index_left, x_slope, x_start_index_left, z_grid_values_linear_trendline_KOS)
     # Right
-    bend_pts_xyz_global_right, bend_pts_xyz_trendline_right, bend_pts_xz_local_right, new_bending_direction_points_on_surface_global_KOS_right, \
-    new_bending_direction_points_tilted_KOS_right, x_values_trim_right, y_values_trim_right,trendline_new_direction_global_KOS_right = calc_points_on_surface_and_extract_bendline(
-        dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data_right,
-        trendline_new_direction_current_KOS,
-        x_end_index_right, x_slope, x_start_index_right, x_values, y_0_grid_point_index, z_grid_values_linear)
+    bend_pts_xyz_global_right, bend_pts_xyz_trendline_right, bend_pts_xz_local_right, surface_points_global_KOS_right, \
+    surface_points_local_KOS_right, x_values_trim_right_trendline_KOS, y_values_trim_right_trendline_KOS,local_KOS_in_global_KOS_right = calc_points_on_surface_and_extract_bendline(
+        grid_resolution_int, max_distance, start_point_xyz_trendline_KOS_right, local_KOS_in_trendline_KOS,
+        x_end_index_right, x_slope, x_start_index_right, z_grid_values_linear_trendline_KOS)
     # Center
-    bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, new_bending_direction_points_on_surface_global_KOS, \
-    new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim,trendline_new_direction_global_KOS = calc_points_on_surface_and_extract_bendline(
-        dy, grid_resolution_int, max_distance, start_point_xyz_trendline_data, trendline_new_direction_current_KOS,
-        x_end_index, x_slope, x_start_index, x_values, y_0_grid_point_index, z_grid_values_linear)
+    bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, surface_points_global_KOS, \
+    surface_points_local_KOS, x_values_trim_trendline_KOS, y_values_trim_trendline_KOS,local_KOS_in_global_KOS = calc_points_on_surface_and_extract_bendline(
+        grid_resolution_int, max_distance, start_point_xyz_trendline_KOS, local_KOS_in_trendline_KOS,
+        x_end_index, x_slope, x_start_index, z_grid_values_linear_trendline_KOS)
 
+    if calc_tape_para_2D:
+        global surface_points_start_end_global_KOS, surface_points_start_end_global_KOS_left, surface_points_start_end_global_KOS_right
+        surface_points_start_end_global_KOS = surface_points_global_KOS
+        surface_points_start_end_global_KOS_left = surface_points_global_KOS_left
+        surface_points_start_end_global_KOS_right = surface_points_global_KOS_right
 
+        global bend_points_start_end_global_KOS, bend_points_start_end_global_KOS_left, bend_points_start_end_global_KOS_right
+        bend_points_start_end_global_KOS = bend_pts_xyz_global
+        bend_points_start_end_global_KOS_left = bend_pts_xyz_global_left
+        bend_points_start_end_global_KOS_right = bend_pts_xyz_global_right
     # Trim plot points to second bendpoint and add to global list
-    if not calc_2D_with_edge_detection:
+    if not calc_tape_para_2D:
         append_plot_points_till_second_bendpoint_to_global_list(bend_pts_xz_local, bend_pts_xz_local_left,
                                                             bend_pts_xz_local_right,
-                                                            new_bending_direction_points_on_surface_global_KOS,
-                                                            new_bending_direction_points_on_surface_global_KOS_left,
-                                                            new_bending_direction_points_on_surface_global_KOS_right,
-                                                            new_bending_direction_points_tilted_KOS,
-                                                            new_bending_direction_points_tilted_KOS_left,
-                                                            new_bending_direction_points_tilted_KOS_right,
-                                                            x_values_trim, y_values_trim)
+                                                            surface_points_global_KOS,
+                                                            surface_points_global_KOS_left,
+                                                            surface_points_global_KOS_right,
+                                                            surface_points_local_KOS,
+                                                            surface_points_local_KOS_left,
+                                                            surface_points_local_KOS_right,
+                                                            x_values_trim_trendline_KOS, y_values_trim_trendline_KOS)
 
     global new_start_left, new_start_right
     if not calc_tape_para_2D:
         new_start_right = bend_pts_xyz_trendline_right[1]
         new_start_left = bend_pts_xyz_trendline_left[1]
 
-    return bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local,trendline_new_direction_global_KOS
-def calc_points_on_surface_and_extract_bendline(dy, grid_resolution_int, max_distance,
-                                                start_point_xyz_trendline_data, local_KOS_in_trendline_KOS,
-                                                x_end_index, x_slope, x_start_index, x_values, y_0_grid_point_index,
-                                                z_grid_values_linear):
-
-    new_bending_direction_points_on_surface_global_KOS, y_intercept, x_values_indizes_trim, \
-    x_values_trim, y_values_indizes_trim, y_values_trim = calc_new_direction_points_on_surface(
-        start_point_xyz_trendline_data, dy, grid_resolution_int, x_slope, x_values, y_0_grid_point_index,
-        z_grid_values_linear,
-        x_start_index, x_end_index)
+    return bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right, bend_pts_xyz_trendline, bend_pts_xz_local,local_KOS_in_global_KOS
 
 
-    new_bending_direction_points_tilted_KOS, new_bending_direction_points_on_surface_global_KOS, \
-    trendline_new_direction_global_KOS = new_direction_points_in_global_and_tilted_KOS(y_intercept,
-                                                                                       new_bending_direction_points_on_surface_global_KOS,
-                                                                                       local_KOS_in_trendline_KOS)
+def calc_start_end_point_trendline_KOS(alpha_end, alpha_start, grid_resolution_int, local_KOS_in_trendline_KOS,
+                                       width_for_edge_detection, x_start_end_point_trendline_KOS, y_start_end_point_trendline_KOS,
+                                       z_grid_values_linear_trendline_KOS):
+    # Start and endpoint for tape section
+    end_point_xyz_trendline_KOS, \
+    start_point_xyz_trendline_KOS, \
+    x_start_index, \
+    x_end_index = calc_Start_End_in_trendline_KOS_from_xdata_ydata(grid_resolution_int, x_start_end_point_trendline_KOS,
+                                                                   y_start_end_point_trendline_KOS,
+                                                                   z_grid_values_linear_trendline_KOS)
+    # Start and endpoint from side line for estimating bending angels
+    # Cornerpoints
+    delta_length_start_bend = calc_delta_length_at_bend(width_for_edge_detection, alpha_start)
+    delta_length_end_bend = calc_delta_length_at_bend(width_for_edge_detection, alpha_end)
+    end_point_xyz_trendline_KOS_right, \
+    start_point_xyz_trendline_KOS_right, \
+    x_end_index_right, \
+    x_start_index_right = calc_start_end_point_side_in_trendline_KOS(False, delta_length_end_bend,
+                                                                     delta_length_start_bend,
+                                                                     end_point_xyz_trendline_KOS, grid_resolution_int,
+                                                                     start_point_xyz_trendline_KOS,
+                                                                     width_for_edge_detection,
+                                                                     local_KOS_in_trendline_KOS,
+                                                                     z_grid_values_linear_trendline_KOS)
+    end_point_xyz_trendline_KOS_left, \
+    start_point_xyz_trendline_KOS_left, \
+    x_end_index_left, \
+    x_start_index_left = calc_start_end_point_side_in_trendline_KOS(True, delta_length_end_bend,
+                                                                    delta_length_start_bend,
+                                                                    end_point_xyz_trendline_KOS, grid_resolution_int,
+                                                                    start_point_xyz_trendline_KOS,
+                                                                    width_for_edge_detection,
+                                                                    local_KOS_in_trendline_KOS,
+                                                                    z_grid_values_linear_trendline_KOS)
+    return start_point_xyz_trendline_KOS, start_point_xyz_trendline_KOS_left, start_point_xyz_trendline_KOS_right, x_end_index, x_end_index_left, x_end_index_right, x_start_index, x_start_index_left, x_start_index_right
+
+
+def calc_points_on_surface_and_extract_bendline(grid_resolution_int, max_distance, start_point_xyz_trendline_KOS,
+                                                local_KOS_in_trendline_KOS, x_end_index, x_slope, x_start_index,
+                                                z_grid_values_linear_trendline_KOS):
+
+    new_bending_direction_points_on_surface_trendline_KOS, y_intercept_trendline_KOS, x_values_indizes_trim, \
+    x_values_trim_trendline_KOS, y_values_indizes_trim, y_values_trim_trendline_KOS = extract_points_from_interpolated_surface(
+        start_point_xyz_trendline_KOS, grid_resolution_int, x_slope, z_grid_values_linear_trendline_KOS, x_start_index, x_end_index)
+
+
+    surface_points_local_KOS, surface_points_global_KOS, \
+    local_KOS_in_global_KOS = transform_surface_points_to_global_and_local_KOS(y_intercept_trendline_KOS,
+                                                                               new_bending_direction_points_on_surface_trendline_KOS,
+                                                                               local_KOS_in_trendline_KOS)
     bend_pts_xz_local, bend_pts_xyz_trendline, bend_pts_xyz_global = calc_local_and_global_bendpoints(max_distance,
-                                                                                                      new_bending_direction_points_tilted_KOS,
+                                                                                                      surface_points_local_KOS,
                                                                                                       local_KOS_in_trendline_KOS,
-                                                                                                      y_intercept)
-    return bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, new_bending_direction_points_on_surface_global_KOS, new_bending_direction_points_tilted_KOS, x_values_trim, y_values_trim,trendline_new_direction_global_KOS
-def append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
-                                                              bend_pts_xyz_trendline,
-                                                              beta_angle_between_planes_list_current_direction,
-                                                              edge_directions, lengths_between_planes_list,
-                                                              normal_patch_current_direction,
-                                                              rotated_x_direction_around_edge_current_direction,
-                                                              x_direction_list_current_direction,calc_2D_with_edge_detection,calc_3D_Solution):
+                                                                                                      y_intercept_trendline_KOS)
+    return bend_pts_xyz_global, bend_pts_xyz_trendline, bend_pts_xz_local, surface_points_global_KOS, surface_points_local_KOS, x_values_trim_trendline_KOS, y_values_trim_trendline_KOS,local_KOS_in_global_KOS
+def append_bend_parameters_at_first_bendpoint_to_global_list(alpha_angle_list_current_direction, bend_pts_xyz_global,
+                                                             bend_pts_xyz_trendline,
+                                                             beta_angle_between_planes_list_current_direction,
+                                                             edge_directions, lengths_between_planes_list,
+                                                             normal_patch_current_direction_global_KOS,
+                                                             rotated_x_direction_around_edge_current_direction_global_KOS,
+                                                             x_direction_list_current_direction_global_KOS, calc_tape_para_2D, calc_3D_Solution):
 
     global x_direction_list_global_KOS, x_direction_rotated_list_global_KOS, normal_patch_global_KOS, \
         length_list_3D,beta_angle_between_planes_list_3D, alpha_angle_list_3D,  \
-        length_list_2D_with_edge_detection, beta_angle_between_planes_list_2D_with_edge_detection, alpha_angle_list_2D_with_edge_detection, \
+        length_list_2DE, beta_angle_between_planes_list_2DE, alpha_angle_list_2DE, \
         edge_line_global, x_start_end_point_list, y_start_end_point_list, bend_pts_xyz_global_3D
 
     # Tape parameter for EA
-    if calc_2D_with_edge_detection:
-        length_list_2D_with_edge_detection = np.asarray(lengths_between_planes_list)
-        beta_angle_between_planes_list_2D_with_edge_detection = np.asarray(
+    if calc_tape_para_2D:
+        length_list_2DE = np.asarray(lengths_between_planes_list)
+        beta_angle_between_planes_list_2DE = np.asarray(
             beta_angle_between_planes_list_current_direction)
-        alpha_angle_list_2D_with_edge_detection = np.asarray(alpha_angle_list_current_direction)
+        alpha_angle_list_2DE = np.asarray(alpha_angle_list_current_direction)
 
         if calc_3D_Solution == False: # If no 3D Solution is calculated, we need to save the first x_direction and normal: start_d/start_n Parameter
-            x_direction_list_global_KOS.append(x_direction_list_current_direction[0])
-            x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction[0])
-            normal_patch_global_KOS.append(normal_patch_current_direction[0])
+            x_direction_list_global_KOS.append(x_direction_list_current_direction_global_KOS[0])
+            x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction_global_KOS[0])
+            normal_patch_global_KOS.append(normal_patch_current_direction_global_KOS[0])
 
     else:
         length_list_3D.append(lengths_between_planes_list[0])
@@ -899,10 +923,11 @@ def append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_c
 
             # New Direction and Endpoint in trendline KOS(same then interpolation)
             rotated_x_direction_point_in_trendline_KOS = np.asarray(
-                [bend_pts_xyz_global[1] + np.multiply(rotated_x_direction_around_edge_current_direction[0], 5),
+                [bend_pts_xyz_global[1] + np.multiply(rotated_x_direction_around_edge_current_direction_global_KOS[0], 1),
                  bend_pts_xyz_global[1]])
             rotated_x_direction_around_edge_trendline_KOS_current_direction = translate_and_rotate_points_from_OLD_to_NEW_KOS(
                 rotated_x_direction_point_in_trendline_KOS, trendline_KOS_in_global_KOS, center_of_pointcloud_weighted_in_global_KOS)
+
 
             x_intersect, y_intersect = calc_new_endpoint(bend_pts_xyz_trendline,
                                                          rotated_x_direction_around_edge_trendline_KOS_current_direction,
@@ -917,9 +942,9 @@ def append_bend_parameters_at_second_bendpoint_to_global_list(alpha_angle_list_c
 
 
             # Directions
-            x_direction_list_global_KOS.append(x_direction_list_current_direction[0])
-            x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction[0])
-            normal_patch_global_KOS.append(normal_patch_current_direction[1])
+            x_direction_list_global_KOS.append(x_direction_list_current_direction_global_KOS[0])
+            x_direction_rotated_list_global_KOS.append(rotated_x_direction_around_edge_current_direction_global_KOS[0])
+            normal_patch_global_KOS.append(normal_patch_current_direction_global_KOS[1])
 
 def calc_new_endpoint(bend_pts_xyz_trendline, rotated_x_direction_around_edge_trendline_KOS_current_direction,
                       xdata_list, ydata_list):
@@ -929,9 +954,8 @@ def calc_new_endpoint(bend_pts_xyz_trendline, rotated_x_direction_around_edge_tr
     # End line: Line perpendicular to first start-end-direction, starting at endpoint
     drawn_endpoint = np.asarray([xdata_list[1], ydata_list[1]])
 
-    direction_perpendicular_to_first_start_end = np.asarray(
-        [-(ydata_list[1] - ydata_list[0]), (xdata_list[1] - xdata_list[0])])
-    point_in_direction_perpendicular = drawn_endpoint + direction_perpendicular_to_first_start_end
+    direction_perpendicular_to_first_start_end = np.asarray([-(ydata_list[1] - ydata_list[0]), (xdata_list[1] - xdata_list[0])])
+    point_in_direction_perpendicular_to_start_end_drawn = drawn_endpoint + direction_perpendicular_to_first_start_end
 
     # new startpoint
     new_startpoint = np.asarray([bend_pts_xyz_trendline[1][0], bend_pts_xyz_trendline[1][1]])
@@ -939,73 +963,73 @@ def calc_new_endpoint(bend_pts_xyz_trendline, rotated_x_direction_around_edge_tr
         [rotated_x_direction_around_edge_trendline_KOS_current_direction[0][0],
          rotated_x_direction_around_edge_trendline_KOS_current_direction[0][1]])
 
-    # Stack the 4 points, s for stacked
-    s = np.vstack([new_startpoint, other_point_in_new_direction, drawn_endpoint,
-                   point_in_direction_perpendicular])
-    h = np.hstack((s, np.ones((4, 1))))  # h for homogeneous
-    l1 = np.cross(h[0], h[1])  # get first line
-    l2 = np.cross(h[2], h[3])  # get second line
-    x, y, z = np.cross(l1, l2)  # point of intersection
+    # Calculating the two lines
+    stacked_points = np.vstack([new_startpoint, other_point_in_new_direction, drawn_endpoint,
+                   point_in_direction_perpendicular_to_start_end_drawn])
+    homogen_coordinates = np.hstack((stacked_points, np.ones((4, 1))))
+    line_in_new_direction = np.cross(homogen_coordinates[0], homogen_coordinates[1])
+    end_line = np.cross(homogen_coordinates[2], homogen_coordinates[3])
+    x, y, z = np.cross(line_in_new_direction, end_line)  # point of intersection
     # if z == 0:  # lines are parallel
     x_intersect = x / z
     y_intersect = y / z
     return x_intersect, y_intersect
 def append_plot_points_till_second_bendpoint_to_global_list(bend_pts_xz_local, bend_pts_xz_local_left,
                                                             bend_pts_xz_local_right,
-                                                            new_bending_direction_points_on_surface_global_KOS,
-                                                            new_bending_direction_points_on_surface_global_KOS_left,
-                                                            new_bending_direction_points_on_surface_global_KOS_right,
-                                                            new_bending_direction_points_local_KOS,
-                                                            new_bending_direction_points_local_KOS_left,
-                                                            new_bending_direction_points_local_KOS_right,
-                                                            x_values_trim, y_values_trim):
+                                                            surface_points_global_KOS,
+                                                            surface_points_global_KOS_left,
+                                                            surface_points_global_KOS_right,
+                                                            surface_points_local_KOS,
+                                                            surface_points_local_KOS_left,
+                                                            surface_points_local_KOS_right,
+                                                            x_values_trim_trendline_KOS, y_values_trim_trendline_KOS):
     # Calc trim index
     end_index_pts_global, end_index_pts_global_left, end_index_pts_global_right = calc_trim_index_at_second_bendpoint(
-        bend_pts_xz_local, bend_pts_xz_local_left, bend_pts_xz_local_right, new_bending_direction_points_local_KOS,
-        new_bending_direction_points_local_KOS_left, new_bending_direction_points_local_KOS_right)
+        bend_pts_xz_local, bend_pts_xz_local_left, bend_pts_xz_local_right, surface_points_local_KOS,
+        surface_points_local_KOS_left, surface_points_local_KOS_right)
 
 
 
     # Global 3D-Plot
-    global new_bending_direction_points_on_surface_global_KOS_stacked, new_bending_direction_points_on_surface_global_KOS_left_stacked, new_bending_direction_points_on_surface_global_KOS_right_stacked
-    new_bending_direction_points_on_surface_global_KOS_stacked.append(
-        new_bending_direction_points_on_surface_global_KOS[:][:end_index_pts_global])
-    new_bending_direction_points_on_surface_global_KOS_right_stacked.append(
-        new_bending_direction_points_on_surface_global_KOS_right[:][:end_index_pts_global_right])
-    new_bending_direction_points_on_surface_global_KOS_left_stacked.append(
-        new_bending_direction_points_on_surface_global_KOS_left[:][:end_index_pts_global_left])
+    global surface_points_global_KOS_stacked, surface_points_global_KOS_left_stacked, surface_points_global_KOS_right_stacked
+    surface_points_global_KOS_stacked.append(
+        surface_points_global_KOS[:][:end_index_pts_global])
+    surface_points_global_KOS_right_stacked.append(
+        surface_points_global_KOS_right[:][:end_index_pts_global_right])
+    surface_points_global_KOS_left_stacked.append(
+        surface_points_global_KOS_left[:][:end_index_pts_global_left])
     # local 2D-Plot
-    global new_bending_direction_points_local_KOS_stacked, new_bending_direction_points_local_KOS_left_stacked, new_bending_direction_points_local_KOS_right_stacked, \
+    global surface_points_local_KOS_stacked, surface_points_local_KOS_left_stacked, surface_points_local_KOS_right_stacked, \
         bend_pts_xz_local_stacked, bend_pts_xz_local_right_stacked, bend_pts_xz_local_left_stacked
-    new_bending_direction_points_local_KOS_stacked.append(
-        new_bending_direction_points_local_KOS[:end_index_pts_global])
-    new_bending_direction_points_local_KOS_left_stacked.append(
-        new_bending_direction_points_local_KOS_left[:end_index_pts_global_left])
-    new_bending_direction_points_local_KOS_right_stacked.append(
-        new_bending_direction_points_local_KOS_right[:end_index_pts_global_right])
+    surface_points_local_KOS_stacked.append(
+        surface_points_local_KOS[:end_index_pts_global])
+    surface_points_local_KOS_left_stacked.append(
+        surface_points_local_KOS_left[:end_index_pts_global_left])
+    surface_points_local_KOS_right_stacked.append(
+        surface_points_local_KOS_right[:end_index_pts_global_right])
     bend_pts_xz_local_stacked.append(bend_pts_xz_local[:2])
     bend_pts_xz_local_right_stacked.append(bend_pts_xz_local_right[:2])
     bend_pts_xz_local_left_stacked.append(bend_pts_xz_local_left[:2])
     # for trendline KOS, 2D-Plot-Colormap
-    global x_values_trim_stacked, y_values_trim_stacked
-    x_values_trim_stacked.append(x_values_trim[:end_index_pts_global])
-    y_values_trim_stacked.append(y_values_trim[:end_index_pts_global])
+    global x_values_trim_trendline_KOS_stacked, y_values_trim_trendline_KOS_stacked
+    x_values_trim_trendline_KOS_stacked.append(x_values_trim_trendline_KOS[:end_index_pts_global])
+    y_values_trim_trendline_KOS_stacked.append(y_values_trim_trendline_KOS[:end_index_pts_global])
 def calc_trim_index_at_second_bendpoint(bend_pts_xz_local, bend_pts_xz_local_left, bend_pts_xz_local_right,
-                                        new_bending_direction_points_local_KOS,
-                                        new_bending_direction_points_local_KOS_left,
-                                        new_bending_direction_points_local_KOS_right):
+                                        surface_points_local_KOS,
+                                        surface_points_local_KOS_left,
+                                        surface_points_local_KOS_right):
     try:
         end_index_pts_global = \
-        [i for i, x in enumerate(new_bending_direction_points_local_KOS[:, 0]) if x >= bend_pts_xz_local[1][0]][0]
+        [i for i, x in enumerate(surface_points_local_KOS[:, 0]) if x >= bend_pts_xz_local[1][0]][0]
     except:
         end_index_pts_global = -1
     try:
-        end_index_pts_global_left = [i for i, x in enumerate(new_bending_direction_points_local_KOS_left[:, 0]) if
+        end_index_pts_global_left = [i for i, x in enumerate(surface_points_local_KOS_left[:, 0]) if
                                      x >= bend_pts_xz_local_left[1][0]][0]
     except:
         end_index_pts_global_left = -1
     try:
-        end_index_pts_global_right = [i for i, x in enumerate(new_bending_direction_points_local_KOS_right[:, 0]) if
+        end_index_pts_global_right = [i for i, x in enumerate(surface_points_local_KOS_right[:, 0]) if
                                       x >= bend_pts_xz_local_right[1][0]][0]
     except:
         end_index_pts_global_right = -1
@@ -1067,108 +1091,94 @@ def calc_points_on_line_between_bends_filled_up(bend_pts_xy, bend_pts_xy_curve, 
             j = j + 1  # Comment_DB: NEXT POINT
     bend_pts_xy_curve = np.asarray(bend_pts_xy_curve)  # Comment_DB: This is now one linear curve from start to end point. Everything here is dependent on xy_patch_curve. Below will take divergence into consideration
     return bend_pts_xy_curve
-def calc_bending_parameters_with_bendpoints(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right,
-                                            bend_pts_xyz_trendline, edge_directions, x_direction_start, normal_at_start,
-                                            bend_pts_xz_local, calc_2D_with_edge_detection):
+def calc_tape_parameter_2DE_3D(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz_global_right,
+                               bend_pts_xyz_trendline, edge_directions, x_direction_start, normal_at_start,
+                               bend_pts_xz_local, calc_2D_with_edge_detection):
+
+    x_direction_list_global = [x_direction_start]
+    normal_direction_list_global = [normal_at_start]
     lenght_between_first_two_bends = np.linalg.norm(bend_pts_xz_local[1] - bend_pts_xz_local[0])
-    x_direction_list = [x_direction_start]
-    normal_patch = [normal_at_start]
     lengths_between_planes_list = [lenght_between_first_two_bends]
-    rotated_x_direction_around_edge, rotated_y_direction_around_edge = [],[]
+    rotated_x_direction_around_edge_global = []
     beta_angle_between_planes_list, alpha_angle_between_planes_list = [],[]
 
 
-    if calc_2D_with_edge_detection:
-        range_till_end = (len(edge_directions) - 1)
-    else:
-        range_till_end = 2
+    range_till_end  = (len(edge_directions) - 1) if calc_2D_with_edge_detection else 2
 
     for i in range(1, range_till_end):
-        try:
-            length_current_direction = np.linalg.norm(bend_pts_xz_local[i+1] - bend_pts_xz_local[i])
-        except:
-            break
+        try: length_current_direction = np.linalg.norm(bend_pts_xz_local[i+1] - bend_pts_xz_local[i])
+        except: break
 
         # Calc x_y_and_normal direction of the Tape at each bending point
-        x_direction_before_bend = norm_vector(bend_pts_xyz_global[i] - bend_pts_xyz_global[i - 1])
+        x_direction_before_bend_global = norm_vector(bend_pts_xyz_global[i] - bend_pts_xyz_global[i - 1])
 
         # We get the normal of the plane defined by the right and left bendpoint of the bend and the middlepoint on the next/previous bend.
-        normal_at_bendpoint_0_tape = -calc_tape_normal(bend_pts_xyz_global[i-1], bend_pts_xyz_global_left[i],bend_pts_xyz_global_right[i])
+        normal_before_bend_global = -calc_tape_normal(bend_pts_xyz_global[i-1], bend_pts_xyz_global_left[i],bend_pts_xyz_global_right[i])
 
-        try: normal_at_bendpoint_1_tape = calc_tape_normal(bend_pts_xyz_global[i+1], bend_pts_xyz_global_left[i],
-                                                      bend_pts_xyz_global_right[i])
+        y_direction_before_bend_global = np.cross(normal_before_bend_global, x_direction_before_bend_global)
+
+        tape_orientation_before_bend_KOS_in_global_KOS = np.stack([x_direction_before_bend_global, y_direction_before_bend_global, normal_before_bend_global])
+
+        try: normal_after_bend_global = calc_tape_normal(bend_pts_xyz_global[i + 1], bend_pts_xyz_global_left[i],bend_pts_xyz_global_right[i])
         except:
             print("Not same amount of bending points")
             break
-        y_direction_tape = np.cross(normal_at_bendpoint_0_tape, x_direction_before_bend)
 
-        trendline_patch = np.stack([x_direction_before_bend, y_direction_tape, normal_at_bendpoint_0_tape])
+        beta_angle = calc_3D_beta(bend_pts_xyz_trendline, i, normal_before_bend_global, normal_after_bend_global)
 
-        #Calc angle between two consecutiv tape normals: beta
-        beta_angle_between_planes = math.acos(np.dot(normal_at_bendpoint_0_tape, normal_at_bendpoint_1_tape))
-
-        # Compare slope of old and new x_direction
-        x_direction_before_bend_local = norm_vector(bend_pts_xyz_trendline[i] - bend_pts_xyz_trendline[i - 1])
-
-        x_direction_i_without_rotation_local = norm_vector(bend_pts_xyz_trendline[i + 1] - bend_pts_xyz_trendline[i])
-        if x_direction_before_bend_local[2] < x_direction_i_without_rotation_local[2]:
-            beta_angle_between_planes = -beta_angle_between_planes
-
-
+        alpha_angle = calc_3D_alpha(edge_directions, i, normal_before_bend_global,
+                                    tape_orientation_before_bend_KOS_in_global_KOS,
+                                    y_direction_before_bend_global)
         # Calc new x_direction after bending around edge
-        rotated_x_direction_around_edge_i = Quaternion(axis=edge_directions[i], angle=beta_angle_between_planes).rotate(x_direction_before_bend)
-        rotated_x_direction_around_edge.append(rotated_x_direction_around_edge_i)
-
-        edge_directions_trendlineKOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(np.asarray(edge_directions),
-                                                                                       trendline_patch,
-                                                                                       np.asarray([0, 0, 0]))
-        if edge_directions_trendlineKOS[i][1] < 0:
-            edge_directions[i] = - edge_directions[i]
-
-        rotated_y_direction_around_edge.append(np.cross(normal_at_bendpoint_1_tape,rotated_x_direction_around_edge[-1]))
+        rotated_x_direction_around_edge_i_global = Quaternion(axis=edge_directions[i], angle=beta_angle).rotate(x_direction_before_bend_global)
+        rotated_x_direction_around_edge_global.append(rotated_x_direction_around_edge_i_global)
 
 
-        # Calc alpha. Angle between y_tape and direction of edge. Transformation in local tape KOS to get direction of angle
-
-        side_directions = np.stack([edge_directions[i], y_direction_tape])
-        side_directions_rotated = translate_and_rotate_points_from_OLD_to_NEW_KOS(side_directions, trendline_patch,
-                                                                                  np.asarray([0, 0, 0]))
-
-        if side_directions_rotated[0][1] < 0:
-            side_directions_rotated[0][:] = -side_directions_rotated[0][:]
-        if side_directions_rotated[1][1] < 0:
-            side_directions_rotated[1][:] = -side_directions_rotated[1][:]
-
-        # Edge_direction projected to current tape orientation
-        edge_direction_on_tapeplane = project_pointtoplane(edge_directions[i],normal_at_bendpoint_0_tape,np.asarray([0,0,0]))
-        edge_direction_on_tapeplane = norm_vector(edge_direction_on_tapeplane)
-        y_direction_tape = norm_vector(y_direction_tape)
-
-        try: alpha_angle = math.acos(np.dot(edge_direction_on_tapeplane, y_direction_tape))
-        except: alpha_angle = 0
-
-        if side_directions_rotated[1][0] > side_directions_rotated[0][0]:
-            alpha_angle = (math.pi-alpha_angle)
 
         # safe x_directions, alpha, beta, and normals in a List.
-        x_direction_list.append(x_direction_before_bend)    #x_direction_start is two times in the list. If there are 1+ bending points. For special case there is no bending point, the x_direction is put in the list also outside the loop
+        x_direction_list_global.append(x_direction_before_bend_global)    #x_direction_start is two times in the list. If there are 1+ bending points.
         alpha_angle_between_planes_list.append(alpha_angle)
-        beta_angle_between_planes_list.append(beta_angle_between_planes)
-        normal_patch.append(normal_at_bendpoint_1_tape)
+        beta_angle_between_planes_list.append(beta_angle)
+        normal_direction_list_global.append(normal_after_bend_global)
         lengths_between_planes_list.append(length_current_direction)
 
-    # Rotate new Tape-Orientation to Trendline KOS as referenz for the next bending direction
-    if len(edge_directions)>2:
-        x_y_stacked = np.stack([rotated_x_direction_around_edge[0],rotated_y_direction_around_edge[0]])
-        global x_y_direction_tape_in_trendline_KOS_stacked
-        x_y_direction_tape_in_trendline_KOS_stacked.append(
-            translate_and_rotate_points_from_OLD_to_NEW_KOS(x_y_stacked, trendline_KOS_in_global_KOS, np.asarray([0, 0, 0])))
+
+    rotated_x_direction_around_edge_global = np.asarray(rotated_x_direction_around_edge_global)
+    x_direction_list_global = np.asarray(x_direction_list_global)
+
+    return x_direction_list_global, normal_direction_list_global, rotated_x_direction_around_edge_global,beta_angle_between_planes_list,alpha_angle_between_planes_list,lengths_between_planes_list
 
 
-    rotated_x_direction_around_edge = np.asarray(rotated_x_direction_around_edge)
-    x_direction_list = np.asarray(x_direction_list)
+def calc_3D_alpha(edge_directions, i, normal_at_bendpoint_0_tape, tape_orientation_before_bend_KOS_in_global_KOS, y_direction_tape):
+    
+    # Calc alpha. Angle between y_tape and direction of edge. Transformation in local tape KOS to get direction of angle
+    edge_and_tape_side = np.stack([edge_directions[i], tape_orientation_before_bend_KOS_in_global_KOS[1]])
+    edge_and_tape_side_TapeKOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(edge_and_tape_side,tape_orientation_before_bend_KOS_in_global_KOS,np.asarray([0, 0, 0]))
 
-    return x_direction_list, normal_patch, rotated_x_direction_around_edge,beta_angle_between_planes_list,alpha_angle_between_planes_list,lengths_between_planes_list
+    # Orienting Edge
+    if edge_and_tape_side_TapeKOS[0][1] < 0:
+        edge_and_tape_side_TapeKOS[0][:] = -edge_and_tape_side_TapeKOS[0][:]
+        edge_directions[i] = -edge_directions[i]
+    # Orienting Tape
+    if edge_and_tape_side_TapeKOS[1][1] < 0:
+        edge_and_tape_side_TapeKOS[1][:] = -edge_and_tape_side_TapeKOS[1][:]
+    try:
+        alpha_angle = math.acos(np.dot(edge_directions[i], tape_orientation_before_bend_KOS_in_global_KOS[1]))
+    except:
+        alpha_angle = 0
+    if  edge_and_tape_side_TapeKOS[0][0] < 0:
+        alpha_angle = (math.pi - alpha_angle)
+    return alpha_angle
+def calc_3D_beta(bend_pts_xyz_trendline, i, normal_at_bendpoint_0_tape, normal_at_bendpoint_1_tape):
+    # Calc angle between two consecutiv tape normals: beta
+    beta_angle_between_planes = math.acos(np.dot(normal_at_bendpoint_0_tape, normal_at_bendpoint_1_tape))
+    # Compare slope of old and new x_direction
+    x_direction_before_bend_local = norm_vector(bend_pts_xyz_trendline[i] - bend_pts_xyz_trendline[i - 1])
+    x_direction_after_bend_without_rotation_local = norm_vector(
+        bend_pts_xyz_trendline[i + 1] - bend_pts_xyz_trendline[i])
+    if x_direction_before_bend_local[2] < x_direction_after_bend_without_rotation_local[2]:
+        beta_angle_between_planes = -beta_angle_between_planes
+    return beta_angle_between_planes
 def calc_edge_directions(bend_pts_xyz_global_left, bend_pts_xyz_global_right):
     global counter_failed_matches_of_edges
 
@@ -1194,10 +1204,9 @@ def calc_tape_normal(bend_pts_xyz_global, bend_pts_xyz_global_left, bend_pts_xyz
     normal_at_bendpoint_index_tape = np.cross(v2, v1)
     normal_at_bendpoint_index_tape = norm_vector(normal_at_bendpoint_index_tape)
 
-
     return normal_at_bendpoint_index_tape
 
-# Functions in calc tilted bending points
+# Functions in calc local bending points
 def calc_delta_length_at_bend(width,alpha):
     if alpha > math.pi / 2:
         delta_length_bend = (width / 2) * math.tan(math.pi - alpha)
@@ -1205,72 +1214,57 @@ def calc_delta_length_at_bend(width,alpha):
     else:  # alpha_list[0] < math.pi / 2:
         delta_length_bend = - (width / 2) * math.tan(alpha)
     return delta_length_bend
-def calc_local_trendline_KOS(x_slope):
-    x_trendline_new_direction = np.asarray((1, x_slope, 0), dtype=np.float32)
-    x_trendline_new_direction = norm_vector(x_trendline_new_direction)
-    y_trendline_new_direction = np.asarray((-x_slope, 1, 0), dtype=np.float32)
-    y_trendline_new_direction = norm_vector(y_trendline_new_direction)
+def calc_local_KOS_in_trendline_KOS(x_start_end_point_trendline_KOS,y_start_end_point_trendline_KOS):
+    # incline/x_slope and y-intercept with Leastsquare, y = x_slope*x + y_intercept
+    A = np.vstack([x_start_end_point_trendline_KOS, np.ones(len(x_start_end_point_trendline_KOS))]).T
+    x_slope, y_intercept = np.linalg.lstsq(A, y_start_end_point_trendline_KOS, rcond=None)[0]
+
+    x_trendline_new_direction = norm_vector(np.asarray((1, x_slope, 0), dtype=np.float32))
+    y_trendline_new_direction = norm_vector(np.asarray((-x_slope, 1, 0), dtype=np.float32))
     z_trendline_new_direction = np.asarray((0, 0, 1), dtype=np.float32)
-    trendline_new_direction_current_KOS = np.vstack(
-        (x_trendline_new_direction, y_trendline_new_direction, z_trendline_new_direction))
-    return trendline_new_direction_current_KOS
-def calc_start_end_point_side_in_trendline_KOS(calc_left_side, delta_length_end_bend, delta_length_start_bend, dx, dy, end_point_drawn,
-                                               grid_resolution_int, start_point_drawn, width, x_0_grid_point_index,
-                                               x_trendline_new_direction, y_0_grid_point_index, z_grid_values_linear,
-                                               y_trendline_new_direction):
+
+    local_KOS_in_trendline_KOS = np.vstack((x_trendline_new_direction, y_trendline_new_direction, z_trendline_new_direction))
+    return local_KOS_in_trendline_KOS, x_slope
+def calc_start_end_point_side_in_trendline_KOS(calc_left_side, delta_length_end_bend, delta_length_start_bend,
+                                               end_point_drawn, grid_resolution_int, start_point_drawn, width,
+                                               local_KOS_in_trendline_KOS, z_grid_values_linear_trendline_KOS):
 
     # We need to consider how the Tape is placed 3D
 
     if calc_left_side:
-        if delta_length_start_bend != 0:
-            Start_point_side = start_point_drawn - x_y_direction_tape_in_trendline_KOS_stacked[-1][1] * width / 2 + delta_length_start_bend * x_y_direction_tape_in_trendline_KOS_stacked[-1][0]
-            End_point_side = end_point_drawn - x_y_direction_tape_in_trendline_KOS_stacked[-1][1] * width / 2 + delta_length_end_bend * x_y_direction_tape_in_trendline_KOS_stacked[-1][0]
-        else:
-            Start_point_side = start_point_drawn - y_trendline_new_direction * width / 2 + delta_length_start_bend * x_trendline_new_direction
-            End_point_side = end_point_drawn - y_trendline_new_direction * width / 2 + delta_length_end_bend * x_trendline_new_direction
-
+        Start_point_side_trendline_KOS = start_point_drawn - local_KOS_in_trendline_KOS[1] * width / 2 + delta_length_start_bend * local_KOS_in_trendline_KOS[0]
+        End_point_side_trendline_KOS = end_point_drawn - local_KOS_in_trendline_KOS[1] * width / 2 + delta_length_end_bend * local_KOS_in_trendline_KOS[0]
 
         if new_start_left != []:
-            Start_point_side = new_start_left
-
+            Start_point_side_trendline_KOS = new_start_left
 
     else:
-        if delta_length_start_bend != 0:
-            Start_point_side = start_point_drawn + x_y_direction_tape_in_trendline_KOS_stacked[-1][1] * width / 2 - delta_length_start_bend * \
-                               x_y_direction_tape_in_trendline_KOS_stacked[-1][0]
-            End_point_side = end_point_drawn + x_y_direction_tape_in_trendline_KOS_stacked[-1][1] * width / 2 - delta_length_end_bend * \
-                             x_y_direction_tape_in_trendline_KOS_stacked[-1][0]
-        else:
-            Start_point_side = start_point_drawn + y_trendline_new_direction * width / 2 - delta_length_start_bend * x_trendline_new_direction
-            End_point_side = end_point_drawn + y_trendline_new_direction * width / 2 - delta_length_end_bend * x_trendline_new_direction
+        Start_point_side_trendline_KOS = start_point_drawn + local_KOS_in_trendline_KOS[1] * width / 2 - delta_length_start_bend * local_KOS_in_trendline_KOS[0]
+        End_point_side_trendline_KOS = end_point_drawn + local_KOS_in_trendline_KOS[1] * width / 2 - delta_length_end_bend * local_KOS_in_trendline_KOS[0]
 
         if new_start_right != []:
-            Start_point_side = new_start_right
+            Start_point_side_trendline_KOS = new_start_right
 
 
 
-    x_data_side_start_end = (Start_point_side[0], End_point_side[0])
-    y_data_side_start_end = (Start_point_side[1], End_point_side[1])
+    x_data_side_start_end = (Start_point_side_trendline_KOS[0], End_point_side_trendline_KOS[0])
+    y_data_side_start_end = (Start_point_side_trendline_KOS[1], End_point_side_trendline_KOS[1])
 
     end_point_drawn_side, start_point_drawn_side, x_start_index_side, x_end_index_side = calc_Start_End_in_trendline_KOS_from_xdata_ydata(
-        dx, dy, grid_resolution_int,
-        x_0_grid_point_index, x_data_side_start_end,
-        y_0_grid_point_index, y_data_side_start_end,
-        z_grid_values_linear)
+        grid_resolution_int, x_data_side_start_end, y_data_side_start_end, z_grid_values_linear_trendline_KOS)
     return end_point_drawn_side, start_point_drawn_side, x_end_index_side, x_start_index_side
-def calc_local_and_global_bendpoints(max_distance, new_bending_direction_points_tilted_KOS,
-                                     trendline_new_direction_current_KOS, y_intercept):
+def calc_local_and_global_bendpoints(max_distance, surface_points_local_KOS,
+                                     local_KOS_in_trendline_KOS, y_intercept_trendline_KOS):
 
-    x_z_points = np.stack([new_bending_direction_points_tilted_KOS[:, 0],new_bending_direction_points_tilted_KOS[:, 2]],axis=1)
+    x_z_points = np.stack([surface_points_local_KOS[:, 0],surface_points_local_KOS[:, 2]],axis=1)
     #y_smooth_left = smooth_savgol(x_z_points_filled_up, poly_order, savgol_window_quotient)
     bend_pts_xz_local = calc_bend_pts(max_distance, x_z_points)
-    # in tilted KOS y=0. Insert this to bendpoints to get (x,y,z)
-    bend_pts_xyz = np.insert(bend_pts_xz_local, 1, np.zeros(len(bend_pts_xz_local)), axis=1)
-    bend_pts_xyz_trendline, bend_pts_xyz_global = new_bending_points_tilted_to_global(y_intercept, bend_pts_xyz,
-                                                                  trendline_new_direction_current_KOS)
+    # in local KOS y=0. Insert this to bendpoints to get (x,y,z)
+    bend_pts_xyz_local = np.insert(bend_pts_xz_local, 1, np.zeros(len(bend_pts_xz_local)), axis=1)
+    bend_pts_xyz_trendline, bend_pts_xyz_global = new_bending_points_local_to_global(y_intercept_trendline_KOS, bend_pts_xyz_local,
+                                                                                     local_KOS_in_trendline_KOS)
     return bend_pts_xz_local, bend_pts_xyz_trendline, bend_pts_xyz_global
-def calc_Start_End_in_trendline_KOS_from_xdata_ydata(dx, dy, grid_resolution_int, x_0_grid_point_index, xdata,
-                                                     y_0_grid_point_index, ydata, z_grid_values_linear):
+def calc_Start_End_in_trendline_KOS_from_xdata_ydata(grid_resolution_int, xdata, ydata, z_grid_values_linear_trendline_KOS):
     # Start und Endpunkt der Eingezeichnet wurde
 
     y_end_index = np.asarray(np.round(np.add(np.divide(ydata[1], dy), (grid_resolution_int - y_0_grid_point_index))),
@@ -1285,23 +1279,23 @@ def calc_Start_End_in_trendline_KOS_from_xdata_ydata(dx, dy, grid_resolution_int
     # Left and right starting point can be outside the grit, when they are outside, they get a default value. The z-Data would be needed for the plot.
     if x_start_index < 0 or x_start_index >= grid_resolution_int or \
             y_start_index < 0 or y_start_index >= grid_resolution_int:
-        z_start_data = z_grid_values_linear[0, 0]
-    else: z_start_data = z_grid_values_linear[x_start_index, y_start_index]
+        z_start_data = z_grid_values_linear_trendline_KOS[0, 0]
+    else: z_start_data = z_grid_values_linear_trendline_KOS[x_start_index, y_start_index]
 
     if x_end_index < 0 or x_end_index >= grid_resolution_int or \
             y_end_index < 0 or y_end_index >= grid_resolution_int:
-        z_end_data = z_grid_values_linear[grid_resolution_int - 1, grid_resolution_int - 1]
-    else: z_end_data = z_grid_values_linear[x_end_index, y_end_index]
+        z_end_data = z_grid_values_linear_trendline_KOS[grid_resolution_int - 1, grid_resolution_int - 1]
+    else: z_end_data = z_grid_values_linear_trendline_KOS[x_end_index, y_end_index]
 
 
     start_point_xyz_data = (np.vstack((xdata[0], ydata[0], z_start_data)).T)[0][:]
     end_point_xyz_data = (np.vstack((xdata[1], ydata[1], z_end_data)).T)[0][:]
     return end_point_xyz_data, start_point_xyz_data, x_start_index, x_end_index
-def trim_x_y_values_to_geometry(grid_resolution_int, x_slope, x_values, x_values_indizes, y_values, y_values_indizes):
+def trim_x_y_values_to_grid(grid_resolution_int, x_slope, x_values_trendline_KOS, x_values_indizes, y_values_trendline_KOS, y_values_indizes):
 
     y_start_index = -1
     y_end_index = -1
-    for k in range(len(x_values)-1):
+    for k in range(len(x_values_trendline_KOS) - 1):
 
         if x_slope >= 0:
             if (y_values_indizes[k] >= 0) & (y_start_index < 0): y_start_index = k
@@ -1315,94 +1309,106 @@ def trim_x_y_values_to_geometry(grid_resolution_int, x_slope, x_values, x_values
     # Trim indizes and coordinates to grid size
     x_values_indizes_trim = x_values_indizes[y_start_index:y_end_index]
     y_values_indizes_trim = y_values_indizes[y_start_index:y_end_index]
-    x_values_trim = x_values[y_start_index:y_end_index]
-    y_values_trim = y_values[y_start_index:y_end_index]
+    x_values_trim = x_values_trendline_KOS[y_start_index:y_end_index]
+    y_values_trim = y_values_trendline_KOS[y_start_index:y_end_index]
     return x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
-def trim_x_y_values_to_start_end_point(x_start_index, x_end_index, x_values, x_values_indizes, y_values,
+def trim_x_y_values_to_start_end_point(x_start_index, x_end_index, x_values_trendline_KOS, x_values_indizes, y_values_trendline_KOS,
                                        y_values_indizes):
      # Trim indizes and coordinates to grid size
     if x_start_index < x_end_index:
         x_values_indizes_trim = x_values_indizes[x_start_index:x_end_index]
         y_values_indizes_trim = y_values_indizes[x_start_index:x_end_index]
-        x_values_trim = x_values[x_start_index:x_end_index]
-        y_values_trim = y_values[x_start_index:x_end_index]
+        x_values_trim_trendline_KOS = x_values_trendline_KOS[x_start_index:x_end_index]
+        y_values_trim_trendline_KOS = y_values_trendline_KOS[x_start_index:x_end_index]
     else:
         x_values_indizes_trim = x_values_indizes[x_end_index:x_start_index]
         y_values_indizes_trim = y_values_indizes[x_end_index:x_start_index]
-        x_values_trim = x_values[x_end_index:x_start_index]
-        y_values_trim = y_values[x_end_index:x_start_index]
+        x_values_trim_trendline_KOS = x_values_trendline_KOS[x_end_index:x_start_index]
+        y_values_trim_trendline_KOS = y_values_trendline_KOS[x_end_index:x_start_index]
 
-    return x_values_indizes_trim, x_values_trim, y_values_indizes_trim, y_values_trim
-def calc_new_direction_points_on_surface(Start_point, dy, grid_resolution_int, x_slope, x_values, y_0_grid_point_index,
-                                         z_grid_values_linear, x_start_index, x_end_index):
-
-
-    # new y_intercept, inserting startpoint into formula:y = x_slope*x + y_intercept
-    y_intercept = Start_point[1] - Start_point[0] * x_slope
-    # x-y-values in coordinates
-    y_values = np.add(np.multiply(x_values, x_slope), y_intercept)
-    # x-y-values with Indizies
-    x_values_indizes = np.asarray(list(range(grid_resolution_int)), dtype=np.int32)
-    y_values_indizes = np.add(np.divide(y_values, dy), (grid_resolution_int - y_0_grid_point_index))
-    y_values_indizes = np.asarray(np.round(y_values_indizes), dtype=np.int32)
-
-
-    # Trim x and y valules to start/end point and if nec
-    x_indizes_trim, x_values_trim, y_indizes_trim, y_values_trim = trim_x_y_values_to_start_end_point(
-            x_start_index, x_end_index, x_values, x_values_indizes, y_values, y_values_indizes)
-
-    if min(y_values_indizes) < 0 or  max(y_values_indizes) > grid_resolution_int-1:
-      x_indizes_trim, x_values_trim, y_indizes_trim, y_values_trim = trim_x_y_values_to_geometry(
-                grid_resolution_int, x_slope, x_values_trim, x_indizes_trim, y_values_trim, y_indizes_trim)
+    return x_values_indizes_trim, x_values_trim_trendline_KOS, y_values_indizes_trim, y_values_trim_trendline_KOS
+def extract_points_from_interpolated_surface(Start_point_trendline_KOS, grid_resolution_int, x_slope, z_grid_values_linear_trendline_KOS, x_start_index,
+                                             x_end_index):
+    x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_intercept_trendline_KOS, y_values_trim_trendline_KOS = calc_x_y_values_in_trendline_KOS_and_with_indizes(
+        Start_point_trendline_KOS, grid_resolution_int, x_end_index, x_slope, x_start_index)
 
     # z Values from grid
-    z_values_new_bending_direction = []
-    for i in range(len(x_indizes_trim)):
-        z_values_new_bending_direction.append(
-            z_grid_values_linear[x_indizes_trim[i], y_indizes_trim[i]])
-    z_values_new_bending_direction = np.asarray(z_values_new_bending_direction, dtype=np.float32)
+    z_values_trendline_KOS = extract_z_values_from_grid(x_indizes_trim, y_indizes_trim,
+                                                                z_grid_values_linear_trendline_KOS)
+
+    # In z_grid_values_linear_trendline_KOS can be NaN. Trim those of.
+    x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_values_trim_trendline_KOS, z_values_trendline_KOS = trim_x_y_z_values_to_geometry(
+        x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_values_trim_trendline_KOS,
+        z_values_trendline_KOS)
+    
     # x, y and z stacked together to 3D-Points
-
-    # In z_grid_values_linear can be NaN. Trim those of.
+    new_bending_direction_points_trendline_KOS = np.vstack(
+        (x_values_trim_trendline_KOS, y_values_trim_trendline_KOS, z_values_trendline_KOS)).T
+    return new_bending_direction_points_trendline_KOS, y_intercept_trendline_KOS, x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_values_trim_trendline_KOS
+def extract_z_values_from_grid(x_indizes_trim, y_indizes_trim, z_grid_values_linear_trendline_KOS):
+    z_values_trendline_KOS = []
+    for i in range(len(x_indizes_trim)):
+        z_values_trendline_KOS.append(
+            z_grid_values_linear_trendline_KOS[x_indizes_trim[i], y_indizes_trim[i]])
+    z_values_trendline_KOS = np.asarray(z_values_trendline_KOS, dtype=np.float32)
+    return z_values_trendline_KOS
+def trim_x_y_z_values_to_geometry(x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim,
+                                  y_values_trim_trendline_KOS, z_values_trendline_KOS):
     i = 0
-    while z_values_new_bending_direction[i] != z_values_new_bending_direction[i]: i += 1
+    while z_values_trendline_KOS[i] != z_values_trendline_KOS[i]: i += 1
     j = -1
-    while z_values_new_bending_direction[j] != z_values_new_bending_direction[j] :  j -= 1
-
-    z_values_new_bending_direction = z_values_new_bending_direction[i:j]
-
-    x_values_trim = x_values_trim[i:j]
-    y_values_trim = y_values_trim[i:j]
-
+    while z_values_trendline_KOS[j] != z_values_trendline_KOS[j]:  j -= 1
+    z_values_trendline_KOS = z_values_trendline_KOS[i:j]
+    x_values_trim_trendline_KOS = x_values_trim_trendline_KOS[i:j]
+    y_values_trim_trendline_KOS = y_values_trim_trendline_KOS[i:j]
     x_indizes_trim = x_indizes_trim[i:j]
     y_indizes_trim = y_indizes_trim[i:j]
-
-    new_bending_direction_points_current_KOS = np.vstack(
-        (x_values_trim, y_values_trim, z_values_new_bending_direction)).T
-    return new_bending_direction_points_current_KOS, y_intercept, x_indizes_trim, x_values_trim, y_indizes_trim, y_values_trim
-def new_direction_points_in_global_and_tilted_KOS(y_intercept, new_bending_direction_points_current_KOS,
-                                                  trendline_new_direction_current_KOS):
+    return x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_values_trim_trendline_KOS, z_values_trendline_KOS
+def calc_x_y_values_in_trendline_KOS_and_with_indizes(Start_point_trendline_KOS, grid_resolution_int, x_end_index,
+                                                      x_slope, x_start_index):
+    ##### Oblique linear line y(x)
+    # 2 lines needed:   • mathematical decription with coordinates for Plot.
+    #                   • with Indizies for extraction from grid
+    # new y_intercept_trendline_KOS, inserting startpoint into formula:y = x_slope*x + y_intercept_trendline_KOS
+    y_intercept_trendline_KOS = Start_point_trendline_KOS[1] - Start_point_trendline_KOS[0] * x_slope
+    # x-y-values in coordinates
+    x_values_trendline_KOS = grid_x[:, 0]
+    y_values_trendline_KOS = np.add(np.multiply(x_values_trendline_KOS, x_slope), y_intercept_trendline_KOS)
+    # x-y-values with Indizies
+    x_values_indizes = np.asarray(list(range(grid_resolution_int)), dtype=np.int32)
+    y_values_indizes = np.add(np.divide(y_values_trendline_KOS, dy), (grid_resolution_int - y_0_grid_point_index))
+    y_values_indizes = np.asarray(np.round(y_values_indizes), dtype=np.int32)
+    # Trim x and y valules to start/end point and if nec
+    x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_values_trim_trendline_KOS = trim_x_y_values_to_start_end_point(
+        x_start_index, x_end_index, x_values_trendline_KOS, x_values_indizes, y_values_trendline_KOS, y_values_indizes)
+    if min(y_values_indizes) < 0 or max(y_values_indizes) > grid_resolution_int - 1:
+        x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_values_trim_trendline_KOS = trim_x_y_values_to_grid(
+            grid_resolution_int, x_slope, x_values_trim_trendline_KOS, x_indizes_trim, y_values_trim_trendline_KOS,
+            y_indizes_trim)
+    return x_indizes_trim, x_values_trim_trendline_KOS, y_indizes_trim, y_intercept_trendline_KOS, y_values_trim_trendline_KOS
+def transform_surface_points_to_global_and_local_KOS(y_intercept_trendline_KOS, new_bending_direction_points_trendline_KOS,
+                                                     local_KOS_in_trendline_KOS):
     # new zero
-    new_zero = np.asarray((0, y_intercept, 0), dtype=np.float32)
+    new_zero = np.asarray((0, y_intercept_trendline_KOS, 0), dtype=np.float32)
 
-    trendline_new_direction_global_KOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(
-        trendline_new_direction_current_KOS, trendline_KOS_in_global_KOS, np.asarray([0, 0, 0]), True)
+    local_KOS_in_global_KOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(
+        local_KOS_in_trendline_KOS, trendline_KOS_in_global_KOS, np.asarray([0, 0, 0]), True)
 
     new_bending_direction_points_global_KOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(
-        new_bending_direction_points_current_KOS, trendline_KOS_in_global_KOS, center_of_pointcloud_weighted_in_global_KOS, True)
+        new_bending_direction_points_trendline_KOS, trendline_KOS_in_global_KOS, center_of_pointcloud_weighted_in_global_KOS, True)
 
-    new_bending_direction_points_tilted_KOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(
-        new_bending_direction_points_current_KOS, trendline_new_direction_current_KOS, new_zero)
+    surface_points_local_KOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(
+        new_bending_direction_points_trendline_KOS, local_KOS_in_trendline_KOS, new_zero)
 
-    return new_bending_direction_points_tilted_KOS, new_bending_direction_points_global_KOS, trendline_new_direction_global_KOS
-def new_bending_points_tilted_to_global(y_intercept,
-                                                new_bending_direction_points_current_KOS,
-                                                trendline_new_direction_current_KOS):
+    return surface_points_local_KOS, new_bending_direction_points_global_KOS, local_KOS_in_global_KOS
+def new_bending_points_local_to_global(y_intercept_trendline_KOS,
+                                       surface_points_local_KOS,
+                                       local_KOS_in_trendline_KOS):
     # new zero
-    new_zero = np.asarray((0, y_intercept, 0), dtype=np.float32)
+    new_zero = np.asarray((0, y_intercept_trendline_KOS, 0), dtype=np.float32)
 
     new_bending_direction_points_trendline_KOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(
-        new_bending_direction_points_current_KOS, trendline_new_direction_current_KOS, new_zero, True)
+        surface_points_local_KOS, local_KOS_in_trendline_KOS, new_zero, True)
 
     new_bending_direction_points_global_KOS = translate_and_rotate_points_from_OLD_to_NEW_KOS(
         new_bending_direction_points_trendline_KOS, trendline_KOS_in_global_KOS, center_of_pointcloud_weighted_in_global_KOS, True)
@@ -1417,10 +1423,10 @@ def calc_L_aim(x_y_points_filled_up):
         L_aim =L_aim + np.linalg.norm(x_y_points_filled_up[i]-x_y_points_filled_up[i - 1])
 
     """L_aim = 0
-    for i in range(len(new_bending_direction_points_local_KOS_stacked)):
-        for j in range(1, len(new_bending_direction_points_local_KOS_stacked[i])):
-            distance = calc_distance_between_two_points(new_bending_direction_points_local_KOS_stacked[i][j - 1],
-                                                        new_bending_direction_points_local_KOS_stacked[i][j])
+    for i in range(len(surface_points_local_KOS_stacked)):
+        for j in range(1, len(surface_points_local_KOS_stacked[i])):
+            distance = calc_distance_between_two_points(surface_points_local_KOS_stacked[i][j - 1],
+                                                        surface_points_local_KOS_stacked[i][j])
 
             L_aim = L_aim + distance
     """
@@ -1467,9 +1473,9 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end,dimension):
     axes.plot(x3, y3, z3, c='green', label ='z-Achse')
     """
     # Midpoint
-    #"""
+    """
     axes.scatter(center_of_pointcloud_weighted_in_global_KOS[0],center_of_pointcloud_weighted_in_global_KOS[1],center_of_pointcloud_weighted_in_global_KOS[2],c='g')
-
+    """
 
     # Start- Endpoint
     axes.scatter(patch_start[0], patch_start[1], patch_start[2], c="green")
@@ -1534,10 +1540,42 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end,dimension):
         c='blue', label='z-Axis')
     
     """
-    for i in range(len(new_bending_direction_points_on_surface_global_KOS_stacked)):
-        plt.plot((new_bending_direction_points_on_surface_global_KOS_stacked[i][:, 0]), (new_bending_direction_points_on_surface_global_KOS_stacked[i][:, 1]), (new_bending_direction_points_on_surface_global_KOS_stacked[i][:, 2]), marker='o', c='blue')
-        plt.plot((new_bending_direction_points_on_surface_global_KOS_right_stacked[i][:, 0]), (new_bending_direction_points_on_surface_global_KOS_right_stacked[i][:, 1]), (new_bending_direction_points_on_surface_global_KOS_right_stacked[i][:, 2]), marker='o', c='blue')
-        plt.plot((new_bending_direction_points_on_surface_global_KOS_left_stacked[i][:, 0]), (new_bending_direction_points_on_surface_global_KOS_left_stacked[i][:, 1]), (new_bending_direction_points_on_surface_global_KOS_left_stacked[i][:, 2]), marker='o', c='blue')
+    """
+    for i in range(len(surface_points_global_KOS_stacked)):
+        plt.plot((surface_points_global_KOS_stacked[i][:, 0]), (surface_points_global_KOS_stacked[i][:, 1]), (surface_points_global_KOS_stacked[i][:, 2]), marker='o', c='blue')
+        plt.plot((surface_points_global_KOS_right_stacked[i][:, 0]), (surface_points_global_KOS_right_stacked[i][:, 1]), (surface_points_global_KOS_right_stacked[i][:, 2]), marker='o', c='blue')
+        plt.plot((surface_points_global_KOS_left_stacked[i][:, 0]), (surface_points_global_KOS_left_stacked[i][:, 1]), (surface_points_global_KOS_left_stacked[i][:, 2]), marker='o', c='blue')
+     """
+    """
+    plt.plot((surface_points_start_end_global_KOS[:, 0]), (surface_points_start_end_global_KOS[:, 1]),
+             (surface_points_start_end_global_KOS[:, 2]), marker='o', c='blue')
+    plt.plot((surface_points_start_end_global_KOS_left[:, 0]), (surface_points_start_end_global_KOS_left[:, 1]),
+             (surface_points_start_end_global_KOS_left[:, 2]), marker='o', c='blue')
+    plt.plot((surface_points_start_end_global_KOS_right[:, 0]), (surface_points_start_end_global_KOS_right[:, 1]),
+             (surface_points_start_end_global_KOS_right[:, 2]), marker='o', c='blue')
+    """
+    # Bendpoints and edge direction 2DE
+    """plt.plot((bend_points_start_end_global_KOS[:, 0]), (bend_points_start_end_global_KOS[:, 1]),
+             (bend_points_start_end_global_KOS[:, 2]), marker='o', c='red')
+    plt.plot((bend_points_start_end_global_KOS_left[:, 0]), (bend_points_start_end_global_KOS_left[:, 1]),
+             (bend_points_start_end_global_KOS_left[:, 2]), marker='o', c='red')
+    plt.plot((bend_points_start_end_global_KOS_right[:, 0]), (bend_points_start_end_global_KOS_right[:, 1]),
+             (bend_points_start_end_global_KOS_right[:, 2]), marker='o', c='red')
+
+    global edge_directions_global_2DE
+    edge_line_global_current_direction = [
+        (bend_points_start_end_global_KOS[:] + np.multiply(edge_directions_global_2DE[:], 50)),
+        (bend_points_start_end_global_KOS[:] - np.multiply(edge_directions_global_2DE[:], 50))]
+
+    for i in range(len(edge_line_global_current_direction[0])):
+        axes.plot([edge_line_global_current_direction[0][i][0], edge_line_global_current_direction[1][i][0]],
+                  [edge_line_global_current_direction[0][i][1], edge_line_global_current_direction[1][i][1]],
+                  [edge_line_global_current_direction[0][i][2], edge_line_global_current_direction[1][i][2]],
+                  c='green')  # Comment_DB: *pc_axes is *args, and .T is np.transpose"""
+    #bend_points_start_end_global_KOS, bend_points_start_end_global_KOS_left, bend_points_start_end_global_KOS_right
+
+
+    #surface_points_global_KOS_left, surface_points_global_KOS_right, bend_pts_xyz_global_left, bend_pts_xyz_global_right
 
     """
     
@@ -1605,3 +1643,6 @@ def show_startstrip(bestPatch_patternpoints,patch_start,patch_end,dimension):
     pyplot.axis('off')
     pyplot.show(figure)
     return
+
+
+

@@ -22,7 +22,7 @@ def get_results_of_test_run(sub_dir):
                                    penalty_length_list_execution,
                                    penalty_negativ_list_execution, penalty_minimise_beta_list_execution]
 
-                for i in range(12):
+                for i in range(11):
 
                     list1 = file2.readline()[1:]
                     while list1[-2] != "]":
@@ -108,12 +108,8 @@ def plot_setup_results(j, list_setup_results,color1,color2):
         plt.plot(list_setup_results[j + 1][i][0], list_setup_results[j + 1][i][10], linewidth=1, color=color2)
     plt.xlabel('Generation')
     plt.ylabel('Penalty Negative')
-    plt.figure(11)
-    for i in range(10):
-        plt.plot(list_setup_results[j][i][0], list_setup_results[j][i][11], linewidth=1, color=color1)
-        plt.plot(list_setup_results[j + 1][i][0], list_setup_results[j + 1][i][11], linewidth=1, color=color2)
-    plt.xlabel('Generation')
-    plt.ylabel('Penalty - minimize Beta')
+
+
 
 
 ############################## GUI and read in start chromosoms ####################################################################
